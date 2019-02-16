@@ -29,8 +29,7 @@ class Main{
 			    	PlainSelect plainSelect = (PlainSelect) selectbody;
 			    	new SelectWrapper(plainSelect).parse();			
 			    }
-			}
-			else if(query instanceof CreateTable) {
+			} else if(query instanceof CreateTable) {
 				cw.createHandler(query);
 				CreateTable createtab = (CreateTable) query;
 				Table tbal = createtab.getTable();

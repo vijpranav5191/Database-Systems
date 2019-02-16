@@ -9,9 +9,8 @@ import java.util.ArrayList;
 public class FileUtils {
 	
 	public static ArrayList<String> getDBContents(String tableName){
-		String csvFile = "data/" + tableName +".csv";
-        
-	  	BufferedReader br = null;
+		String csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
+        BufferedReader br = null;
         String line = "";
         String cvsSplitBy = ",";
         ArrayList<String> list = new ArrayList<>();
@@ -22,9 +21,11 @@ public class FileUtils {
                 list.add(line);
             }
         } catch (FileNotFoundException e) {
+        	e.printStackTrace();
       		System.out.println("Error 1 " + tableName);
       		return null;
         } catch (IOException e) {
+        	e.printStackTrace();
       		System.out.println("Error 2 " + tableName);
       		return null;
 	    } finally {
