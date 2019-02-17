@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
@@ -47,4 +48,5 @@ class Main{
 
 class Schema{
 	static HashMap<Table, List<ColumnDefinition>> schema = new HashMap<>();
+	static HashMap<String, PrimitiveValue> tupleMap = new HashMap<>();
 }
