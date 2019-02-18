@@ -34,5 +34,30 @@ public class SelectWrapper {
 		this.whereExp = this.plainselect.getWhere();
 		ArrayList<String> data = FileUtils.getDBContents(this.table.getName().toLowerCase());
 		System.out.print(data);
+		
+//		String fullname = tbalname+cd.getColumnName();
+//		String dt = cd.getColDataType().getDataType().toLowerCase();
+//		PrimitiveValue pm = null;
+//		switch (dt) {
+//			case "int":
+//				 pm = new LongValue(0);
+//				break;
+//			case "string":
+//				pm = new StringValue("");
+//				break;
+//			case "varchar":
+//				pm = new StringValue("");
+//				break;	
+//			case "char":
+//				pm = new StringValue("");
+//				break;
+//			case "decimal":
+//				pm = new DoubleValue(0);
+//				break;
+//			case "date":
+//				pm = new DateValue("");
+//				break;
+//			default:
+//				break;
 	}
 }

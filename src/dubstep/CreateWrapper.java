@@ -1,5 +1,6 @@
 package dubstep;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,51 +22,16 @@ public class CreateWrapper {
 	public void createHandler(Statement query) {
 		CreateTable createtab = (CreateTable) query;
 		Table tbal = createtab.getTable();
-		String tbalname = tbal.getName();
+		
 		List<ColumnDefinition> cdef = createtab.getColumnDefinitions();
-		List<Index> indexList = createtab.getIndexes();
+		List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
+		
 		for (ColumnDefinition cd : cdef) {
-			String fullname = tbalname+cd.getColumnName();
-			String dt = cd.getColDataType().getDataType().toLowerCase();
-			PrimitiveValue pm = null;
-			switch (dt) {
-			case "int":
-				 pm = new LongValue(0);
-				break;
-			case "string":
-				pm = new StringValue("");
-				break;
-			case "varchar":
-				pm = new StringValue("");
-				break;	
-			case "char":
-				pm = new StringValue("");
-				break;
-			case "decimal":
-				pm = new DoubleValue(0);
-				break;
-			case "date":
-				pm = new DateValue("");
-				break;
-			default:
-				break;
-			}
-			Schema.tupleMap.put(fullname, pm);
+			ColumnDefs c = new ColumnDefs();
+			c.cdef = cd;
+			cdfList.add(c);
 		}
-		Schema.schema.put(tbal, cdef);
-		}
-}
-
-class Evaluate extends Eval{
- 
-		public PrimitiveValue eval(Column col){
-			String name = col.getColumnName();
-			if(col.getTable() != null && col.getTable().getName() != null){
-//				name = col.getTable().getName() + "." + col
-				List<ColumnDefinition> cd = Schema.schema.get(col.getTable());
-			}
-			return null;
-
-//			return scope.get(name);
-}
+		SchemaStructure.schema.put(tbal.getName(), cdfList);
+		SchemaStructure.tableMap.put(tbal.getName(), tbal);
+	}
 }

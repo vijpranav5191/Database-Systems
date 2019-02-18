@@ -17,6 +17,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
+	
 	public static void main(String args[]) throws SQLException, ParseException {
 		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
@@ -32,21 +33,9 @@ class Main{
 			    }
 			} else if(query instanceof CreateTable) {
 				cw.createHandler(query);
-				CreateTable createtab = (CreateTable) query;
-				Table tbal = createtab.getTable();
-				List<ColumnDefinition> lcd = Schema.schema.get(tbal);
-				for (ColumnDefinition columnDefinition : lcd) {
-					System.out.println(columnDefinition);
-				}		
 			}
 			System.out.println("$> "); // print a prompt after executing each command
 		}
-	  
-
 	}
 }
 
-class Schema{
-	static HashMap<Table, List<ColumnDefinition>> schema = new HashMap<>();
-	static HashMap<String, PrimitiveValue> tupleMap = new HashMap<>();
-}
