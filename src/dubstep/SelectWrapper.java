@@ -1,11 +1,16 @@
 package dubstep;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jsqlparser.eval.Eval;
+import net.sf.jsqlparser.expression.DateValue;
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -33,31 +38,44 @@ public class SelectWrapper {
 		}
 		this.whereExp = this.plainselect.getWhere();
 		ArrayList<String> data = FileUtils.getDBContents(this.table.getName().toLowerCase());
-		System.out.print(data);
+		List<ColumnDefs> cdefs = SchemaStructure.schema.get(this.table.getName());
+	
+		HashMap<String,List<PrimitiveValue>> dataMap = new HashMap<String, List<PrimitiveValue>>();
+		for(int i = 0;i < data.size();i++) {
+			String[] row = data.get(i).split("|");
+			for(int j = 0;j < row.length; j++) {
+				ColumnDefs cdef = cdefs.get(j);
+				String value = row[j];
+				PrimitiveValue pm;
+				switch (cdef.cdef.getColDataType().getDataType()) {
+					case "int":
+						 pm = new LongValue(value);
+						break;
+					case "string":
+						pm = new StringValue(value);
+						break;
+					case "varchar":
+						pm = new StringValue(value);
+						break;	
+					case "char":
+						pm = new StringValue(value);
+						break;
+					case "decimal":
+						pm = new DoubleValue(value);
+						break;
+					case "date":
+						pm = new DateValue(value);
+						break;
+					default:
+						pm = new StringValue(value);
+						break;
+				}
+				List<PrimitiveValue> pmList = dataMap.getOrDefault(cdef.getColumnName(), new ArrayList<PrimitiveValue>());
+				pmList.add(pm);
+				dataMap.put(cdef.getColumnName(), pmList);
+			}
+		}
 		
-//		String fullname = tbalname+cd.getColumnName();
-//		String dt = cd.getColDataType().getDataType().toLowerCase();
-//		PrimitiveValue pm = null;
-//		switch (dt) {
-//			case "int":
-//				 pm = new LongValue(0);
-//				break;
-//			case "string":
-//				pm = new StringValue("");
-//				break;
-//			case "varchar":
-//				pm = new StringValue("");
-//				break;	
-//			case "char":
-//				pm = new StringValue("");
-//				break;
-//			case "decimal":
-//				pm = new DoubleValue(0);
-//				break;
-//			case "date":
-//				pm = new DateValue("");
-//				break;
-//			default:
-//				break;
+		
 	}
 }
