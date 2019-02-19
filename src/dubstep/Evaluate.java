@@ -12,13 +12,9 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 class Evaluate extends Eval{
  
 		public PrimitiveValue eval(Column col){
-			String name = col.getColumnName();
 			if(col.getTable() != null && col.getTable().getName() != null){
-//				name = col.getTable().getName() + "." + col
 				List<ColumnDefs> cd = SchemaStructure.schema.get(col.getTable().getName());
 			}
 			return null;
-
-//			return scope.get(name);
 		}
 }

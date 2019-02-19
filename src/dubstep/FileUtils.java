@@ -17,7 +17,6 @@ public class FileUtils {
         try {
             br = new BufferedReader(new FileReader(csvFile));
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
                 list.add(line);
             }
         } catch (FileNotFoundException e) {

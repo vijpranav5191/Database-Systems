@@ -1,5 +1,6 @@
 package dubstep;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,7 @@ public class SelectWrapper {
 	private Table table;
 	private List<SelectItem> selectItems;
 	private Expression whereExp;
+	HashMap<String,List<PrimitiveValue>> dataMap;
 	
 	public SelectWrapper(PlainSelect plainselect){
 		this.plainselect = plainselect;
@@ -40,9 +42,10 @@ public class SelectWrapper {
 		ArrayList<String> data = FileUtils.getDBContents(this.table.getName().toLowerCase());
 		List<ColumnDefs> cdefs = SchemaStructure.schema.get(this.table.getName());
 	
-		HashMap<String,List<PrimitiveValue>> dataMap = new HashMap<String, List<PrimitiveValue>>();
-		for(int i = 0;i < data.size();i++) {
-			String[] row = data.get(i).split("|");
+		this.dataMap = new HashMap<String, List<PrimitiveValue>>();
+		
+		for(int i = 0;i < data.size();i++) {	
+			String[] row = data.get(i).split("\\|");
 			for(int j = 0;j < row.length; j++) {
 				ColumnDefs cdef = cdefs.get(j);
 				String value = row[j];
@@ -70,12 +73,31 @@ public class SelectWrapper {
 						pm = new StringValue(value);
 						break;
 				}
-				List<PrimitiveValue> pmList = dataMap.getOrDefault(cdef.getColumnName(), new ArrayList<PrimitiveValue>());
+				
+				List<PrimitiveValue> pmList = dataMap.getOrDefault(cdef.cdef.getColumnName(), new ArrayList<PrimitiveValue>());
 				pmList.add(pm);
-				dataMap.put(cdef.getColumnName(), pmList);
+				dataMap.put(cdef.cdef.getColumnName(), pmList);
 			}
 		}
-		
-		
+		if(this.whereExp != null) {
+			for(int i = 0;i < data.size();i++) {
+				try {	
+					System.out.println(evaluate(i, this.whereExp));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		System.out.println(data);
+	}
+	
+	public Boolean evaluate(int index, Expression where) throws Exception {
+		Eval eval = new Eval() {
+			public PrimitiveValue eval(Column col){
+			      return SelectWrapper.this.dataMap.get(col.getColumnName()).get(index);
+			    }
+		};
+		return eval.eval(where).toBool();
 	}
 }
