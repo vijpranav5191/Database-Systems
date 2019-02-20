@@ -11,7 +11,12 @@ public class EvaluateUtils{
 	public static Boolean evaluate(Map<String, PrimitiveValue> scope, Expression where) throws Exception {
 		Eval eval = new Eval() {
 			public PrimitiveValue eval(Column col){
-			      return scope.get(col.getColumnName());
+				String name = col.getColumnName();
+				if(col.getTable() != null && col.getTable().getName() != null){
+			        name = col.getTable().getName() + "." + col.getColumnName();
+			        return scope.get(name);
+			      }
+				return scope.get(name);
 			    }
 		};
 		return eval.eval(where).toBool();
