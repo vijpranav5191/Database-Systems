@@ -1,33 +1,30 @@
-package dubstep;
+package utils;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+
+import interfaces.OnTupleGetListener;
 
 public class FileUtils {
 	
-	public static ArrayList<String> getDBContents(String tableName){
+	public static void getDBContents(String tableName, OnTupleGetListener onTupleGetListener){
 		String csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
         BufferedReader br = null;
-        String line = "";
-        String cvsSplitBy = ",";
-        ArrayList<String> list = new ArrayList<>();
+        String tuple = "";
         try {
             br = new BufferedReader(new FileReader(csvFile));
-            while ((line = br.readLine()) != null) {
-                list.add(line);
+            while ((tuple = br.readLine()) != null) {
+            	if(!tuple.isEmpty()) onTupleGetListener.onTupleReceived(tuple, tableName);
             }
         } catch (FileNotFoundException e) {
         	e.printStackTrace();
       		System.out.println("Error 1 " + tableName);
-      		return null;
-        } catch (IOException e) {
-        	e.printStackTrace();
-      		System.out.println("Error 2 " + tableName);
-      		return null;
-	    } finally {
+       } catch (IOException e) {
+       	e.printStackTrace();
+     		System.out.println("Error 1 " + tableName);
+      } finally {
             if (br != null) {
                 try {
                     br.close();
@@ -36,6 +33,5 @@ public class FileUtils {
                 }
             }
         }
-        return list;
 	}
 }

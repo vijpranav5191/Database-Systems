@@ -1,4 +1,4 @@
-package dubstep;
+package objects;
 
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 

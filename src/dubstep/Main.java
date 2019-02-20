@@ -1,19 +1,15 @@
 package dubstep;
 
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
 
-import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
+import queryexec.CreateWrapper;
+import queryexec.SelectWrapper;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
@@ -21,6 +17,7 @@ class Main{
 	public static void main(String args[]) throws SQLException, ParseException {
 		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
+		
 		Statement query;
 		CreateWrapper cw = new CreateWrapper();
 		while((query = parser.Statement()) != null){

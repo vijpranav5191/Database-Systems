@@ -1,4 +1,4 @@
-package dubstep;
+package queryexec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +16,8 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
+import objects.ColumnDefs;
+import objects.SchemaStructure;
 
 public class CreateWrapper {
 
