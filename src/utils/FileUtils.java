@@ -3,7 +3,9 @@ package utils;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import interfaces.OnTupleGetListener;
 
@@ -33,5 +35,12 @@ public class FileUtils {
                 }
             }
         }
+	}
+	
+	public static void writeToFile(String fileName, String content) throws IOException {
+		FileWriter fileWriter = new FileWriter(fileName);
+	    PrintWriter printWriter = new PrintWriter(fileWriter);
+	    printWriter.print(content);
+	    printWriter.close();
 	}
 }
