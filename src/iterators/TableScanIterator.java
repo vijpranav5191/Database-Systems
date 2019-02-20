@@ -43,6 +43,7 @@ public class TableScanIterator implements DefaultIterator{
 			e.printStackTrace();
 			System.out.println("Error 2 " + tableName);
 			return false;
+			
 		}
 	}
 	public List<PrimitiveValue> next() {
