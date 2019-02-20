@@ -11,6 +11,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
@@ -25,8 +26,10 @@ public class SelectWrapper implements OnTupleGetListener {
 	private PlainSelect plainselect;
 	private Table table;
 	private List<SelectItem> selectItems;
+	
 	private Expression whereExp;
 	private List<Join> joins;
+	private List<Column> groupByColumns;
 	
 	public SelectWrapper(PlainSelect plainselect){
 		this.plainselect = plainselect;
@@ -40,6 +43,7 @@ public class SelectWrapper implements OnTupleGetListener {
 		}
 		this.whereExp = this.plainselect.getWhere();
 		this.joins = this.plainselect.getJoins();
+		this.groupByColumns = this.plainselect.getGroupByColumnReferences();
 		FileUtils.getDBContents(this.table.getName(), this);
 	}
 	
