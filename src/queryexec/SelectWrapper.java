@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import interfaces.OnTupleGetListener;
+import iterators.DefaultIterator;
+import iterators.NlJoiniterator;
+import iterators.TableScanIterator;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.Expression;
@@ -36,15 +39,24 @@ public class SelectWrapper implements OnTupleGetListener {
 	}
 	
 	public void parse() {
+		DefaultIterator iter = null;
+	
 		FromItem fromItem = this.plainselect.getFromItem();
 		this.selectItems = this.plainselect.getSelectItems();
 		if(fromItem instanceof Table) {
-			this.table = (Table) fromItem;
+			Table table = (Table) fromItem;
+			iter = new TableScanIterator(table);
+			
 		}
-		this.whereExp = this.plainselect.getWhere();
-		this.joins = this.plainselect.getJoins();
-		this.groupByColumns = this.plainselect.getGroupByColumnReferences();
-		FileUtils.getDBContents(this.table.getName(), this);
+		if((this.joins=this.plainselect.getJoins())!=null){
+			for (Join join : joins) {
+					iter =  new NlJoiniterator(iter, join);
+			}
+		}
+//		this.whereExp = this.plainselect.getWhere();
+
+//		this.groupByColumns = this.plainselect.getGroupByColumnReferences();
+//		FileUtils.getDBContents(this.table.getName(), this);
 	}
 	
 	@Override
