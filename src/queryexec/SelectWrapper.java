@@ -25,8 +25,7 @@ import utils.FileUtils;
 public class SelectWrapper implements OnTupleGetListener {
 	private PlainSelect plainselect;
 	private Table table;
-	private List<SelectItem> selectItems;
-	
+	private List<SelectItem> selectItems;	
 	private Expression whereExp;
 	private List<Join> joins;
 	private List<Column> groupByColumns;

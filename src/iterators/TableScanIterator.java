@@ -4,8 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
@@ -16,7 +17,7 @@ import net.sf.jsqlparser.schema.Table;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 
-public class TableScanIterator implements DefaultIterator{
+public class TableScanIterator implements DefaultIterator {
 	String csvFile;
 	String tableName;
 	BufferedReader br;
@@ -33,6 +34,8 @@ public class TableScanIterator implements DefaultIterator{
 		}
 		tuple = "";
 	}
+	
+	@Override
 	public boolean hasNext() {
 		try {
 			if((this.tuple = this.br.readLine()) !=null) {
@@ -46,11 +49,12 @@ public class TableScanIterator implements DefaultIterator{
 			
 		}
 	}
-	public List<PrimitiveValue> next() {
-
+	
+	@Override
+	public Map<String, PrimitiveValue> next() {
+		Map<String, PrimitiveValue> map = new HashMap<String, PrimitiveValue>();
 		String[] row = tuple.split("\\|");
 		List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
-		List<PrimitiveValue> rowlist = new ArrayList<>();
 		for(int j = 0;j < row.length; j++) {
 			ColumnDefs cdef = cdefs.get(j);
 			String value = row[j];
@@ -78,9 +82,25 @@ public class TableScanIterator implements DefaultIterator{
 				pm = new StringValue(value);
 				break;
 			}
-			rowlist.add(pm);
+			map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
 			//System.out.println(tableName + "." + cdef.cdef.getColumnName() + ":" + pm);
 		}
-		return rowlist;
+		return map;
 	}
+
+	@Override
+	public void reset() {
+		// TODO Auto-generated method stub
+		try {
+			br.close();
+			br = new BufferedReader(new FileReader(this.csvFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Error 1 " + tableName);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }
