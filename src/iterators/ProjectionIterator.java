@@ -7,11 +7,11 @@ import net.sf.jsqlparser.expression.PrimitiveValue;
 import utils.EvaluateUtils;
 
 public class ProjectionIterator implements DefaultIterator {
-	TableScanIterator iterator;
+	DefaultIterator iterator;
 	private Expression whereExp;
 	Map<String, PrimitiveValue> nextResult;
 	
-	public ProjectionIterator(TableScanIterator iterator, Expression whereExp){
+	public ProjectionIterator(DefaultIterator iterator, Expression whereExp){
 		this.iterator = iterator;
 		this.whereExp = whereExp;
 		

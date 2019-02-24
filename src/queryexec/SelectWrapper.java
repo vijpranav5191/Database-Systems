@@ -7,6 +7,7 @@ import java.util.Map;
 import interfaces.OnTupleGetListener;
 import iterators.DefaultIterator;
 import iterators.JoinIterator;
+import iterators.ProjectionIterator;
 import iterators.ResultIterator;
 import iterators.SelectionIterator;
 import iterators.TableScanIterator;
@@ -43,6 +44,7 @@ public class SelectWrapper implements OnTupleGetListener {
 	
 		FromItem fromItem = this.plainselect.getFromItem();
 		this.selectItems = this.plainselect.getSelectItems();
+		this.whereExp = this.plainselect.getWhere();
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
@@ -59,10 +61,14 @@ public class SelectWrapper implements OnTupleGetListener {
 					//System.out.println(result.next());
 				}
 			}
-			if (this.selectItems!=null) {
+			if (this.whereExp!=null) {
+				result = new ProjectionIterator(result, this.whereExp);
+			}
+			if(this.selectItems!=null ) {
 				result = new SelectionIterator(result, this.selectItems);
 			}
 			ResultIterator res = new ResultIterator(result);
+			iter.next();
 		}
 
 //		this.whereExp = this.plainselect.getWhere();
