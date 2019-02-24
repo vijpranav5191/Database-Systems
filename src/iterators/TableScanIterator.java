@@ -18,14 +18,16 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 
 public class TableScanIterator implements DefaultIterator {
-	String csvFile;
-	String tableName;
-	BufferedReader br;
-	String tuple;
+	private String csvFile;
+	private String tableName;
+	private BufferedReader br;
+	private String tuple;
+	private Map<String, PrimitiveValue> map;
+	
 	public TableScanIterator(Table tab) {
 		// TODO Auto-generated constructor stub
 		this.tableName = tab.getName();
-		this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
+		this.csvFile = "C://Users/Amit/Desktop/Sanity_Check_Examples/data/" + tableName.toLowerCase() + ".dat";
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 		} catch (FileNotFoundException e) {
@@ -38,7 +40,7 @@ public class TableScanIterator implements DefaultIterator {
 	@Override
 	public boolean hasNext() {
 		try {
-			if((this.tuple = this.br.readLine()) !=null) {
+			if(br.ready()) {
 				return true;
 			}
 			else return false;
@@ -52,38 +54,46 @@ public class TableScanIterator implements DefaultIterator {
 	
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> map = new HashMap<String, PrimitiveValue>();
-		String[] row = tuple.split("\\|");
-		List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
-		for(int j = 0;j < row.length; j++) {
-			ColumnDefs cdef = cdefs.get(j);
-			String value = row[j];
-			PrimitiveValue pm;
-			switch (cdef.cdef.getColDataType().getDataType()) {
-			case "int":
-				pm = new LongValue(value);
-				break;
-			case "string":
-				pm = new StringValue(value);
-				break;
-			case "varchar":
-				pm = new StringValue(value);
-				break;	
-			case "char":
-				pm = new StringValue(value);
-				break;
-			case "decimal":
-				pm = new DoubleValue(value);
-				break;
-			case "date":
-				pm = new DateValue(value);
-				break;
-			default:
-				pm = new StringValue(value);
-				break;
+		if(this.hasNext()) {
+			try {
+				tuple = br.readLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
-			//System.out.println(tableName + "." + cdef.cdef.getColumnName() + ":" + pm);
+			map = new HashMap<String, PrimitiveValue>();
+			String[] row = tuple.split("\\|");
+			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
+			for(int j = 0;j < row.length; j++) {
+				ColumnDefs cdef = cdefs.get(j);
+				String value = row[j];
+				PrimitiveValue pm;
+				switch (cdef.cdef.getColDataType().getDataType()) {
+				case "int":
+					pm = new LongValue(value);
+					break;
+				case "string":
+					pm = new StringValue(value);
+					break;
+				case "varchar":
+					pm = new StringValue(value);
+					break;	
+				case "char":
+					pm = new StringValue(value);
+					break;
+				case "decimal":
+					pm = new DoubleValue(value);
+					break;
+				case "date":
+					pm = new DateValue(value);
+					break;
+				default:
+					pm = new StringValue(value);
+					break;
+				}
+				this.map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
+				//System.out.println(tableName + "." + cdef.cdef.getColumnName() + ":" + pm);
+			}
 		}
 		return map;
 	}

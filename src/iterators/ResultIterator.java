@@ -7,9 +7,9 @@ import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class ResultIterator implements DefaultIterator{
-	TableScanIterator iterator;
+	DefaultIterator iterator;
 	
-	ResultIterator(TableScanIterator iterator) {
+	public ResultIterator(DefaultIterator iterator) {
 		this.iterator = iterator;
 	}
 	

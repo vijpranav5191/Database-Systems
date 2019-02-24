@@ -9,9 +9,9 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class SelectionIterator implements DefaultIterator{
 	private List<SelectItem> selectItems;
-	TableScanIterator iterator;
+	DefaultIterator iterator;
 	
-	SelectionIterator(TableScanIterator iterator, List<SelectItem> selectItems) {
+	public SelectionIterator(DefaultIterator iterator, List<SelectItem> selectItems) {
 		this.selectItems = selectItems;
 		this.iterator = iterator;
 	}

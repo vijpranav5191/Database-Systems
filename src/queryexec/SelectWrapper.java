@@ -6,6 +6,9 @@ import java.util.Map;
 
 import interfaces.OnTupleGetListener;
 import iterators.DefaultIterator;
+import iterators.JoinIterator;
+import iterators.ResultIterator;
+import iterators.SelectionIterator;
 import iterators.TableScanIterator;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
@@ -31,7 +34,6 @@ public class SelectWrapper implements OnTupleGetListener {
 	private Expression whereExp;
 	private List<Join> joins;
 	private List<Column> groupByColumns;
-	
 	public SelectWrapper(PlainSelect plainselect){
 		this.plainselect = plainselect;
 	}
@@ -44,13 +46,25 @@ public class SelectWrapper implements OnTupleGetListener {
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
-			
 		}
-		if((this.joins=this.plainselect.getJoins())!=null){
-			for (Join join : joins) {
-				//	iter =  new NlJoiniterator(iter, join);
+		DefaultIterator result=null;
+		while(iter.hasNext()) {
+			if((this.joins=this.plainselect.getJoins())!=null){
+				for (Join join : joins) {
+					FromItem item = join.getRightItem();
+					if(item instanceof Table ) {
+						DefaultIterator iter2= new TableScanIterator((Table) item);
+						result = new JoinIterator(iter, iter2);
+					}
+					//System.out.println(result.next());
+				}
 			}
+			if (this.selectItems!=null) {
+				result = new SelectionIterator(result, this.selectItems);
+			}
+			ResultIterator res = new ResultIterator(result);
 		}
+
 //		this.whereExp = this.plainselect.getWhere();
 
 //		this.groupByColumns = this.plainselect.getGroupByColumnReferences();

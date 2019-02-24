@@ -5,11 +5,11 @@ import java.util.Map;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 
 public class JoinIterator implements DefaultIterator{
-	TableScanIterator leftIterator;
-	TableScanIterator rightIterator;
+	DefaultIterator leftIterator;
+	DefaultIterator rightIterator;
 	Map<String, PrimitiveValue> leftTuple;
 	
-	public JoinIterator(TableScanIterator leftIterator, TableScanIterator rightIterator) {
+	public JoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator) {
 		this.leftIterator = leftIterator;
 		this.rightIterator = rightIterator;
 		this.leftTuple = leftIterator.next();

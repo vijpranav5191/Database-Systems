@@ -12,7 +12,7 @@ import interfaces.OnTupleGetListener;
 public class FileUtils {
 	
 	public static void getDBContents(String tableName, OnTupleGetListener onTupleGetListener){
-		String csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
+		String csvFile = "C://Users/Amit/Desktop/Sanity_Check_Examples/data/" + tableName.toLowerCase() + ".dat";
         BufferedReader br = null;
         String tuple = "";
         try {
