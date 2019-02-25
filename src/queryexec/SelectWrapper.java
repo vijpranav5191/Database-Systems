@@ -49,33 +49,34 @@ public class SelectWrapper implements OnTupleGetListener {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
 		}
-		DefaultIterator result=null;
+		DefaultIterator result = iter;
 		while(iter.hasNext()) {
 			if((this.joins=this.plainselect.getJoins())!=null){
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
-						DefaultIterator iter2= new TableScanIterator((Table) item);
-						result = new JoinIterator(iter, iter2);
+						DefaultIterator iter2 = new TableScanIterator((Table) item);
+						result = new JoinIterator(result, iter2);
 					}
 					//System.out.println(result.next());
 				}
 			}
-			if (this.whereExp!=null) {
-				result = new ProjectionIterator(result, this.whereExp);
+			if (this.whereExp != null) {
+				result = new SelectionIterator(result, this.whereExp);
 			}
-			if(this.selectItems!=null ) {
-				result = new SelectionIterator(result, this.selectItems);
-			}
+//			if(this.selectItems != null ) {
+//				result = new ProjectionIterator(result, this.selectItems);
+//			}
 			ResultIterator res = new ResultIterator(result);
-			iter.next();
+			while(res.hasNext()) {
+				res.next();
+			}
 		}
-
-//		this.whereExp = this.plainselect.getWhere();
-
 //		this.groupByColumns = this.plainselect.getGroupByColumnReferences();
 //		FileUtils.getDBContents(this.table.getName(), this);
 	}
+	
+	
 	
 	@Override
 	public void onTupleReceived(String tuple, String tableName) {

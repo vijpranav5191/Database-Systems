@@ -1,5 +1,6 @@
 package iterators;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import net.sf.jsqlparser.expression.PrimitiveValue;
@@ -25,15 +26,20 @@ public class JoinIterator implements DefaultIterator{
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
+		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();
 		if(!rightIterator.hasNext()) {
 			this.leftTuple = this.leftIterator.next();
 			this.rightIterator.reset();
 		}
 		Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
-		for(String key: this.leftTuple.keySet()) {
-			rightTuple.put(key, this.leftTuple.get(key));
+		
+		for(String key: rightTuple.keySet()) {
+			temp.put(key, rightTuple.get(key));
 		}
-		return rightTuple;
+		for(String key: this.leftTuple.keySet()) {
+			temp.put(key, this.leftTuple.get(key));
+		}
+		return temp;
 	}
 
 	@Override

@@ -15,7 +15,6 @@ public class ResultIterator implements DefaultIterator{
 	
 	@Override
 	public boolean hasNext() {
-		// TODO Auto-generated method stub
 		return this.iterator.hasNext();
 	}
 	
@@ -28,7 +27,10 @@ public class ResultIterator implements DefaultIterator{
 //		}
 //		return result;
 		if(this.hasNext()) {
-			System.out.println(this.iterator.next().toString());
+			Map<String, PrimitiveValue> map = this.iterator.next();
+			if(map != null) {
+			System.out.println(map.toString());
+		}
 		}
 		return null;
 	}

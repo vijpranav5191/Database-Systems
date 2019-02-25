@@ -1,41 +1,65 @@
 package iterators;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
-import net.sf.jsqlparser.statement.select.SelectItem;
+import utils.EvaluateUtils;
 
-public class SelectionIterator implements DefaultIterator{
-	private List<SelectItem> selectItems;
+public class SelectionIterator implements DefaultIterator {
 	DefaultIterator iterator;
+	private Expression whereExp;
+	Map<String, PrimitiveValue> nextResult;
 	
-	public SelectionIterator(DefaultIterator iterator, List<SelectItem> selectItems) {
-		this.selectItems = selectItems;
+	public SelectionIterator(DefaultIterator iterator, Expression whereExp){
 		this.iterator = iterator;
+		this.whereExp = whereExp;
 	}
 	
 	@Override
 	public boolean hasNext() {
-		// TODO Auto-generated method stub
 		return this.iterator.hasNext();
 	}
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
-		Map<String, PrimitiveValue> map = this.iterator.next();
-		for(int index = 0; index < this.selectItems.size();index++) {
-			SelectItem selectItem = this.selectItems.get(index);
+		Map<String, PrimitiveValue> temp = this.nextResult;
+		Map<String, PrimitiveValue> pos = this.iterator.next();
+		while(this.iterator.hasNext() && pos!=null && !evaluate(pos)) {
+			pos = this.iterator.next();
 		}
-		return selectMap;
+		if(this.iterator.hasNext() && temp == null) { // for first
+			temp = pos;
+			pos = this.iterator.next();
+			while(this.iterator.hasNext() && !evaluate(pos)) {
+				pos = this.iterator.next();
+			}
+			this.nextResult = pos;
+		} else {
+			this.nextResult = pos; 
+		}
+		return temp;
 	}
 
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-		
+		this.iterator.reset();
+		this.nextResult = null;
 	}
 
+	public Boolean evaluate(Map<String, PrimitiveValue> map) {
+		if(this.whereExp != null) {
+			try {
+				return EvaluateUtils.evaluate(map, this.whereExp);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+		} else {
+			System.out.println(map.toString());
+		}
+		return false;
+	}
 }
