@@ -94,8 +94,9 @@ public class TableScanIterator implements DefaultIterator {
 				this.map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
 				//System.out.println(tableName + "." + cdef.cdef.getColumnName() + ":" + pm);
 			}
+			return map;
 		}
-		return map;
+		return null;
 	}
 
 	@Override
