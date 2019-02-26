@@ -2,6 +2,7 @@ package iterators;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -29,7 +30,11 @@ public class ResultIterator implements DefaultIterator{
 		if(this.hasNext()) {
 			Map<String, PrimitiveValue> map = this.iterator.next();
 			if(map != null) {
-			System.out.println(map.toString());
+			Set<String> strlist = map.keySet();
+			for (String string : strlist) {
+				System.out.print(map.get(string)+" | ");
+			}
+			System.out.println("");
 		}
 		}
 		return null;
