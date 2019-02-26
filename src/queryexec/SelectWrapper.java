@@ -64,9 +64,9 @@ public class SelectWrapper implements OnTupleGetListener {
 			if (this.whereExp != null) {
 				result = new SelectionIterator(result, this.whereExp);
 			}
-//			if(this.selectItems != null ) {
-//				result = new ProjectionIterator(result, this.selectItems);
-//			}
+			if(this.selectItems != null ) {
+				result = new ProjectionIterator(result, this.selectItems);
+			}
 			ResultIterator res = new ResultIterator(result);
 			while(res.hasNext()) {
 				res.next();

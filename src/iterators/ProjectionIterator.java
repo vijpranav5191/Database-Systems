@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class ProjectionIterator implements DefaultIterator{
@@ -28,6 +30,12 @@ public class ProjectionIterator implements DefaultIterator{
 		Map<String, PrimitiveValue> map = this.iterator.next();
 		for(int index = 0; index < this.selectItems.size();index++) {
 			SelectItem selectItem = this.selectItems.get(index);
+			if(selectItem instanceof AllTableColumns) {
+				AllTableColumns allTableColumns = (AllTableColumns) selectItem;
+				allTableColumns.getTable();
+			} else if(selectItem instanceof AllColumns) {
+				AllColumns allTableColumns = (AllColumns) selectItem;
+			}
 		}
 		return selectMap;
 	}
