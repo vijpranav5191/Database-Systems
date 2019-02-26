@@ -56,7 +56,7 @@ public class SelectWrapper implements OnTupleGetListener {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
 						DefaultIterator iter2 = new TableScanIterator((Table) item);
-						result = new JoinIterator(result, iter2);
+						result = new JoinIterator(result, iter2, join);
 					}
 					//System.out.println(result.next());
 				}
@@ -64,13 +64,13 @@ public class SelectWrapper implements OnTupleGetListener {
 			if (this.whereExp != null) {
 				result = new SelectionIterator(result, this.whereExp);
 			}
-			if(this.selectItems != null ) {
-				result = new ProjectionIterator(result, this.selectItems);
-			}
-			ResultIterator res = new ResultIterator(result);
-			while(res.hasNext()) {
-				res.next();
-			}
+//			if(this.selectItems != null ) {
+//				result = new ProjectionIterator(result, this.selectItems);
+//			}
+//			ResultIterator res = new ResultIterator(result);
+//			while(res.hasNext()) {
+//				res.next();
+//			}
 		}
 //		this.groupByColumns = this.plainselect.getGroupByColumnReferences();
 //		FileUtils.getDBContents(this.table.getName(), this);
