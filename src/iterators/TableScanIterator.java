@@ -27,7 +27,7 @@ public class TableScanIterator implements DefaultIterator {
 	public TableScanIterator(Table tab) {
 		// TODO Auto-generated constructor stub
 		this.tableName = tab.getName();
-		this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
+		this.csvFile = "C://Users/Amit/Desktop/Sanity_Check_Examples/data/" + tableName.toLowerCase() + ".dat";
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 		} catch (FileNotFoundException e) {
