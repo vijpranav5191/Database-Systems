@@ -36,8 +36,8 @@ public class JoinIterator implements DefaultIterator{
 		if(exp != null) {
 			try {
 				while(temp != null && !EvaluateUtils.evaluate(temp, exp)) {
-					System.out.println(EvaluateUtils.evaluate(temp, exp));
-					System.out.println(temp);
+					//System.out.println(EvaluateUtils.evaluate(temp, exp));
+					//System.out.println(temp);
 					temp = this.getNextIter();
 				}
 			} catch (Exception e) {
@@ -61,8 +61,10 @@ public class JoinIterator implements DefaultIterator{
 			this.leftTuple = this.leftIterator.next();
 			this.rightIterator.reset();
 		}
+		if(this.leftTuple == null) {
+			return null;
+		}
 		Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
-		
 		for(String key: rightTuple.keySet()) {
 			temp.put(key, rightTuple.get(key));
 		}
