@@ -32,7 +32,13 @@ public class ProjectionIterator implements DefaultIterator{
 				SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
 				if(selectExpression.getExpression() instanceof Column) {
 					Column column = (Column) selectExpression.getExpression();
-					this.columns.add(column.getTable() + "." + column.getColumnName());
+					if(column.getTable().getName() != null) {
+						this.columns.add(column.getTable().getName() + "." + column.getColumnName());
+					} else if(column.getTable().getAlias() != null) {
+						this.columns.add(column.getTable().getAlias() + "." + column.getColumnName());
+					} else {
+						this.columns.add(column.getColumnName());		
+					}
 				} else {
 					this.columns = this.iterator.getColumns(); 
 				}
@@ -71,11 +77,7 @@ public class ProjectionIterator implements DefaultIterator{
 						} else if(column.getTable().getAlias() != null && column.getColumnName() != null) {
 							selectMap.put(column.getTable().getAlias() + "." + column.getColumnName(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
 						} else if(column.getTable().getAlias() == null && column.getTable().getName() == null){
-							if(this.primaryTable.getName() != null) {
-								selectMap.put(this.primaryTable.getName() + "." + column.getColumnName(), map.get(this.primaryTable.getName() + "." + column.getColumnName()));
-							} else if(this.primaryTable.getAlias() != null) {
-								selectMap.put(this.primaryTable.getAlias() + "." + column.getColumnName(), map.get(this.primaryTable.getAlias() + "." + column.getColumnName()));	
-							}
+							selectMap.put(column.getColumnName(), map.get(column.getColumnName()));	
 						}
 					} else {
 						try {
