@@ -1,6 +1,8 @@
 package iterators;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
@@ -13,12 +15,14 @@ public class JoinIterator implements DefaultIterator{
 	DefaultIterator rightIterator;
 	Map<String, PrimitiveValue> leftTuple;
 	Join join;
+	List<String> columns;
 	
 	public JoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join) {
 		this.leftIterator = leftIterator;
 		this.rightIterator = rightIterator;
 		this.leftTuple = leftIterator.next();
 		this.join = join;
+		this.columns = new ArrayList<String>();
 	}
 	
 	@Override
@@ -31,13 +35,11 @@ public class JoinIterator implements DefaultIterator{
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		Expression exp = this.join.getOnExpression();
 		Map<String, PrimitiveValue> temp = this.getNextIter();
+		Expression exp = this.join.getOnExpression();
 		if(exp != null) {
 			try {
 				while(temp != null && !EvaluateUtils.evaluate(temp, exp)) {
-					//System.out.println(EvaluateUtils.evaluate(temp, exp));
-					//System.out.println(temp);
 					temp = this.getNextIter();
 				}
 			} catch (Exception e) {
@@ -73,4 +75,15 @@ public class JoinIterator implements DefaultIterator{
 		}
 		return temp;
 	}
+
+	@Override
+	public List<String> getColumns() {
+		if(this.columns.size() == 0) {
+			this.columns.addAll(this.leftIterator.getColumns());
+			this.columns.addAll(this.rightIterator.getColumns());
+		}
+		return this.columns;
+	}
+	
+	
 }

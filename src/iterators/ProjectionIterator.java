@@ -22,9 +22,13 @@ public class ProjectionIterator implements DefaultIterator{
 		this.columns = new ArrayList<String>();
 		for(int index = 0; index < this.selectItems.size();index++) {
 			SelectItem selectItem = this.selectItems.get(index);
-			SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
-			Column column = (Column) selectExpression.getExpression();
-			this.columns.add(column.getTable() + "." + column.getColumnName());
+			if(selectItem instanceof SelectExpressionItem) {
+				SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
+				Column column = (Column) selectExpression.getExpression();
+				this.columns.add(column.getTable() + "." + column.getColumnName());
+			} else {
+				
+			}
 		}
 	}
 	
@@ -66,7 +70,8 @@ public class ProjectionIterator implements DefaultIterator{
 		this.iterator.reset();
 	}
 
-	public List<String> getProjectionColumns(){
+	@Override
+	public List<String> getColumns() {
 		return this.columns;
 	}
 }

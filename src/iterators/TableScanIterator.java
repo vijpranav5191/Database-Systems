@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,9 +24,10 @@ public class TableScanIterator implements DefaultIterator {
 	private BufferedReader br;
 	private String tuple;
 	private Map<String, PrimitiveValue> map;
+	private List<String> columns;
 	
 	public TableScanIterator(Table tab) {
-		// TODO Auto-generated constructor stub
+		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
 		try {
@@ -112,6 +114,14 @@ public class TableScanIterator implements DefaultIterator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public List<String> getColumns() {
+		if(this.columns.size() == 0) {
+			
+		}
+		return this.columns;
 	}
 	
 }
