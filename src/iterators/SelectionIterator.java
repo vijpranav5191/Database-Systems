@@ -1,5 +1,6 @@
 package iterators;
 
+import java.util.List;
 import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
@@ -54,5 +55,11 @@ public class SelectionIterator implements DefaultIterator {
 		// TODO Auto-generated method stub
 		this.iterator.reset();
 		this.nextResult = null;
+	}
+
+	@Override
+	public List<String> getColumns() {
+		// TODO Auto-generated method stub
+		return this.iterator.getColumns();
 	}
 }

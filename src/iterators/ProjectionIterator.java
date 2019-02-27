@@ -27,7 +27,7 @@ public class ProjectionIterator implements DefaultIterator{
 				Column column = (Column) selectExpression.getExpression();
 				this.columns.add(column.getTable() + "." + column.getColumnName());
 			} else {
-				
+				this.columns = this.iterator.getColumns(); 
 			}
 		}
 	}

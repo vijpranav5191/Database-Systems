@@ -69,7 +69,7 @@ public class UnionWrapper {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
 						DefaultIterator iter2 = new TableScanIterator((Table) item);
-						result = new JoinIterator(result, iter2);
+						result = new JoinIterator(result, iter2, join);
 					}
 					//System.out.println(result.next());
 				}

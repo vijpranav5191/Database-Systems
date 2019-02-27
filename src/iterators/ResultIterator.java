@@ -1,5 +1,6 @@
 package iterators;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import net.sf.jsqlparser.expression.PrimitiveValue;
@@ -34,6 +35,11 @@ public class ResultIterator implements DefaultIterator{
 	@Override
 	public void reset() {
 		this.iterator.reset();
+	}
+
+	@Override
+	public List<String> getColumns() {
+		return this.iterator.getColumns();
 	}
 
 }

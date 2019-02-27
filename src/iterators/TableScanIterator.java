@@ -103,7 +103,6 @@ public class TableScanIterator implements DefaultIterator {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 		try {
 			br.close();
 			br = new BufferedReader(new FileReader(this.csvFile));
@@ -111,7 +110,6 @@ public class TableScanIterator implements DefaultIterator {
 			e.printStackTrace();
 			System.out.println("Error 1 " + tableName);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -119,7 +117,10 @@ public class TableScanIterator implements DefaultIterator {
 	@Override
 	public List<String> getColumns() {
 		if(this.columns.size() == 0) {
-			
+			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
+			for(int j = 0;j < cdefs.size(); j++) {
+				this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
+			}
 		}
 		return this.columns;
 	}
