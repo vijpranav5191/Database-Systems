@@ -8,6 +8,7 @@ import java.util.Map;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.SelectExpressionItem;
@@ -18,12 +19,13 @@ public class ProjectionIterator implements DefaultIterator{
 	private List<SelectItem> selectItems;
 	DefaultIterator iterator;
 	List<String> columns;
+	Table primaryTable;
 	
-	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems) {
+	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems, Table primaryTable) {
 		this.selectItems = selectItems;
 		this.iterator = iterator;
 		this.columns = new ArrayList<String>();
-		
+		this.primaryTable = primaryTable;
 		for(int index = 0; index < this.selectItems.size();index++) {
 			SelectItem selectItem = this.selectItems.get(index);
 			if(selectItem instanceof SelectExpressionItem) {
@@ -64,8 +66,16 @@ public class ProjectionIterator implements DefaultIterator{
 					SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
 					if(selectExpression.getExpression() instanceof Column) {
 						Column column = (Column) selectExpression.getExpression();
-						if(column.getTable() != null && column.getColumnName() != null) {
-							selectMap.put(column.getTable() + "." + column.getColumnName(), map.get(column.getTable() + "." + column.getColumnName()));
+						if(column.getTable().getName() != null && column.getColumnName() != null) {
+							selectMap.put(column.getTable().getName() + "." + column.getColumnName(), map.get(column.getTable().getName() + "." + column.getColumnName()));
+						} else if(column.getTable().getAlias() != null && column.getColumnName() != null) {
+							selectMap.put(column.getTable().getAlias() + "." + column.getColumnName(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
+						} else if(column.getTable().getAlias() == null && column.getTable().getName() == null){
+							if(this.primaryTable.getName() != null) {
+								selectMap.put(this.primaryTable.getName() + "." + column.getColumnName(), map.get(this.primaryTable.getName() + "." + column.getColumnName()));
+							} else if(this.primaryTable.getAlias() != null) {
+								selectMap.put(this.primaryTable.getAlias() + "." + column.getColumnName(), map.get(this.primaryTable.getAlias() + "." + column.getColumnName()));	
+							}
 						}
 					} else {
 						try {

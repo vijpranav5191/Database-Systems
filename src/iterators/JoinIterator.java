@@ -84,6 +84,4 @@ public class JoinIterator implements DefaultIterator{
 		}
 		return this.columns;
 	}
-	
-	
 }

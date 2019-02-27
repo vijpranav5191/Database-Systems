@@ -24,12 +24,14 @@ public class TableScanIterator implements DefaultIterator {
 	private String tableName;
 	private BufferedReader br;
 	private String tuple;
+	private Table tab;
 	private Map<String, PrimitiveValue> map;
 	private List<String> columns;
 	
 	public TableScanIterator(Table tab) {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
+		this.tab = tab;
 		if(DEBUG) {
 			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
 		} else {
@@ -98,7 +100,11 @@ public class TableScanIterator implements DefaultIterator {
 					pm = new StringValue(value);
 					break;
 				}
-				this.map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
+				if(this.tab.getAlias() == null) {
+					this.map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
+				} else {
+					this.map.put( this.tab.getAlias() + "." + cdef.cdef.getColumnName(), pm);	
+				}
 				//System.out.println(tableName + "." + cdef.cdef.getColumnName() + ":" + pm);
 			}
 			return map;
@@ -124,7 +130,11 @@ public class TableScanIterator implements DefaultIterator {
 		if(this.columns.size() == 0) {
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			for(int j = 0;j < cdefs.size(); j++) {
-				this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
+				if(this.tab.getAlias() == null) {
+					this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
+				} else {
+					this.columns.add(this.tab.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
+				}
 			}
 		}
 		return this.columns;

@@ -49,7 +49,7 @@ public class SelectWrapper{
 				result = new SelectionIterator(result, this.whereExp);
 			}
 			if(this.selectItems != null ) {
-				result = new ProjectionIterator(result, this.selectItems);
+				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem);
 			}
 			ResultIterator res = new ResultIterator(result);
 			while(res.hasNext()) {
