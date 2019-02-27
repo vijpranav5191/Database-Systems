@@ -21,4 +21,19 @@ public class EvaluateUtils{
 		};
 		return eval.eval(where).toBool();
 	}
+	
+	public static PrimitiveValue evaluateExpression(Map<String, PrimitiveValue> scope, Expression where) throws Exception {
+		Eval eval = new Eval() {
+			public PrimitiveValue eval(Column col){
+				String name = col.getColumnName();
+				if(col.getTable() != null && col.getTable().getName() != null){
+			        name = col.getTable().getName() + "." + col.getColumnName();
+			        return scope.get(name);
+			      }
+				return scope.get(name);
+			    }
+		};
+		return eval.eval(where);
+	}
+	
 }

@@ -19,6 +19,7 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 
 public class TableScanIterator implements DefaultIterator {
+	private Boolean DEBUG = false;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
@@ -29,7 +30,11 @@ public class TableScanIterator implements DefaultIterator {
 	public TableScanIterator(Table tab) {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
-		this.csvFile = "data/" + tableName + ".csv";
+		if(DEBUG) {
+			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
+		} else {
+			this.csvFile = "data/" + tableName + ".csv";	
+		}
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 		} catch (FileNotFoundException e) {
