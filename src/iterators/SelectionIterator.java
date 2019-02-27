@@ -25,14 +25,22 @@ public class SelectionIterator implements DefaultIterator {
 	public Map<String, PrimitiveValue> next() {
 		Map<String, PrimitiveValue> temp = this.nextResult;
 		Map<String, PrimitiveValue> pos = this.iterator.next();
-		while(this.iterator.hasNext() && pos!=null && !evaluate(pos)) {
-			pos = this.iterator.next();
+		try {
+			while(this.iterator.hasNext() && pos!=null && !EvaluateUtils.evaluate(pos, this.whereExp)) {
+				pos = this.iterator.next();
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 		if(this.iterator.hasNext() && temp == null) { // for first
 			temp = pos;
 			pos = this.iterator.next();
-			while(this.iterator.hasNext() && !evaluate(pos)) {
-				pos = this.iterator.next();
+			try {
+				while(this.iterator.hasNext() && !EvaluateUtils.evaluate(pos, this.whereExp)) {
+					pos = this.iterator.next();
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			this.nextResult = pos;
 		} else {
@@ -46,20 +54,5 @@ public class SelectionIterator implements DefaultIterator {
 		// TODO Auto-generated method stub
 		this.iterator.reset();
 		this.nextResult = null;
-	}
-
-	public Boolean evaluate(Map<String, PrimitiveValue> map) {
-		if(this.whereExp != null) {
-			try {
-				return EvaluateUtils.evaluate(map, this.whereExp);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			}
-		} else {
-			System.out.println(map.toString());
-		}
-		return false;
 	}
 }

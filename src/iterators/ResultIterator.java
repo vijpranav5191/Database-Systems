@@ -1,11 +1,8 @@
 package iterators;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import net.sf.jsqlparser.expression.PrimitiveValue;
-import net.sf.jsqlparser.statement.select.SelectItem;
 
 public class ResultIterator implements DefaultIterator{
 	DefaultIterator iterator;
