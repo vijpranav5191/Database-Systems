@@ -23,8 +23,15 @@ public class ResultIterator implements DefaultIterator{
 			Map<String, PrimitiveValue> map = this.iterator.next();
 			if(map != null) {
 				Set<String> strlist = map.keySet();
+				int count = strlist.size();
 				for (String string : strlist) {
-					System.out.print(map.get(string)+"|");
+					if(count!=1){
+						System.out.print(map.get(string)+"|");
+					}
+					else {
+						System.out.print(map.get(string));
+					}
+					count--;
 				}
 				System.out.println("");
 			}
