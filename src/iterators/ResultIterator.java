@@ -25,7 +25,7 @@ public class ResultIterator implements DefaultIterator{
 				List<String> columns = this.iterator.getColumns();
 				int count = columns.size();
 				for (String string : columns) {
-					if(count!=1){
+					if(count != 1){
 						System.out.print(map.get(string) + "|");
 					}
 					else {

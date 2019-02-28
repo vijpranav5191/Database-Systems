@@ -37,13 +37,19 @@ public class ProjectionIterator implements DefaultIterator{
 					} else if(column.getTable().getAlias() != null) {
 						this.columns.add(column.getTable().getAlias() + "." + column.getColumnName());
 					} else {
-						this.columns.add(column.getColumnName());		
+						this.columns.add(column.getColumnName());	
 					}
 				} else {
-					this.columns = this.iterator.getColumns(); 
+					this.columns.add(selectExpression.getAlias());
 				}
-			} else {
-				this.columns = this.iterator.getColumns(); 
+			} else if(selectItem instanceof AllTableColumns){
+				AllTableColumns allTableColumns = (AllTableColumns) selectItem;
+				Table table = allTableColumns.getTable();
+				for(String column: this.iterator.getColumns()) {
+					if(column.split("\\.")[0].equals(table.getName())) {
+						this.columns.add(column);
+					}
+				}
 			}
 		}
 	}
@@ -77,7 +83,12 @@ public class ProjectionIterator implements DefaultIterator{
 						} else if(column.getTable().getAlias() != null && column.getColumnName() != null) {
 							selectMap.put(column.getTable().getAlias() + "." + column.getColumnName(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
 						} else if(column.getTable().getAlias() == null && column.getTable().getName() == null){
-							selectMap.put(column.getColumnName(), map.get(column.getColumnName()));	
+							for(String key: map.keySet()) {
+								if(key.split("\\.")[1].equals(column.getColumnName())) {
+									selectMap.put(key.split("\\.")[1], map.get(key));					
+									break;
+								}
+							}
 						}
 					} else {
 						try {

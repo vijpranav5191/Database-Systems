@@ -32,7 +32,7 @@ public class SelectWrapper{
 		this.whereExp = this.plainselect.getWhere();
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
-			iter = new TableScanIterator(table, true);
+			iter = new TableScanIterator(table);
 		}
 		DefaultIterator result = iter;
 		while(iter.hasNext()) {
@@ -40,7 +40,7 @@ public class SelectWrapper{
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
-						DefaultIterator iter2 = new TableScanIterator((Table) item, false);
+						DefaultIterator iter2 = new TableScanIterator((Table) item);
 						result = new JoinIterator(result, iter2, join);
 					}
 				}
