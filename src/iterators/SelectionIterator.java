@@ -15,6 +15,7 @@ public class SelectionIterator implements DefaultIterator {
 	public SelectionIterator(DefaultIterator iterator, Expression whereExp){
 		this.iterator = iterator;
 		this.whereExp = whereExp;
+		this.nextResult = getNextIter();
 	}
 	
 	@Override
@@ -24,30 +25,9 @@ public class SelectionIterator implements DefaultIterator {
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> pos = this.iterator.next();
-		try {
-			while(this.iterator.hasNext() && pos!=null && !EvaluateUtils.evaluate(pos, this.whereExp)) {
-				pos = this.iterator.next();
-			}
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-		
-//		if(this.iterator.hasNext() && temp == null) { // for first
-//			temp = pos;
-//			pos = this.iterator.next();
-//			try {
-//				while(this.iterator.hasNext() && !EvaluateUtils.evaluate(pos, this.whereExp)) {
-//					pos = this.iterator.next();
-//				}
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//			this.nextResult = pos;
-//		} else {
-//			this.nextResult = pos; 
-//		}
-		return pos;
+		Map<String, PrimitiveValue> temp = this.nextResult;
+		this.nextResult = getNextIter();
+		return temp;
 	}
 
 	@Override
@@ -61,5 +41,17 @@ public class SelectionIterator implements DefaultIterator {
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
 		return this.iterator.getColumns();
+	}
+	
+	public Map<String, PrimitiveValue> getNextIter(){
+		Map<String, PrimitiveValue> pos = this.iterator.next();
+		try {
+			while(this.iterator.hasNext() && pos != null && !EvaluateUtils.evaluate(pos, this.whereExp)) {
+				pos = this.iterator.next();
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+		return pos;
 	}
 }
