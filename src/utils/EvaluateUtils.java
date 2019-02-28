@@ -35,9 +35,15 @@ public class EvaluateUtils{
 				if(col.getTable() != null && col.getTable().getName() != null){
 			        name = col.getTable().getName() + "." + col.getColumnName();
 			        return scope.get(name);
-			      }
+			    } else {
+			    	for(String key: scope.keySet()) {
+			    		if(key.split("\\.")[1].equals(name)) {
+			    			return scope.get(key);
+			    		}
+			    	}
+				}
 				return scope.get(name);
-			    }
+			}
 		};
 		return eval.eval(where);
 	}
