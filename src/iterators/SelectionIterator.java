@@ -20,7 +20,11 @@ public class SelectionIterator implements DefaultIterator {
 	
 	@Override
 	public boolean hasNext() {
-		return this.iterator.hasNext();
+		if(this.nextResult != null) {
+			return true;
+		}
+		return false;
+		//return this.iterator.hasNext();
 	}
 
 	@Override
