@@ -26,8 +26,10 @@ public class ProjectionIterator implements DefaultIterator{
 		this.iterator = iterator;
 		this.columns = new ArrayList<String>();
 		this.primaryTable = primaryTable;
+		
 		for(int index = 0; index < this.selectItems.size();index++) {
 			SelectItem selectItem = this.selectItems.get(index);
+			
 			if(selectItem instanceof SelectExpressionItem) {
 				SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
 				if(selectExpression.getExpression() instanceof Column) {
@@ -63,7 +65,9 @@ public class ProjectionIterator implements DefaultIterator{
 	public Map<String, PrimitiveValue> next() {
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		Map<String, PrimitiveValue> map = this.iterator.next();
+		
 		if(map != null) { // hasNext() not working
+			
 			for(int index = 0; index < this.selectItems.size();index++) {
 				SelectItem selectItem = this.selectItems.get(index);
 				

@@ -24,7 +24,6 @@ public class SelectionIterator implements DefaultIterator {
 			return true;
 		}
 		return false;
-		//return this.iterator.hasNext();
 	}
 
 	@Override
@@ -36,7 +35,6 @@ public class SelectionIterator implements DefaultIterator {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 		this.iterator.reset();
 		this.nextResult = null;
 	}
@@ -46,11 +44,11 @@ public class SelectionIterator implements DefaultIterator {
 		// TODO Auto-generated method stub
 		return this.iterator.getColumns();
 	}
-	
-	public Map<String, PrimitiveValue> getNextIter(){
+
+	public Map<String, PrimitiveValue> getNextIter() {
 		Map<String, PrimitiveValue> pos = this.iterator.next();
 		try {
-			while(this.iterator.hasNext() && pos != null && !EvaluateUtils.evaluate(pos, this.whereExp)) {
+			while(pos != null && !EvaluateUtils.evaluate(pos, this.whereExp)) {
 				pos = this.iterator.next();
 			}
 		} catch (Exception e1) {
