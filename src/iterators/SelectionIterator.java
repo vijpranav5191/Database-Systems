@@ -24,7 +24,6 @@ public class SelectionIterator implements DefaultIterator {
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = this.nextResult;
 		Map<String, PrimitiveValue> pos = this.iterator.next();
 		try {
 			while(this.iterator.hasNext() && pos!=null && !EvaluateUtils.evaluate(pos, this.whereExp)) {
@@ -33,21 +32,22 @@ public class SelectionIterator implements DefaultIterator {
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
-		if(this.iterator.hasNext() && temp == null) { // for first
-			temp = pos;
-			pos = this.iterator.next();
-			try {
-				while(this.iterator.hasNext() && !EvaluateUtils.evaluate(pos, this.whereExp)) {
-					pos = this.iterator.next();
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			this.nextResult = pos;
-		} else {
-			this.nextResult = pos; 
-		}
-		return temp;
+		
+//		if(this.iterator.hasNext() && temp == null) { // for first
+//			temp = pos;
+//			pos = this.iterator.next();
+//			try {
+//				while(this.iterator.hasNext() && !EvaluateUtils.evaluate(pos, this.whereExp)) {
+//					pos = this.iterator.next();
+//				}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//			this.nextResult = pos;
+//		} else {
+//			this.nextResult = pos; 
+//		}
+		return pos;
 	}
 
 	@Override
