@@ -96,8 +96,13 @@ public class ProjectionIterator implements DefaultIterator{
 						}
 					} else {
 						try {
+							
+							
 							Expression exp = selectExpression.getExpression();
 							selectMap.put(selectExpression.getAlias(), EvaluateUtils.evaluateExpression(map, exp));
+							
+							
+							
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
