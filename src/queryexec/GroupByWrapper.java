@@ -23,14 +23,20 @@ public class GroupByWrapper {
 	public void parse() {
 		ArrayList<ArrayList<String>> groupList = new ArrayList<ArrayList<String>>();
 		groupList.add(this.data);
+		
+		
+		
 		for(int colIndex = 0; colIndex < this.groupByColumns.size(); colIndex++) {
 			Column column = this.groupByColumns.get(colIndex);
+			
 			int index = 0;
 			while(index < this.cdefs.size() && !column.getColumnName().equals(this.cdefs.get(index).cdef.getColumnName())) {
 				index += 1;
 			}
 			ArrayList<ArrayList<String>> tempList = new ArrayList<ArrayList<String>>();
 			int groupListIndex = 0;
+			
+			
 			while(groupList.size() > groupListIndex) {
 				Map<String, ArrayList<String>> map = groupByColumn(index, groupList.get(groupListIndex));
 				for(String key: map.keySet()) {
@@ -40,15 +46,6 @@ public class GroupByWrapper {
 			}
 			groupList = tempList;
 		}
-		
-		
-		
-		
-//		this.data.clear();
-//		for(int i=0; i < groupList.size();i++) {
-//			this.data.addAll(groupList.get(i));
-//		}
-//		return this.data;
 	}
 	
 	

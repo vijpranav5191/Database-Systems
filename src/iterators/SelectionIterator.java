@@ -36,7 +36,7 @@ public class SelectionIterator implements DefaultIterator {
 	@Override
 	public void reset() {
 		this.iterator.reset();
-		this.nextResult = null;
+		this.nextResult = getNextIter();
 	}
 
 	@Override
