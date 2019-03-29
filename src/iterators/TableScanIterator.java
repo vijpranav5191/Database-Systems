@@ -1,6 +1,7 @@
 package iterators;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -27,15 +28,44 @@ public class TableScanIterator implements DefaultIterator {
 	private Table tab;
 	private Map<String, PrimitiveValue> map;
 	private List<String> columns;
+	private Boolean isFrom ;
+	private Boolean isOrderBy;
 	
-	public TableScanIterator(Table tab) {
+	public TableScanIterator(Table tab, Boolean isFrom ) {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.tab = tab;
+		this.isFrom = isFrom;
 		if(DEBUG) {
 			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
 		} else {
 			this.csvFile = "data/" + tableName + ".csv";	
+		}
+		try {
+			br = new BufferedReader(new FileReader(csvFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Error 1 " + tableName);
+		}
+		tuple = "";
+	}
+	
+	public TableScanIterator(Table tab, Boolean isOrderBy, Boolean isFrom , File fileName ) {
+		this.columns = new ArrayList<String>();
+		this.tableName = tab.getName();
+//		System.out.println("Tabele " + this.tableName);
+		this.tab = tab;
+		this.isFrom = isFrom;
+		this.isOrderBy = isOrderBy;
+		if(DEBUG) {
+			if(isOrderBy)
+				this.csvFile = String.valueOf(fileName);		
+//			else 
+//				this.csvFile = "C:\\Users\\ayush\\git\\JsqlParser-PA2\\data\\" + tableName.toLowerCase() + ".dat";
+		} else {
+			if(isOrderBy == true)
+				this.csvFile = String.valueOf(fileName);		
+			
 		}
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -71,7 +101,9 @@ public class TableScanIterator implements DefaultIterator {
 				e.printStackTrace();
 			}
 			map = new HashMap<String, PrimitiveValue>();
+			
 			String[] row = tuple.split("\\|");
+			
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			for(int j = 0;j < row.length; j++) {
 				ColumnDefs cdef = cdefs.get(j);
@@ -100,11 +132,16 @@ public class TableScanIterator implements DefaultIterator {
 					pm = new StringValue(value);
 					break;
 				}
+				if(this.tableName != null) {
+					this.map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
+				} 
 				if(this.tab.getAlias() != null) {
 					this.map.put( this.tab.getAlias() + "." + cdef.cdef.getColumnName(), pm);	
-				} else {
-					this.map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
 				}
+				if(this.isFrom) {
+					this.map.put(cdef.cdef.getColumnName(), pm);	
+				}
+				//System.out.println(tableName + "." + cdef.cdef.getColumnName() + ":" + pm);
 			}
 			return map;
 		}
@@ -129,10 +166,12 @@ public class TableScanIterator implements DefaultIterator {
 		if(this.columns.size() == 0) {
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			for(int j = 0;j < cdefs.size(); j++) {
-				if(this.tab.getAlias() != null){
-					this.columns.add(this.tab.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
-				}else {
+				if(tableName != null) {
 					this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
+				} else if(this.tab.getAlias() != null){
+					this.columns.add(this.tab.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
+				} else {
+					this.columns.add(cdefs.get(j).cdef.getColumnName());		
 				}
 			}
 		}

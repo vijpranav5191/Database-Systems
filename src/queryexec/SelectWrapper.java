@@ -8,6 +8,7 @@ import iterators.OrderByIterator;
 import iterators.ProjectionIterator;
 import iterators.ResultIterator;
 import iterators.SelectionIterator;
+import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
@@ -39,7 +40,7 @@ public class SelectWrapper{
 		
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
-			iter = new TableScanIterator(table);
+			iter = new TableScanIterator(table, true);
 		}
 		
 		DefaultIterator result = iter;
@@ -48,8 +49,8 @@ public class SelectWrapper{
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
-						DefaultIterator iter2 = new TableScanIterator((Table) item);
-						result = new HashJoinIterator(result, iter2, join);
+						DefaultIterator iter2 = new TableScanIterator((Table) item, false);
+						result = new JoinIterator(result, iter2, join);
 					}
 				}
 			}
