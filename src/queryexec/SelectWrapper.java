@@ -4,7 +4,10 @@ import java.io.IOException;
 import java.util.List;
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
+import iterators.HavingIterator;
+
 import iterators.HashJoinIterator;
+
 import iterators.JoinIterator;
 import iterators.LimitIterator;
 import iterators.ProjectionIterator;
@@ -35,7 +38,8 @@ public class SelectWrapper{
 	private List<OrderByElement> orderBy;
 	private boolean flagOrderBy;
 	private Limit limit;
-	
+	private Expression having;
+
 	public SelectWrapper(PlainSelect plainselect){
 		this.plainselect = plainselect;
 	}
@@ -48,8 +52,7 @@ public class SelectWrapper{
 		this.whereExp = this.plainselect.getWhere();
 		this.groupBy = this.plainselect.getGroupByColumnReferences();
 		this.orderBy = this.plainselect.getOrderByElements();
-		this.limit = this.plainselect.getLimit();
-		
+		this.limit = this.plainselect.getLimit();		
 		this.flagOrderBy = false;
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
@@ -81,7 +84,10 @@ public class SelectWrapper{
 				}
 				result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
 			}
-			
+
+			if(this.having!=null) {
+				result = new HavingIterator(result, this.having, this.selectItems);
+			}
 			if(this.orderBy != null){
 				for(OrderByElement key : orderBy){
 					String xKey = key.getExpression().toString();

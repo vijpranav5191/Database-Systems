@@ -42,7 +42,7 @@ public class SelectionIterator implements DefaultIterator {
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return this.iterator.getColumns();
+			return this.iterator.getColumns();
 	}
 
 	public Map<String, PrimitiveValue> getNextIter() {
