@@ -24,7 +24,7 @@ public class orderExternalIterator implements DefaultIterator {
 	{
 		// TODO Auto-generated constructor stub
 		int level = 0;
-		int filenumber = 1;
+		int filenumber = 200;
 		List<List<Map<String,PrimitiveValue>>> batches = new ArrayList<>();
 		// branching done
 		Queue<File> queue = new LinkedList<>();
@@ -69,6 +69,7 @@ public class orderExternalIterator implements DefaultIterator {
 			}
 			filenumber++;
 			writer.close();
+//			filename.close();
 		}
 		DefaultIterator  itr1 = null;
 		DefaultIterator  itr2 = null;
@@ -77,10 +78,10 @@ public class orderExternalIterator implements DefaultIterator {
 		while(queue.size()!=1)
 		{
 			File one = queue.poll();
-			itr1 = new TableScanIterator( primaryTable, true , false , one );
+			itr1 = new TableScanIterator( primaryTable, true, one );
 			
 			File two = queue.poll();
-			itr2 = new TableScanIterator( primaryTable,true , false , two);
+			itr2 = new TableScanIterator( primaryTable, true, two);
 			
 			File newF = new File("src\\dubstep\\file\\level"+level+"_file"+filenumber+".dat");
 			
@@ -193,11 +194,8 @@ public class orderExternalIterator implements DefaultIterator {
 			// makeNewFile with new Level 
 		}
 		// merging start
-		
-		
-		
-		
 	}
+	
 	@Override
 	public boolean hasNext() {
 		// TODO Auto-generated method stub
@@ -212,14 +210,13 @@ public class orderExternalIterator implements DefaultIterator {
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.iterator.getColumns();
 	}
 
 }

@@ -13,10 +13,13 @@ public class orderIterator implements DefaultIterator{
 	
 	private List<OrderByElement> orderBy;
 	DefaultIterator iterator;
+	Table primaryTable;
 	private Expression whereExp;
 //	PriorityQueue<DefaultIterator> pq;
 	List<Map<String,PrimitiveValue>> resultSet;
 	int index ;
+	
+	
 	Map<String , PrimitiveValue> nextResult;
 	
 	public orderIterator()
@@ -24,27 +27,25 @@ public class orderIterator implements DefaultIterator{
 		
 	}
 	
-	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy) {
+	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy ) {
 		// TODO Auto-generated constructor stub
 		 
 		List<Map<String,PrimitiveValue>> lstObj = new ArrayList<>();
 		while(iterator.hasNext())
-		{	
-			lstObj.add( iterator.next() );
-		}
+		{	lstObj.add( iterator.next() );	}
+		System.out.println(orderBy); 
+		System.out.println(lstObj.get(0));
 		resultSet = backTrack(lstObj,orderBy);	
 		index = 0;
 	}
 
-	
-	
 	public List<Map<String, PrimitiveValue>> backTrack(List<Map<String, PrimitiveValue>> lstObj,
 			List<OrderByElement> orderBy2) {
 		// TODO Auto-generated method stub
-		
 		List<Map<String,PrimitiveValue>> temp = new ArrayList<>();
 		// temp for result
 		// 3rd argument is index starting from 0 to traverse through orderby element
+		
 		backTrackUtil(lstObj, orderBy2,0,temp);
 		return temp;
 		
@@ -65,6 +66,8 @@ public class orderIterator implements DefaultIterator{
 		}
 		// for String
 //		System.out.println( i + " " + orderBy2 + " "  + lstObj + " " + String.valueOf(lstObj.get(0).get(String.valueOf(orderBy2.get(i))).getType()) ); 
+		
+		//
 		if( (String.valueOf(lstObj.get(0).get(String.valueOf(orderBy2.get(i))).getType())).equals("STRING") )
 		{
 //	        System.out.println(" XYZ ");
@@ -182,28 +185,28 @@ public class orderIterator implements DefaultIterator{
 
 	@Override
 	public boolean hasNext() {
-		return index < resultSet.size();
+		
+			return index < resultSet.size();
+
 	}
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		if(index < this.resultSet.size()) {
-			Map<String, PrimitiveValue> temp = this.resultSet.get(index);
-			index++;
-			return temp;
-		}
-		return null;
+		// TODO Auto-generated method stub
+		return this.resultSet.get(index++);
 	}
 
 	
 	@Override
 	public void reset() {
-		this.index = 0;
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public List<String> getColumns() {
-		return this.iterator.getColumns();
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

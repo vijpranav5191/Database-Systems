@@ -6,7 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -17,15 +20,17 @@ import utils.EvaluateUtils;
 
 public class ProjectionIterator implements DefaultIterator{
 	private List<SelectItem> selectItems;
+	private List<Column> groupBy;
 	DefaultIterator iterator;
 	List<String> columns;
 	Table primaryTable;
 	
-	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems, Table primaryTable) {
+	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems, Table primaryTable, List<Column> groupBy) {
 		this.selectItems = selectItems;
 		this.iterator = iterator;
 		this.columns = new ArrayList<String>();
 		this.primaryTable = primaryTable;
+		this.groupBy = groupBy;
 		
 		for(int index = 0; index < this.selectItems.size();index++) {
 			SelectItem selectItem = this.selectItems.get(index);
@@ -41,7 +46,24 @@ public class ProjectionIterator implements DefaultIterator{
 					} else {
 						this.columns.add(column.getColumnName());	
 					}
-				} else {
+				} else if((selectExpression.getExpression() instanceof Function)){
+					Function func = (Function) selectExpression.getExpression();
+					String name = func.getName();
+					if(func.getParameters()!=null) {
+						List<Expression> expList = func.getParameters().getExpressions();
+						StringBuilder sb = new StringBuilder();
+						for(Expression exp : expList) {
+							sb.append(exp.toString());
+						}
+						this.columns.add(name+"("+sb.toString()+")");
+					}
+					else {
+						if(func.isAllColumns()) {
+							this.columns.add("COUNT(*)");
+						}
+					}
+				}
+				else {
 					this.columns.add(selectExpression.getAlias());
 				}
 			} else if(selectItem instanceof AllTableColumns){
@@ -52,7 +74,9 @@ public class ProjectionIterator implements DefaultIterator{
 						this.columns.add(column);
 					}
 				}
-			}
+			} else if(selectItem instanceof AllColumns) {
+				this.columns = this.iterator.getColumns();
+			}	
 		}
 	}
 	
@@ -66,8 +90,10 @@ public class ProjectionIterator implements DefaultIterator{
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		Map<String, PrimitiveValue> map = this.iterator.next();
 		
+
+		
 		if(map != null) { // hasNext() not working
-			
+
 			for(int index = 0; index < this.selectItems.size();index++) {
 				SelectItem selectItem = this.selectItems.get(index);
 				
@@ -94,18 +120,36 @@ public class ProjectionIterator implements DefaultIterator{
 								}
 							}
 						}
-					} else {
-						try {
-							
-							
-							Expression exp = selectExpression.getExpression();
-							selectMap.put(selectExpression.getAlias(), EvaluateUtils.evaluateExpression(map, exp));
-							
-							
-							
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+					} else if(selectExpression.getExpression() instanceof Function) {
+						Expression exp = selectExpression.getExpression();
+						Function func = (Function) exp;
+						if(this.groupBy==null) {
+							try {
+								this.iterator.reset();
+								DefaultIterator iter = new SimpleAggregateIterator(this.iterator, func);
+								selectMap.putAll(iter.next());	
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}else {
+							String name = func.getName();
+							String key= null;
+							List<Expression> expList = new ArrayList<>();
+							if(func.getParameters()!=null) {
+								expList = func.getParameters().getExpressions(); //check this later
+								StringBuilder sb = new StringBuilder();
+								for(Expression exp1 : expList) {
+									sb.append(exp1.toString());
+								}
+								key = name+"("+sb.toString()+")";
+							}
+							else {
+								if(func.isAllColumns()) {
+									key = "COUNT(*)";
+								}
+							}
+							selectMap.put(key, map.get(key));
 						}
 					}
 				}

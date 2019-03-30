@@ -1,5 +1,6 @@
 package dubstep;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
@@ -13,7 +14,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
 	
-	public static void main(String args[]) throws SQLException, ParseException {
+	public static void main(String args[]) throws SQLException, ParseException, IOException {
 		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
 		

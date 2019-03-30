@@ -11,10 +11,15 @@ import java.util.*;
 //import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import utils.EvaluateUtils;
 
 public class GroupByIterator implements DefaultIterator{
@@ -23,33 +28,30 @@ public class GroupByIterator implements DefaultIterator{
 	DefaultIterator iterator;
 	Table primaryTable;
 	private Expression whereExp;
+	private List<SelectItem> selectItems;
 //	PriorityQueue<DefaultIterator> pq;
 	List<List<Map<String,PrimitiveValue>>> resultSet;
 	int index ;
 	
-	
 	Map<String , PrimitiveValue> nextResult;
 	
-	public GroupByIterator()
+	public GroupByIterator(DefaultIterator result, List<Column> groupBy, Table fromItem)
 	{
 		
 	}
 	
-	public GroupByIterator(DefaultIterator iterator, List<Column> groupBy, Table primaryTable) {
+	public GroupByIterator(DefaultIterator iterator, List<Column> groupBy, Table primaryTable, List<SelectItem> selectItems) {
+		this.selectItems = selectItems;
 		// TODO Auto-generated constructor stub
-		 
+		this.iterator = iterator; 
 		List<Map<String,PrimitiveValue>> lstObj = new ArrayList<>();
-		while(iterator.hasNext())
+		while(this.iterator.hasNext())
 		{	
 			lstObj.add( iterator.next() );
 		}
 		resultSet = backTrack(lstObj,groupBy);	
 		index = 0;
 		
-		for(List<Map<String,PrimitiveValue>> x : resultSet)
-		{
-			System.out.println(x);
-		}
 	}
 
 	public List<List<Map<String,PrimitiveValue>>> backTrack(List<Map<String, PrimitiveValue>> lstObj,
@@ -201,22 +203,74 @@ public class GroupByIterator implements DefaultIterator{
 
 	@Override
 	public boolean hasNext() {
-		return false;
-//			return index < resultSet.size();
+			return index < resultSet.size();
 
 	}
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
 		// TODO Auto-generated method stub
-//		return this.resultSet.get(index++);
-		return null;
+		Map<String, PrimitiveValue> selectMap = new LinkedHashMap<>();
+		if(this.hasNext()) {
+			List<Map<String, PrimitiveValue>> group = this.resultSet.get(index++);
+			Iterator iter = group.iterator();
+			Map<String, PrimitiveValue> map = (Map<String, PrimitiveValue>) iter.next();
+			if(map!=null) {
+				for(int index = 0; index < this.selectItems.size();index++) {
+					SelectItem selectItem = this.selectItems.get(index);
+					
+					if(selectItem instanceof AllTableColumns) {
+						AllTableColumns allTableColumns = (AllTableColumns) selectItem;
+						allTableColumns.getTable();
+						selectMap = map;
+					} else if(selectItem instanceof AllColumns) {
+						AllColumns allColumns = (AllColumns) selectItem;	
+						selectMap = map;
+					} else if(selectItem instanceof SelectExpressionItem) {
+						SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
+						if(selectExpression.getExpression() instanceof Column) {
+							Column column = (Column) selectExpression.getExpression();
+							if(column.getTable().getName() != null && column.getColumnName() != null) {
+								selectMap.put(column.getTable().getName() + "." + column.getColumnName(), map.get(column.getTable().getName() + "." + column.getColumnName()));
+							} else if(column.getTable().getAlias() != null && column.getColumnName() != null) {
+								selectMap.put(column.getTable().getAlias() + "." + column.getColumnName(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
+							} else if(column.getTable().getAlias() == null && column.getTable().getName() == null){
+								for(String key: map.keySet()) {
+									if(key.split("\\.")[1].equals(column.getColumnName())) {
+										selectMap.put(key, map.get(key));					
+										break;
+									}
+								}
+							}
+						} else if(selectExpression.getExpression() instanceof Function) {
+							try {
+								Expression exp = selectExpression.getExpression();
+								if(exp instanceof Function) {
+									Function func = (Function) exp;
+									iter = group.iterator();
+									DefaultIterator iter1 = new SimpleAggregateIterator(iter, func);
+									selectMap.putAll(iter1.next());	
+								}
+							} catch (Exception e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}
+
+			return selectMap;
+		}
+		else return selectMap;
+
 	}
 
 	
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
+		this.index = 0;
 		
 	}
 

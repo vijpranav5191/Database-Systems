@@ -60,7 +60,7 @@ public class UnionWrapper {
 		whereExp = plainselect.getWhere();
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
-			iter = new TableScanIterator(table, true);
+			iter = new TableScanIterator(table);
 		}
 		DefaultIterator result = iter;
 		while(iter.hasNext()) {
@@ -68,7 +68,7 @@ public class UnionWrapper {
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
-						DefaultIterator iter2 = new TableScanIterator((Table) item, false);
+						DefaultIterator iter2 = new TableScanIterator((Table) item);
 						result = new JoinIterator(result, iter2, join);
 					}
 					//System.out.println(result.next());
