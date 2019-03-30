@@ -192,21 +192,23 @@ public class orderIterator implements DefaultIterator{
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		// TODO Auto-generated method stub
-		return this.resultSet.get(index++);
+		Map<String, PrimitiveValue> temp = null;
+		if(this.index < this.resultSet.size()) {
+			 temp = this.resultSet.get(index);	
+			 this.index++;
+		}
+		return temp;
 	}
 
 	
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-		
+		this.index = 0;
 	}
 
 	@Override
 	public List<String> getColumns() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.iterator.getColumns();
 	}
 
 }
