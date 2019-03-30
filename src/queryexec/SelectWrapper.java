@@ -6,6 +6,7 @@ import iterators.DefaultIterator;
 import iterators.GroupByIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
+import iterators.LimitIterator;
 import iterators.ProjectionIterator;
 import iterators.ResultIterator;
 import iterators.SelectionIterator;
@@ -18,6 +19,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
+import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -32,6 +34,7 @@ public class SelectWrapper{
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
 	private boolean flagOrderBy;
+	private Limit limit;
 	
 	public SelectWrapper(PlainSelect plainselect){
 		this.plainselect = plainselect;
@@ -45,7 +48,9 @@ public class SelectWrapper{
 		this.whereExp = this.plainselect.getWhere();
 		this.groupBy = this.plainselect.getGroupByColumnReferences();
 		this.orderBy = this.plainselect.getOrderByElements();
-		this.flagOrderBy = true;
+		this.limit = this.plainselect.getLimit();
+		
+		this.flagOrderBy = false;
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
@@ -57,7 +62,7 @@ public class SelectWrapper{
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
 						DefaultIterator iter2 = new TableScanIterator((Table) item);
-						result = new SortMergeIterator(result, iter2, join);
+						result = new JoinIterator(result, iter2, join);
 					}
 				}
 			}
@@ -76,6 +81,7 @@ public class SelectWrapper{
 				}
 				result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
 			}
+			
 			if(this.orderBy != null){
 				for(OrderByElement key : orderBy){
 					String xKey = key.getExpression().toString();
@@ -85,14 +91,21 @@ public class SelectWrapper{
 					}
 					
 				}
-				if(this.flagOrderBy == false)
-					result = new orderIterator(result,this.orderBy);				
-				else
+				if(this.flagOrderBy == false) {
+					result = new orderIterator(result,this.orderBy);
+				} else{
 					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem);
+				}
 			}
+			
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
 			}
+			
+			if(this.limit != null) {
+				result = new LimitIterator(result, this.limit);
+			}
+			
 			ResultIterator res = new ResultIterator(result);
 			while(res.hasNext()) {
 				res.next();

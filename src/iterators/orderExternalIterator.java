@@ -31,7 +31,7 @@ public class orderExternalIterator implements DefaultIterator {
 		while(iterator.hasNext())
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-			for(int i=0;i<4 && iterator.hasNext();i++)
+			for(int i=0;i<10 && iterator.hasNext();i++)
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
 				batch.add(obj);

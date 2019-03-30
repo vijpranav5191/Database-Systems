@@ -35,7 +35,8 @@ public class orderIterator implements DefaultIterator{
 		{	lstObj.add( iterator.next() );	}
 		System.out.println(orderBy); 
 		System.out.println(lstObj.get(0));
-		resultSet = backTrack(lstObj,orderBy);	
+		resultSet = backTrack(lstObj,orderBy);
+		System.out.println(" results " + resultSet);
 		index = 0;
 	}
 
@@ -137,7 +138,7 @@ public class orderIterator implements DefaultIterator{
 //	                System.out.println(" " + key);
 	                for(Map<String,PrimitiveValue> l : lstObj)
 	                {
-//	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
+	                	System.out.println( " " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key); 
 	                    if(!mapRes.containsKey( Double.valueOf(String.valueOf(l.get(String.valueOf(key))))))
 	                    {
 	                        mapRes.put(Double.valueOf(String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
@@ -166,9 +167,11 @@ public class orderIterator implements DefaultIterator{
 //	                System.out.println(" " + key);
 	                for(Map<String,PrimitiveValue> l : lstObj)
 	                {
-//	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
-	                    if(!mapRes.containsKey( Long.valueOf(String.valueOf(l.get(String.valueOf(key))))))
-	                    {
+	                	
+	                	System.out.println( " upar "  + " " + l + " " + key); 
+	                	System.out.println( " " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key); 
+	    	            
+	                	if(!mapRes.containsKey( Long.valueOf(String.valueOf(l.get(String.valueOf(key)))))){
 	                        mapRes.put(Long.valueOf(String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
 	                    }
 	                    mapRes.get(( Long.valueOf(String.valueOf(l.get(String.valueOf(key)))))).add(l);
@@ -185,9 +188,7 @@ public class orderIterator implements DefaultIterator{
 
 	@Override
 	public boolean hasNext() {
-		
-			return index < resultSet.size();
-
+		return index < resultSet.size();
 	}
 
 	@Override
