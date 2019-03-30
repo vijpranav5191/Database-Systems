@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.List;
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
+import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.ProjectionIterator;
 import iterators.ResultIterator;
 import iterators.SelectionIterator;
+import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
 import iterators.orderExternalIterator;
 import iterators.orderIterator;
@@ -55,7 +57,7 @@ public class SelectWrapper{
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
 						DefaultIterator iter2 = new TableScanIterator((Table) item);
-						result = new JoinIterator(result, iter2, join);
+						result = new SortMergeIterator(result, iter2, join);
 					}
 				}
 			}
