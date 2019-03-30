@@ -29,6 +29,7 @@ public class GroupByIterator implements DefaultIterator{
 	Table primaryTable;
 	private Expression whereExp;
 	private List<SelectItem> selectItems;
+	private Expression having;
 //	PriorityQueue<DefaultIterator> pq;
 	List<List<Map<String,PrimitiveValue>>> resultSet;
 	int index ;
@@ -45,6 +46,7 @@ public class GroupByIterator implements DefaultIterator{
 		// TODO Auto-generated constructor stub
 		this.iterator = iterator; 
 		List<Map<String,PrimitiveValue>> lstObj = new ArrayList<>();
+		this.having = having;
 		while(this.iterator.hasNext())
 		{	
 			lstObj.add( iterator.next() );

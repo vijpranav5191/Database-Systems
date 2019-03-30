@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
+import iterators.HavingIterator;
 import iterators.JoinIterator;
 import iterators.ProjectionIterator;
 import iterators.ResultIterator;
@@ -30,7 +31,7 @@ public class SelectWrapper{
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
 	private boolean flagOrderBy;
-	
+	private Expression having;
 	public SelectWrapper(PlainSelect plainselect){
 		this.plainselect = plainselect;
 	}
@@ -43,6 +44,7 @@ public class SelectWrapper{
 		this.whereExp = this.plainselect.getWhere();
 		this.groupBy = this.plainselect.getGroupByColumnReferences();
 		this.orderBy = this.plainselect.getOrderByElements();
+		this.having = this.plainselect.getHaving();
 		this.flagOrderBy = true;
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
@@ -73,6 +75,9 @@ public class SelectWrapper{
 					
 				}
 				result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+			}
+			if(this.having!=null) {
+				result = new HavingIterator(result, this.having, this.selectItems);
 			}
 			if(this.orderBy != null){
 				for(OrderByElement key : orderBy){
