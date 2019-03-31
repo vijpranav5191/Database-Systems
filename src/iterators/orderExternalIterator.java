@@ -1,6 +1,7 @@
 package iterators;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,53 +11,88 @@ import java.util.Queue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.sql.ResultSet;
 public class orderExternalIterator implements DefaultIterator {
 
 	private List<OrderByElement> orderBy;
+	
+	Map<String, PrimitiveValue> mapValue;
+	BufferedReader br;
 	DefaultIterator iterator;
 	Table primaryTable;
-	
-	public orderExternalIterator(DefaultIterator iterator, List<OrderByElement> orderBy, Table primaryTable) throws IOException 
+	String sCurrentString;
+	DefaultIterator deItr;
+	DefaultIterator dummy;
+	private List<String> colmnValues;
+	private List<SelectItem> column;
+	private List<PrimitiveValue> pmValues;
+	String str;
+	public orderExternalIterator(DefaultIterator iterator, List<OrderByElement> orderBy, Table primaryTable , List<SelectItem> column) throws Exception 
 	{
 		// TODO Auto-generated constructor stub
+		this.iterator = iterator;
+		this.orderBy = orderBy;
+		this.column = column;
+		
+//		System.out.println( " columnValue " + column);
 		int level = 0;
-		int filenumber = 200;
-		List<List<Map<String,PrimitiveValue>>> batches = new ArrayList<>();
+ 		int filenumber = 1;
+		
+ 		List<List<Map<String,PrimitiveValue>>> batches = new ArrayList<>();
 		// branching done
+//		DefaultIterator abc = iterator;
+		colmnValues = new ArrayList<String>();
+		pmValues = new ArrayList<PrimitiveValue>();
+		
+		Map<String ,PrimitiveValue> mapValue = this.iterator.next();
+		this.iterator.reset();
+
+		for(String  key : mapValue.keySet())
+		{
+			PrimitiveValue pm = mapValue.get(key);
+//			System.out.println(key);
+			colmnValues.add(key);
+			pmValues.add(pm);
+		}
+		
 		Queue<File> queue = new LinkedList<>();
 		while(iterator.hasNext())
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-			for(int i=0;i<4 && iterator.hasNext();i++)
+			for(int i=0;i<5000 && iterator.hasNext();i++)
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
+				mapValue = obj;
 				batch.add(obj);
 			}
 //			System.out.println(primaryTable);
-			List<ColumnDefs> cdef = SchemaStructure.schema.get(String.valueOf(primaryTable));
+//			List<ColumnDefs> cdef = SchemaStructure.schema.get(String.valueOf(primaryTable));
 //			System.out.println(cdef);
 			List<Map<String, PrimitiveValue>> result = new orderIterator().backTrack(batch, orderBy);
 			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
-			System.out.println("here"); 
-			File filename = new File("src\\dubstep\\file\\level"+level+"_file"+filenumber+".dat");
+//			System.out.println("here"); 
+			File filename = new File("F:\\ff\\level"+level+"_file"+filenumber+".dat");
 			queue.add(filename);
-			System.out.println(filename); 
+//			System.out.println(filename); 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
 			while( itr.hasNext() )
 			{
 				Map<String,PrimitiveValue> mp = itr.next();
-				System.out.println(" " + mp);
+//				System.out.println(" " + mp);
+				
 				
 				String writeInFile = "";
 				
-				for (ColumnDefs object : cdef)
+				for (String x : mp.keySet())
 				{
-					String x = String.valueOf(primaryTable)+"."+ String.valueOf(object.cdef.getColumnName());
-					System.out.println(x);
+//					String x = String.valueOf(primaryTable)+"."+ String.valueOf(object.cdef.getColumnName());
+//					System.out.println(x);
 					
 //		            writer.write(String.valueOf(mp.get(object)+"|"));
 //					System.out.println( " " + object);
@@ -74,18 +110,17 @@ public class orderExternalIterator implements DefaultIterator {
 		DefaultIterator  itr1 = null;
 		DefaultIterator  itr2 = null;
 		level = 1; 
-		System.out.println( );
+//		System.out.println( );
 		while(queue.size()!=1)
 		{
 			File one = queue.poll();
-			itr1 = new TableScanIterator( primaryTable, true, one );
+			itr1 = new fileIterator(one , pmValues , colmnValues);
 			
 			File two = queue.poll();
-			itr2 = new TableScanIterator( primaryTable, true, two);
+			itr2 = new fileIterator(two , pmValues , colmnValues);
 			
-			File newF = new File("src\\dubstep\\file\\level"+level+"_file"+filenumber+".dat");
-			
-			System.out.println( " one " +  String.valueOf(one) + " two " + String.valueOf(two) + " newF " + newF); 
+			str = "F:\\ff\\level"+level+"_file"+filenumber+".dat";
+			File newF = new File("F:\\ff\\level"+level+"_file"+filenumber+".dat");
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newF));   
 			filenumber++;
@@ -157,7 +192,7 @@ public class orderExternalIterator implements DefaultIterator {
 			        writer.newLine();
 			        firstPtr = itr1.next();
 			        secondPtr = itr2.next();
-				}
+				}	
 			}
 			while(firstPtr != null && secondPtr == null)
 			{
@@ -188,35 +223,46 @@ public class orderExternalIterator implements DefaultIterator {
 //			System.out.println(" ithe " + itr1.next() );
 //			System.out.println(" ithe " + itr2.next() );
 			writer.close();
+//			one.delete();
+//			two.delete();
 			queue.add(newF);
 			
 			
 			// makeNewFile with new Level 
 		}
+		
 		// merging start
+		File fileName = queue.poll();
+		String fr = String.valueOf(fileName);		
+		deItr = new fileIterator(str , column , colmnValues , pmValues);
+
+		 
 	}
-	
 	@Override
-	public boolean hasNext() {
+	public boolean hasNext() 
 		// TODO Auto-generated method stub
-		return false;
+	{
+		return this.deItr.hasNext();
 	}
+//		return false;
+	
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.deItr.next();
 	}
 
 	@Override
 	public void reset() {
-		
+		// TODO Auto-generated method stub
+		this.deItr.reset();//
 	}
 
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return this.iterator.getColumns();
+		return this.deItr.getColumns();
 	}
 
 }

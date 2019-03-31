@@ -14,21 +14,25 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
 	
-	public static void main(String args[]) throws SQLException, ParseException, IOException {
+	public static void main(String args[]) throws Exception {
 		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
 		
 		Statement query;
 		CreateWrapper cw = new CreateWrapper();
 		while((query = parser.Statement()) != null){
-			if(query instanceof Select) {
+			if(query instanceof Select) 
+				{
 			    Select select = (Select) query;
+
 			    SelectBody selectbody = select.getSelectBody();
+			    
 			    if(selectbody instanceof PlainSelect) {
 			    	PlainSelect plainSelect = (PlainSelect) selectbody;
 			    	new SelectWrapper(plainSelect).parse();			
 			    }
-			    else {
+			    else 
+			    {
 			    	//Union union = (Union) selectbody;
 			    	//new UnionWrapper(union).parse();
 			    }

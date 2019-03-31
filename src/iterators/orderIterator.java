@@ -27,20 +27,22 @@ public class orderIterator implements DefaultIterator{
 		
 	}
 	
-	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy ) {
+	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy ) throws Exception {
 		// TODO Auto-generated constructor stub
 		 
 		List<Map<String,PrimitiveValue>> lstObj = new ArrayList<>();
 		while(iterator.hasNext())
-		{	lstObj.add( iterator.next() );	}
-		System.out.println(orderBy); 
-		System.out.println(lstObj.get(0));
+		{	
+			lstObj.add( iterator.next() );	
+		}
+//		System.out.println(orderBy); 
+//		System.out.println(lstObj.get(0));
 		resultSet = backTrack(lstObj,orderBy);	
 		index = 0;
 	}
 
 	public List<Map<String, PrimitiveValue>> backTrack(List<Map<String, PrimitiveValue>> lstObj,
-			List<OrderByElement> orderBy2) {
+			List<OrderByElement> orderBy2) throws Exception {
 		// TODO Auto-generated method stub
 		List<Map<String,PrimitiveValue>> temp = new ArrayList<>();
 		// temp for result
@@ -52,7 +54,7 @@ public class orderIterator implements DefaultIterator{
 //		return null;
 	}
 
-	private void backTrackUtil(List<Map<String, PrimitiveValue>> lstObj, List<OrderByElement> orderBy2, int i,List<Map<String, PrimitiveValue>> res) {
+	private void backTrackUtil(List<Map<String, PrimitiveValue>> lstObj, List<OrderByElement> orderBy2, int i,List<Map<String, PrimitiveValue>> res) throws Exception {
 		// TODO Auto-generated method stub
 		
 		if(i == orderBy2.size())
@@ -68,8 +70,10 @@ public class orderIterator implements DefaultIterator{
 //		System.out.println( i + " " + orderBy2 + " "  + lstObj + " " + String.valueOf(lstObj.get(0).get(String.valueOf(orderBy2.get(i))).getType()) ); 
 		
 		//
+//		EvaluateUtils.evaluateExpression( lstObj.get(0) , null);  
 		if( (String.valueOf(lstObj.get(0).get(String.valueOf(orderBy2.get(i))).getType())).equals("STRING") )
 		{
+			
 //	        System.out.println(" XYZ ");
 	            Map< String  , List<Map<String,PrimitiveValue> >> mapRes = new TreeMap<>(); 
 	            if(i<orderBy2.size())
@@ -200,13 +204,13 @@ public class orderIterator implements DefaultIterator{
 	@Override
 	public void reset() {
 		// TODO Auto-generated method stub
-		
+		this.index = 0;
 	}
 
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return null;
+		return this.getColumns();
 	}
 
 }

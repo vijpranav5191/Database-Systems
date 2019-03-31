@@ -1,6 +1,7 @@
 package queryexec;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
@@ -12,17 +13,24 @@ import iterators.TableScanIterator;
 import iterators.orderExternalIterator;
 import iterators.orderIterator;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.AllColumns;
+import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.SchemaStructure;
 
 
-public class SelectWrapper{
+
+
+public class SelectWrapper	
+{
 	private PlainSelect plainselect;
 	private List<SelectItem> selectItems;	
 	private Expression whereExp;
@@ -30,20 +38,24 @@ public class SelectWrapper{
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
 	private boolean flagOrderBy;
+	private List<SelectItem> columns;
+	private List<String> table;
+	
 	
 	public SelectWrapper(PlainSelect plainselect){
 		this.plainselect = plainselect;
 	}
 	
-	public void parse() throws IOException {
+	public void parse() throws Exception {
 		DefaultIterator iter = null;
-	
+				
 		FromItem fromItem = this.plainselect.getFromItem();
 		this.selectItems = this.plainselect.getSelectItems();
 		this.whereExp = this.plainselect.getWhere();
 		this.groupBy = this.plainselect.getGroupByColumnReferences();
 		this.orderBy = this.plainselect.getOrderByElements();
-		this.flagOrderBy = true;
+		this.flagOrderBy = true ;
+//		this.columns = new ArrayList<String>();
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
@@ -83,10 +95,27 @@ public class SelectWrapper{
 					}
 					
 				}
+				
+				
+//					} else if(selectItem instanceof AllTableColumns){
+//						AllTableColumns allTableColumns = (AllTableColumns) selectItem;
+//						Table table = allTableColumns.getTable();
+//						for(String column: this.iterator.getColumns()) {
+//							if(column.split("\\.")[0].equals(table.getName())) {
+//								this.columns.add(column);
+//							}
+//						}
+//					} else if(selectItem instanceof AllColumns) {
+//						this.columns = this.iterator.getColumns();
+//					}
+						
+				}
+				
+//				columns.addAll(selectItems);
 				if(this.flagOrderBy == false)
-					result = new orderIterator(result,this.orderBy);				
+					result = new orderIterator(result ,this.orderBy );				
 				else
-					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem);
+					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
 			}
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
@@ -96,5 +125,4 @@ public class SelectWrapper{
 				res.next();
 			}
 		}
-	}
 }
