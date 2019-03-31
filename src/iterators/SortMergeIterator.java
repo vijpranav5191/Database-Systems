@@ -84,18 +84,18 @@ public class SortMergeIterator implements DefaultIterator{
 		listRight.add(rightOrderByElement);
 		this.rightIterator = new orderIterator(rightIterator, listRight);
 		
-		System.out.println(leftExpression);	
-		while(this.leftIterator.hasNext()) {
-			System.out.println(this.leftIterator.next());
-		}
-		
-		System.out.println(rightExpression);	
-		while(this.rightIterator.hasNext()) {
-			System.out.println(this.rightIterator.next());
-		}
-		
-		this.rightIterator.reset();
-		this.leftIterator.reset();
+//		System.out.println(leftExpression);	
+//		while(this.leftIterator.hasNext()) {
+//			System.out.println(this.leftIterator.next());
+//		}
+//		
+//		System.out.println(rightExpression);	
+//		while(this.rightIterator.hasNext()) {
+//			System.out.println(this.rightIterator.next());
+//		}
+//		
+//		this.rightIterator.reset();
+//		this.leftIterator.reset();
 		
 		
 		this.rightTuple = this.rightIterator.next();
@@ -171,5 +171,11 @@ public class SortMergeIterator implements DefaultIterator{
 			this.leftTupleList.add(this.leftTuple);
 		}
 		this.leftTuple = next;
+	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.leftIterator;
 	}
 }

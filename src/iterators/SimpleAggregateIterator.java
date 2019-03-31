@@ -11,6 +11,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.PrimitiveValue.InvalidPrimitive;
 import utils.EvaluateUtils;
 
 public class SimpleAggregateIterator implements DefaultIterator {
@@ -21,7 +22,7 @@ public class SimpleAggregateIterator implements DefaultIterator {
 	public SimpleAggregateIterator(DefaultIterator iterator, Function func) {
 		// TODO Auto-generated constructor stub
 		this.iterator = iterator;
-		String name = func.getName();
+		String name = func.getName().toUpperCase();
 		String key= null;
 		List<Expression> expList = new ArrayList<>();
 		if(func.getParameters()!=null) {
@@ -37,32 +38,35 @@ public class SimpleAggregateIterator implements DefaultIterator {
 				key = "COUNT(*)";
 			}
 		}
+		PrimitiveValue pv = null	;
 		switch (name) {
 		case "SUM":
-			long sum = 0;
+			double sum = 0;
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						sum = sum+ pv.toLong();
+						sum = sum+pv.toDouble();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}	
 				}
 			}
-			result.put(key ,new LongValue(sum));
+			if(pv instanceof LongValue) {
+				result.put(key ,new LongValue((long) sum));
+
+			}
+			else if(pv instanceof DoubleValue) {
+				result.put(key ,new DoubleValue(sum));
+			}
 			break;
 		case "AVG":
 			long sum2 = 0,count=0;
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
 						sum2 = sum2+ pv.toLong();
@@ -77,16 +81,14 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			result.put(key,new DoubleValue(res));
 			break;
 		case "MIN":
-			PrimitiveValue min = new LongValue(999999999);
+			PrimitiveValue min = new DoubleValue(999999999);
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						if(pv.toLong()<min.toLong()) {
-							min = pv;
+						if(pv.toDouble() < min.toDouble()) {
+								min = pv;
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -94,28 +96,49 @@ public class SimpleAggregateIterator implements DefaultIterator {
 					}	
 				}
 			}
-			result.put(key,min);
+			if(pv instanceof LongValue) {
+				try {
+					result.put(key ,new LongValue(min.toLong()));
+				} catch (InvalidPrimitive e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			else if(pv instanceof DoubleValue) {
+				result.put(key ,min);
+			}
 			break;
 		case "MAX":
-			PrimitiveValue max = new LongValue(-999999999);
+			PrimitiveValue max = new DoubleValue(-999999999);
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						if(pv.toLong()>max.toLong()) {
-							max = pv;
-						}
+							if(pv.toDouble() > max.toDouble()) {
+								max = pv;
+							}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					}	
+					}
 				}
 			}
-			result.put(key,max);
+			if(pv instanceof LongValue) {
+				try {
+					result.put(key ,new LongValue(max.toLong()));
+				} catch (InvalidPrimitive e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			else if(pv instanceof DoubleValue) {
+				result.put(key ,max);
+			}
 			break;
+			
 		case "COUNT":
 			int counter =0;
 			while(this.iterator.hasNext()) {
@@ -263,6 +286,11 @@ public class SimpleAggregateIterator implements DefaultIterator {
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.iterator;
 	}
 
 }

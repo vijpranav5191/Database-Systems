@@ -14,6 +14,7 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
+import utils.Config;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -65,7 +66,11 @@ public class orderExternalIterator implements DefaultIterator {
 		while(iterator.hasNext())
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-			for(int i=0;i<5000 && iterator.hasNext();i++)
+//<<<<<<< HEAD
+			for(int i=0;i< Config.blockSize && iterator.hasNext();i++)
+//=======
+//			for(int i=0;i<10 && iterator.hasNext();i++)
+//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
 				mapValue = obj;
@@ -234,7 +239,7 @@ public class orderExternalIterator implements DefaultIterator {
 		// merging start
 		File fileName = queue.poll();
 		String fr = String.valueOf(fileName);		
-		deItr = new fileIterator(str , column , colmnValues , pmValues);
+		deItr = new fileIterator(fr , column , colmnValues , pmValues);
 
 		 
 	}
@@ -263,6 +268,12 @@ public class orderExternalIterator implements DefaultIterator {
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
 		return this.deItr.getColumns();
+	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.iterator;
 	}
 
 }

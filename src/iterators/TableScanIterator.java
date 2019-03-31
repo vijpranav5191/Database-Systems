@@ -36,6 +36,7 @@ public class TableScanIterator implements DefaultIterator {
 		this.tableName = tab.getName();
 		this.tab = tab;
 		if(DEBUG) {
+//<<<<<<< HEAD
 			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			} else {
 			this.csvFile = "data\\" + tableName.toLowerCase() + ".dat";		}
 			try {
@@ -46,6 +47,7 @@ public class TableScanIterator implements DefaultIterator {
 				e.printStackTrace();
 				System.out.println("Error 1 " + tableName);
 			}
+
 		tuple = "";
 	}
 	
@@ -108,28 +110,28 @@ public class TableScanIterator implements DefaultIterator {
 				ColumnDefs cdef = cdefs.get(j);
 				String value = row[j];
 				PrimitiveValue pm;
-				switch (cdef.cdef.getColDataType().getDataType()) {
-				case "int":
-					pm = new LongValue(value);
-					break;
-				case "string":
-					pm = new StringValue(value);
-					break;
-				case "varchar":
-					pm = new StringValue(value);
-					break;	
-				case "char":
-					pm = new StringValue(value);
-					break;
-				case "decimal":
-					pm = new DoubleValue(value);
-					break;
-				case "date":
-					pm = new DateValue(value);
-					break;
-				default:
-					pm = new StringValue(value);
-					break;
+				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
+					case "int":
+						pm = new LongValue(value);
+						break;
+					case "string":
+						pm = new StringValue(value);
+						break;
+					case "varchar":
+						pm = new StringValue(value);
+						break;	
+					case "char":
+						pm = new StringValue(value);
+						break;
+					case "decimal":
+						pm = new DoubleValue(value);
+						break;
+					case "date":
+						pm = new DateValue(value);
+						break;
+					default:
+						pm = new StringValue(value);
+						break;
 				}
 				if(this.tab.getAlias() != null) {
 					this.map.put( this.tab.getAlias() + "." + cdef.cdef.getColumnName(), pm);	
@@ -168,6 +170,12 @@ public class TableScanIterator implements DefaultIterator {
 			}
 		}
 		return this.columns;
+	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

@@ -2,19 +2,32 @@ package dubstep;
 
 import java.io.IOException;
 import java.sql.SQLException;
+
+import interfaces.UnionWrapper;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
 import queryexec.SelectWrapper;
+import utils.Config;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
 	
+//<<<<<<< HEAD
+//	public static void main(String args[]) throws Exception {
+//=======
 	public static void main(String args[]) throws Exception {
+		Config.isInMemory = false;
+		for (String arg : args) {
+			if (arg.equals("--in-mem")){
+				Config.isInMemory = true;
+	        }
+		}
 		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
 		
@@ -31,10 +44,10 @@ class Main{
 			    	PlainSelect plainSelect = (PlainSelect) selectbody;
 			    	new SelectWrapper(plainSelect).parse();			
 			    }
-			    else 
-			    {
-			    	//Union union = (Union) selectbody;
-			    	//new UnionWrapper(union).parse();
+
+			    else {
+			    	Union union = (Union) selectbody;
+			    	new UnionWrapper(union).parse();
 			    }
 			} else if(query instanceof CreateTable) {
 				cw.createHandler(query);
