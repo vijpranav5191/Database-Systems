@@ -28,6 +28,7 @@ public class EvaluateUtils{
 			    }
 				return scope.get(name);
 			}
+			
 			public PrimitiveValue eval(Function func){
 				String name = func.getName();
 				
@@ -45,7 +46,7 @@ public class EvaluateUtils{
 					for(Expression exp : expList) {
 						sb.append(exp.toString());
 					}
-					key = namefun+"("+sb.toString()+")";
+					key = namefun + "(" + sb.toString() + ")";
 				}
 				else {
 					if(func.isAllColumns()) {

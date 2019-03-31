@@ -119,11 +119,11 @@ public class SelectWrapper{
 			}
 		}
 	}
-//	public DefaultIterator getChildIter(DefaultIterator root) {
+//	public DefaultIterator optimize(DefaultIterator root) {
 //		
 //		if(root instanceof SelectionIterator) {
 //			SelectionIterator selIter = (SelectionIterator) root;
-//			if(selIter.)
+//			if(selIter.getChildIter() instance of JoinIterator)
 //		}
 //		return null;
 //	}

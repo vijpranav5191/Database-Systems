@@ -11,6 +11,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.PrimitiveValue.InvalidPrimitive;
 import utils.EvaluateUtils;
 
 public class SimpleAggregateIterator implements DefaultIterator {
@@ -21,7 +22,7 @@ public class SimpleAggregateIterator implements DefaultIterator {
 	public SimpleAggregateIterator(DefaultIterator iterator, Function func) {
 		// TODO Auto-generated constructor stub
 		this.iterator = iterator;
-		String name = func.getName();
+		String name = func.getName().toUpperCase();
 		String key= null;
 		List<Expression> expList = new ArrayList<>();
 		if(func.getParameters()!=null) {
@@ -37,30 +38,28 @@ public class SimpleAggregateIterator implements DefaultIterator {
 				key = "COUNT(*)";
 			}
 		}
+		PrimitiveValue pv = null	;
 		switch (name) {
 		case "SUM":
+			double sum = 0;
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						if(pv instanceof LongValue) {
-							long sum = 0;
-							sum = sum+pv.toLong();
-							result.put(key ,new LongValue(sum));
-						}
-						else if(pv instanceof DoubleValue) {
-							double sum = 0;
-							sum = sum + pv.toDouble();
-							result.put(key ,new DoubleValue(sum));
-						}
+						sum = sum+pv.toDouble();
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}	
 				}
+			}
+			if(pv instanceof LongValue) {
+				result.put(key ,new LongValue((long) sum));
+
+			}
+			else if(pv instanceof DoubleValue) {
+				result.put(key ,new DoubleValue(sum));
 			}
 			break;
 		case "AVG":
@@ -68,8 +67,6 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
 						sum2 = sum2+ pv.toLong();
@@ -84,63 +81,64 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			result.put(key,new DoubleValue(res));
 			break;
 		case "MIN":
+			PrimitiveValue min = new DoubleValue(999999999);
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						if(pv instanceof LongValue) {
-							PrimitiveValue min = new LongValue(999999999);
-							if(pv.toLong()<min.toLong()) {
+						if(pv.toDouble() < min.toDouble()) {
 								min = pv;
-								result.put(key,min);
-							}
-						}
-						else if(pv instanceof DoubleValue) {
-							PrimitiveValue min = new LongValue(999999999);
-							if(pv.toDouble() < min.toDouble()) {
-								min = pv;
-								result.put(key,min);
-							}
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}	
 				}
+			}
+			if(pv instanceof LongValue) {
+				try {
+					result.put(key ,new LongValue(min.toLong()));
+				} catch (InvalidPrimitive e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			else if(pv instanceof DoubleValue) {
+				result.put(key ,min);
 			}
 			break;
 		case "MAX":
+			PrimitiveValue max = new DoubleValue(-999999999);
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
-					
-					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						if(pv instanceof LongValue) {
-							PrimitiveValue max = new LongValue(999999999);
-							if(pv.toLong()>max.toLong()) {
-								max = pv;
-								result.put(key,max);
-							}
-						}
-						else if(pv instanceof DoubleValue) {
-							PrimitiveValue max = new LongValue(999999999);
 							if(pv.toDouble() > max.toDouble()) {
 								max = pv;
-								result.put(key,max);
 							}
-						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					}	
+					}
 				}
 			}
+			if(pv instanceof LongValue) {
+				try {
+					result.put(key ,new LongValue(max.toLong()));
+				} catch (InvalidPrimitive e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			}
+			else if(pv instanceof DoubleValue) {
+				result.put(key ,max);
+			}
 			break;
+			
 		case "COUNT":
 			int counter =0;
 			while(this.iterator.hasNext()) {

@@ -36,7 +36,7 @@ public class TableScanIterator implements DefaultIterator {
 		this.tab = tab;
 		if(DEBUG) {
 //			this.csvFile = "C://Users/Amit/Desktop/Sanity_Check_Examples/data/" + tableName.toLowerCase() + ".dat";
-			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2" + tableName.toLowerCase() + ".csv";
+			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
 		} else {
 			this.csvFile = "data/" + tableName + ".csv";
 		}
@@ -105,28 +105,28 @@ public class TableScanIterator implements DefaultIterator {
 				ColumnDefs cdef = cdefs.get(j);
 				String value = row[j];
 				PrimitiveValue pm;
-				switch (cdef.cdef.getColDataType().getDataType()) {
-				case "int":
-					pm = new LongValue(value);
-					break;
-				case "string":
-					pm = new StringValue(value);
-					break;
-				case "varchar":
-					pm = new StringValue(value);
-					break;	
-				case "char":
-					pm = new StringValue(value);
-					break;
-				case "decimal":
-					pm = new DoubleValue(value);
-					break;
-				case "date":
-					pm = new DateValue(value);
-					break;
-				default:
-					pm = new StringValue(value);
-					break;
+				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
+					case "int":
+						pm = new LongValue(value);
+						break;
+					case "string":
+						pm = new StringValue(value);
+						break;
+					case "varchar":
+						pm = new StringValue(value);
+						break;	
+					case "char":
+						pm = new StringValue(value);
+						break;
+					case "decimal":
+						pm = new DoubleValue(value);
+						break;
+					case "date":
+						pm = new DateValue(value);
+						break;
+					default:
+						pm = new StringValue(value);
+						break;
 				}
 				if(this.tab.getAlias() != null) {
 					this.map.put( this.tab.getAlias() + "." + cdef.cdef.getColumnName(), pm);	

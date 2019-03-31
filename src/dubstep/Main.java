@@ -13,11 +13,18 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
 import queryexec.SelectWrapper;
+import utils.Config;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
 	
 	public static void main(String args[]) throws SQLException, ParseException, IOException {
+		Config.isInMemory = false;
+		for (String arg : args) {
+			if (arg.equals("--in-mem")){
+				Config.isInMemory = true;
+	        }
+		}
 		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
 		

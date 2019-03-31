@@ -40,11 +40,6 @@ public class Utils {
 	}
 	
 	public static String getDate(Function func) {
-		String date = "";
-		ExpressionList list = func.getParameters();
-		if(list.getExpressions().size() > 0) {
-			return list.getExpressions().get(0).toString();
-		}
-		return date;
+		return func.getParameters().getExpressions().get(0).toString();	
 	}
 }
