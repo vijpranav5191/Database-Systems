@@ -38,7 +38,8 @@ public class TableScanIterator implements DefaultIterator {
 //			this.csvFile = "C://Users/Amit/Desktop/Sanity_Check_Examples/data/" + tableName.toLowerCase() + ".dat";
 			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
 		} else {
-			this.csvFile = "data\\" + tableName.toLowerCase() + ".csv";		}
+			this.csvFile = "data/" + tableName + ".csv";
+		}
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 		} catch (FileNotFoundException e) {
