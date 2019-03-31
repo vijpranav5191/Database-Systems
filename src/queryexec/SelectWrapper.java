@@ -52,7 +52,8 @@ public class SelectWrapper{
 		this.whereExp = this.plainselect.getWhere();
 		this.groupBy = this.plainselect.getGroupByColumnReferences();
 		this.orderBy = this.plainselect.getOrderByElements();
-		this.limit = this.plainselect.getLimit();		
+		this.limit = this.plainselect.getLimit();
+		this.having = this.plainselect.getHaving();
 		this.flagOrderBy = false;
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
@@ -90,7 +91,7 @@ public class SelectWrapper{
 			}
 			if(this.orderBy != null){
 				for(OrderByElement key : orderBy){
-					String xKey = key.getExpression().toString();
+				 	String xKey = key.getExpression().toString();
 					if(xKey.split("\\.").length == 1){
 						Column cCol = new Column(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem) , xKey);
 						key.setExpression(cCol);

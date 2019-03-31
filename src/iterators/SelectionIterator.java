@@ -56,4 +56,7 @@ public class SelectionIterator implements DefaultIterator {
 		}
 		return pos;
 	}
+	public DefaultIterator getChildIter() {
+		return this.iterator;
+	}
 }
