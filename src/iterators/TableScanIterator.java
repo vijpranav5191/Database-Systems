@@ -20,7 +20,7 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 
 public class TableScanIterator implements DefaultIterator {
-	private Boolean DEBUG = true;
+	private Boolean DEBUG = false;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
@@ -52,7 +52,6 @@ public class TableScanIterator implements DefaultIterator {
 	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName ) {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
-//		System.out.println("Tabele " + this.tableName);
 		this.tab = tab;
 		this.isOrderBy = isOrderBy;
 		if(DEBUG) {
@@ -95,7 +94,6 @@ public class TableScanIterator implements DefaultIterator {
 			try {
 				tuple = br.readLine();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			map = new HashMap<String, PrimitiveValue>();
