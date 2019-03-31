@@ -20,7 +20,7 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 
 public class TableScanIterator implements DefaultIterator {
-	private Boolean DEBUG = false;
+	private Boolean DEBUG = true;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
@@ -36,7 +36,7 @@ public class TableScanIterator implements DefaultIterator {
 		this.tab = tab;
 		if(DEBUG) {
 //			this.csvFile = "C://Users/Amit/Desktop/Sanity_Check_Examples/data/" + tableName.toLowerCase() + ".dat";
-			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";
+			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2" + tableName.toLowerCase() + ".csv";
 		} else {
 			this.csvFile = "data/" + tableName + ".csv";
 		}
