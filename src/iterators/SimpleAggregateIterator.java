@@ -39,7 +39,6 @@ public class SimpleAggregateIterator implements DefaultIterator {
 		}
 		switch (name) {
 		case "SUM":
-			long sum = 0;
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
@@ -47,14 +46,22 @@ public class SimpleAggregateIterator implements DefaultIterator {
 					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						sum = sum+ pv.toLong();
+						if(pv instanceof LongValue) {
+							long sum = 0;
+							sum = sum+pv.toLong();
+							result.put(key ,new LongValue(sum));
+						}
+						else if(pv instanceof DoubleValue) {
+							double sum = 0;
+							sum = sum + pv.toDouble();
+							result.put(key ,new DoubleValue(sum));
+						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}	
 				}
 			}
-			result.put(key ,new LongValue(sum));
 			break;
 		case "AVG":
 			long sum2 = 0,count=0;
@@ -77,7 +84,6 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			result.put(key,new DoubleValue(res));
 			break;
 		case "MIN":
-			PrimitiveValue min = new LongValue(999999999);
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
@@ -85,8 +91,19 @@ public class SimpleAggregateIterator implements DefaultIterator {
 					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						if(pv.toLong()<min.toLong()) {
-							min = pv;
+						if(pv instanceof LongValue) {
+							PrimitiveValue min = new LongValue(999999999);
+							if(pv.toLong()<min.toLong()) {
+								min = pv;
+								result.put(key,min);
+							}
+						}
+						else if(pv instanceof DoubleValue) {
+							PrimitiveValue min = new LongValue(999999999);
+							if(pv.toDouble() < min.toDouble()) {
+								min = pv;
+								result.put(key,min);
+							}
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -94,10 +111,8 @@ public class SimpleAggregateIterator implements DefaultIterator {
 					}	
 				}
 			}
-			result.put(key,min);
 			break;
 		case "MAX":
-			PrimitiveValue max = new LongValue(-999999999);
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
@@ -105,8 +120,19 @@ public class SimpleAggregateIterator implements DefaultIterator {
 					PrimitiveValue pv;
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						if(pv.toLong()>max.toLong()) {
-							max = pv;
+						if(pv instanceof LongValue) {
+							PrimitiveValue max = new LongValue(999999999);
+							if(pv.toLong()>max.toLong()) {
+								max = pv;
+								result.put(key,max);
+							}
+						}
+						else if(pv instanceof DoubleValue) {
+							PrimitiveValue max = new LongValue(999999999);
+							if(pv.toDouble() > max.toDouble()) {
+								max = pv;
+								result.put(key,max);
+							}
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -114,7 +140,6 @@ public class SimpleAggregateIterator implements DefaultIterator {
 					}	
 				}
 			}
-			result.put(key,max);
 			break;
 		case "COUNT":
 			int counter =0;
@@ -263,6 +288,11 @@ public class SimpleAggregateIterator implements DefaultIterator {
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.iterator;
 	}
 
 }

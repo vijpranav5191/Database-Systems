@@ -282,5 +282,11 @@ public class GroupByIterator implements DefaultIterator{
 		return null;
 	}
 
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.iterator;
+	}
+
 }
 

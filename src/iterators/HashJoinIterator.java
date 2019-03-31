@@ -126,4 +126,10 @@ public class HashJoinIterator implements DefaultIterator {
 		}
 		return temp;
 	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

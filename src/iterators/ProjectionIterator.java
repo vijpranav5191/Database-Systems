@@ -168,4 +168,10 @@ public class ProjectionIterator implements DefaultIterator{
 	public List<String> getColumns() {
 		return this.columns;
 	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.iterator;
+	}
 }

@@ -189,4 +189,10 @@ public class orderIterator implements DefaultIterator {
 		return this.iterator.getColumns();
 	}
 
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.iterator;
+	}
+
 }
