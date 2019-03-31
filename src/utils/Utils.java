@@ -6,7 +6,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 
 public class Utils {
 
@@ -35,5 +37,14 @@ public class Utils {
 	                .substring(1));
 	    }
 	    return stringBuffer.toString();
+	}
+	
+	public static String getDate(Function func) {
+		String date = "";
+		ExpressionList list = func.getParameters();
+		if(list.getExpressions().size() > 0) {
+			return list.getExpressions().get(0).toString();
+		}
+		return date;
 	}
 }
