@@ -56,17 +56,18 @@ public class JoinIterator implements DefaultIterator{
 		this.leftTuple = leftIterator.next();
 	}
 	
-	
 	public Map<String, PrimitiveValue> getNextIter(){
 		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();
 		if(!rightIterator.hasNext()) {
-			this.leftTuple = this.leftIterator.next();
-			this.rightIterator.reset();
+			if(this.leftIterator.hasNext()) {
+				this.leftTuple = this.leftIterator.next();
+				this.rightIterator.reset();
+			}
 		}
+		Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
 		if(this.leftTuple == null) {
 			return null;
 		}
-		Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
 		for(String key: rightTuple.keySet()) {
 			temp.put(key, rightTuple.get(key));
 		}
