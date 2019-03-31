@@ -172,4 +172,10 @@ public class SortMergeIterator implements DefaultIterator{
 		}
 		this.leftTuple = next;
 	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.leftIterator;
+	}
 }

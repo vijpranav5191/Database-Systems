@@ -119,4 +119,12 @@ public class SelectWrapper{
 			}
 		}
 	}
+//	public DefaultIterator getChildIter(DefaultIterator root) {
+//		
+//		if(root instanceof SelectionIterator) {
+//			SelectionIterator selIter = (SelectionIterator) root;
+//			if(selIter.)
+//		}
+//		return null;
+//	}
 }

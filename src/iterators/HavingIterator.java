@@ -75,4 +75,9 @@ public class HavingIterator implements DefaultIterator{
 		} 
 		return pos;
 	}
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return this.iterator;
+	}
 }

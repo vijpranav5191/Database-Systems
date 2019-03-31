@@ -166,5 +166,11 @@ public class TableScanIterator implements DefaultIterator {
 		}
 		return this.columns;
 	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

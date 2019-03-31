@@ -10,4 +10,5 @@ public interface DefaultIterator {
 	public Map<String, PrimitiveValue> next();
 	public void reset();
 	public List<String> getColumns();
+	public DefaultIterator getChildIter();
 }
