@@ -37,8 +37,9 @@ public class TableScanIterator implements DefaultIterator {
 		this.tab = tab;
 		if(DEBUG) {
 //<<<<<<< HEAD
-			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			} else {
-			this.csvFile = "data\\" + tableName.toLowerCase() + ".dat";		}
+			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".tbl";			} else {
+			this.csvFile = "data\\" + tableName.toLowerCase() + ".dat";		
+			}
 			try {
 				
 				br = new BufferedReader(new FileReader(csvFile));

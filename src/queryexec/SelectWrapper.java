@@ -16,6 +16,7 @@ import iterators.ResultIterator;
 import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
+import iterators.groupByExternal;
 import iterators.orderExternalIterator;
 import iterators.orderIterator;
 import net.sf.jsqlparser.expression.Expression;
@@ -33,6 +34,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.SchemaStructure;
 import utils.Config;
+import utils.Utils;
 
 
 
@@ -46,6 +48,7 @@ public class SelectWrapper
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
 	private boolean flagOrderBy;
+	private boolean flagGroupBy;
 
 	private List<SelectItem> columns;
 	private List<String> table;
@@ -72,7 +75,8 @@ public class SelectWrapper
 		this.having = this.plainselect.getHaving();
 		
 		
-		this.flagOrderBy = Config.isInMemory;
+		this.flagOrderBy = true;
+//		this.flagGroupBy = Config.isInMemory;
 		
 		
 		if(fromItem instanceof Table) {
@@ -105,12 +109,18 @@ public class SelectWrapper
 					}
 					
 				}
-				result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+				if(flagGroupBy)
+					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+				else
+					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
+			
 			}
 
 			if(this.having!=null) {
 				result = new HavingIterator(result, this.having, this.selectItems);
 			}
+			
+			
 			if(this.orderBy != null){
 				for(OrderByElement key : orderBy){
 				 	String xKey = key.getExpression().toString();
@@ -120,36 +130,11 @@ public class SelectWrapper
 					}
 					
 				}
-//<<<<<<< HEAD
-				
-				
-//					} else if(selectItem instanceof AllTableColumns){
-//						AllTableColumns allTableColumns = (AllTableColumns) selectItem;
-//						Table table = allTableColumns.getTable();
-//						for(String column: this.iterator.getColumns()) {
-//							if(column.split("\\.")[0].equals(table.getName())) {
-//								this.columns.add(column);
-//							}
-//						}
-//					} else if(selectItem instanceof AllColumns) {
-//						this.columns = this.iterator.getColumns();
-//					}
-						
-//				}
-				
-//				columns.addAll(selectItems);
+
 				if(this.flagOrderBy == true)
 					result = new orderIterator(result ,this.orderBy );				
 				else
 					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
-//=======			
-//				if(this.flagOrderBy == false) {
-//					result = new orderIterator(result,this.orderBy);
-//				} else{
-//					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem);
-//				}
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
-//			}
 			
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);

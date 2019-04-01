@@ -36,6 +36,10 @@ public class GroupByIterator implements DefaultIterator{
 	
 	Map<String , PrimitiveValue> nextResult;
 	
+	public GroupByIterator() {
+		
+	}
+	
 	public GroupByIterator(DefaultIterator result, List<Column> groupBy, Table fromItem)
 	{
 		

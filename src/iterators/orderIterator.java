@@ -1,5 +1,6 @@
 package iterators;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 //import java.util.Map;
 
@@ -8,6 +9,7 @@ import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import utils.EvaluateUtils;
+import java.util.Date;
 
 public class orderIterator implements DefaultIterator {
 
@@ -32,7 +34,9 @@ public class orderIterator implements DefaultIterator {
 		List<Map<String,PrimitiveValue>> lstObj = new ArrayList<>();
 		while(iterator.hasNext())
 		{	
-			lstObj.add( iterator.next() );	
+			Map<String, PrimitiveValue> mp = iterator.next() ;
+			System.out.println(mp);
+			lstObj.add(mp );	
 		}
 //		System.out.println(orderBy); 
 //		System.out.println(lstObj.get(0));
@@ -83,8 +87,9 @@ public class orderIterator implements DefaultIterator {
 //		System.out.println( i + " " + orderBy2 + " "  + lstObj + " " + String.valueOf(lstObj.get(0).get(String.valueOf(orderBy2.get(i))).getType()) ); 
 
 
-//		if (( lstObj.get(0).get(orderBy2.get(i).toString()) instanceof String) {
-//		    
+//		if ( ( lstObj.get(0).get(orderBy2.get(i).toString()).getType() instanceof String) ) {
+//		Long x = 5L;
+//		    System.out.println( lstObj.get(0).get(orderBy2.get(i).toString()).getType() == lstObj.get(0).get(orderBy2.get(i).toString()).getType().STRING);
 		if ((String.valueOf(lstObj.get(0).get(String.valueOf(orderBy2.get(i))).getType())).equals("STRING")) {
 //	        System.out.println(" XYZ ");
 			Map<String, List<Map<String, PrimitiveValue>>> mapRes = new TreeMap<>();
@@ -175,6 +180,36 @@ public class orderIterator implements DefaultIterator {
 			}
 
 			for (Long n : mapRes.keySet()) {
+				List<Map<String, PrimitiveValue>> temp = mapRes.get(n);
+				backTrackUtil(temp, orderBy2, i + 1, res);
+			}
+		}
+		
+		if ((String.valueOf(lstObj.get(0).get(String.valueOf(orderBy2.get(i))).getType())).equals("DATE")) {
+//	        System.out.println(" XYZ ");
+			Map<Date, List<Map<String, PrimitiveValue>>> mapRes = new TreeMap<>();
+			if (i < orderBy2.size()) {
+
+				OrderByElement key = orderBy2.get(i);
+//	                System.out.println(" " + key);
+				for (Map<String, PrimitiveValue> l : lstObj) {
+
+//					System.out.println(" upar " + " " + l + " " + key);
+//					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
+					 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				     Date date1 = sdf.parse(String.valueOf(l.get(String.valueOf(key))));
+//				     Date date2 = sdf.parse("2010-01-31");
+				     
+				     
+					
+					if (!mapRes.containsKey(date1)) {
+						mapRes.put(date1, new ArrayList<>());
+					}
+					mapRes.get(sdf.parse(String.valueOf(l.get(String.valueOf(key))))).add(l);
+				}
+			}
+
+			for (Date n : mapRes.keySet()) {
 				List<Map<String, PrimitiveValue>> temp = mapRes.get(n);
 				backTrackUtil(temp, orderBy2, i + 1, res);
 			}

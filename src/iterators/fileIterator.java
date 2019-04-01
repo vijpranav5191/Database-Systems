@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import javafx.scene.control.TableColumn;
+//import javafx.scene.control.TableColumn;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+//import java.util.Arrays;
 import java.util.HashMap;
 
 import net.sf.jsqlparser.expression.DateValue;
@@ -19,11 +19,11 @@ import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.schema.Table;
+//import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectItem;
-import objects.ColumnDefs;
-import objects.SchemaStructure;
+//import objects.ColumnDefs;
+//import objects.SchemaStructure;
 
 public class fileIterator implements DefaultIterator {
 	
@@ -37,7 +37,7 @@ public class fileIterator implements DefaultIterator {
 	private List<SelectItem> selectItems;
 	private List<String> colKeys;
 	private List<String> sendKeys;
-	private List<OrderByElement> orderBy;
+//	private List<OrderByElement> orderBy;
 	//	List<List<String>> tableCol;
 	boolean isFinalMerge;
 	
@@ -204,6 +204,12 @@ public class fileIterator implements DefaultIterator {
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
 		return this.sendKeys;
+	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 		
 }
