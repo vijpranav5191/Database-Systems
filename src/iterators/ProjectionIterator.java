@@ -59,10 +59,6 @@ public class ProjectionIterator implements DefaultIterator{
 							sb.append(exp.toString());
 						}
 						this.columns.add(name+"("+sb.toString()+")");
-						if(!this.iterator.hasNext()) {
-							this.zeroAggflag = true;
-							this.catchfunc = "("+sb.toString()+")";
-						}
 					}
 					else {
 						if(func.isAllColumns()) {
@@ -76,10 +72,6 @@ public class ProjectionIterator implements DefaultIterator{
 				}
 				else {
 					this.columns.add(selectExpression.getAlias());
-					if(!this.iterator.hasNext()) {
-						this.zeroAggflag = true;
-						this.catchfunc = selectExpression.getAlias();
-					}
 					
 				}
 			} else if(selectItem instanceof AllTableColumns){

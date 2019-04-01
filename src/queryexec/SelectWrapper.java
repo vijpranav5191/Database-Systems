@@ -76,6 +76,8 @@ public class SelectWrapper
 		this.having = this.plainselect.getHaving();
 
 		this.flagOrderBy = Config.isInMemory;
+		this.flagGroupBy = Config.isInMemory;
+		
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
 		
 //		Expression exp = Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable), SchemaStructure.schema.get(leftTable), SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);

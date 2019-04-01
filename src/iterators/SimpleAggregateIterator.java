@@ -174,8 +174,8 @@ public class SimpleAggregateIterator implements DefaultIterator {
 		switch (name) {
 		case "SUM":
 			double sum = 0;
-			while(this.iterator.hasNext()) {
-				map = this.iterator.next();
+			while(this.iterator2.hasNext()) {
+				map = this.iterator2.next();
 				for (int i = 0; i < expList.size(); i++) {
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
@@ -214,8 +214,8 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			break;
 		case "MIN":
 			PrimitiveValue min = new DoubleValue(999999999);
-			while(this.iterator.hasNext()) {
-				map = this.iterator.next();
+			while(this.iterator2.hasNext()) {
+				map = this.iterator2.next();
 				for (int i = 0; i < expList.size(); i++) {
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
@@ -243,8 +243,8 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			break;
 		case "MAX":
 			PrimitiveValue max = new DoubleValue(-999999999);
-			while(this.iterator.hasNext()) {
-				map = this.iterator.next();
+			while(this.iterator2.hasNext()) {
+				map = this.iterator2.next();
 				for (int i = 0; i < expList.size(); i++) {
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));

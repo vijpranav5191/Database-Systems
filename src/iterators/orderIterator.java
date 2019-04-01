@@ -18,6 +18,7 @@ public class orderIterator implements DefaultIterator {
 	DefaultIterator iterator;
 	Table primaryTable;
 	private Expression whereExp;
+//	PriorityQueue<DefaultIterator> pq;
 	List<Map<String, PrimitiveValue>> resultSet;
 	int index;
 
@@ -26,27 +27,54 @@ public class orderIterator implements DefaultIterator {
 	public orderIterator() {
 
 	}
+//<<<<<<< HEAD
+	
 	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy ) throws Exception {
+		// TODO Auto-generated constructor stub
+		 
 		List<Map<String,PrimitiveValue>> lstObj = new ArrayList<>();
-		this.resultSet = new ArrayList<>();
-		while(iterator.hasNext()){	
+		while(iterator.hasNext())
+		{	
 			Map<String, PrimitiveValue> mp = iterator.next() ;
 //			System.out.println(mp);
 			lstObj.add(mp );	
 		}
-		if(lstObj.size() > 0)
-			this.resultSet = backTrack(lstObj,orderBy);	
+//		System.out.println(orderBy); 
+//		System.out.println(lstObj.get(0));
+		resultSet = backTrack(lstObj,orderBy);	
+//=======
+//
+//	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy) {
+//		// TODO Auto-generated constructor stub
+//		this.iterator = iterator;
+//		List<Map<String, PrimitiveValue>> lstObj = new ArrayList<>();
+//		while (this.iterator.hasNext()) {
+//			lstObj.add(this.iterator.next());
+//		}
+//		//System.out.println(orderBy);
+//		//System.out.println(lstObj.get(0));
+//		resultSet = backTrack(lstObj, orderBy);
+//		//System.out.println(" results " + resultSet);
+//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
 		index = 0;
 	}
 
 	public List<Map<String, PrimitiveValue>> backTrack(List<Map<String, PrimitiveValue>> lstObj,
 			List<OrderByElement> orderBy2) throws Exception {
+		// TODO Auto-generated method stub
 		List<Map<String, PrimitiveValue>> temp = new ArrayList<>();
+		// temp for result
+		// 3rd argument is index starting from 0 to traverse through orderby element
+		
 		backTrackUtil(lstObj, orderBy2, 0, temp);
 		return temp;
+
+//		return null;
 	}
 
 	private void backTrackUtil(List<Map<String, PrimitiveValue>> lstObj, List<OrderByElement> orderBy2, int i,List<Map<String, PrimitiveValue>> res) throws Exception {
+
+		// TODO Auto-generated method stub
 
 		if (i == orderBy2.size()) {
 			for (Map<String, PrimitiveValue> map : lstObj)
@@ -74,12 +102,15 @@ public class orderIterator implements DefaultIterator {
 		else {
 			orderDesc = orderBy2.get(i).toString();
 		}
-		System.out.println(" asdas " + orderDesc);
+		System.out.println(" asdas " + orderDesc + " " + orderBy2.get(i));
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("STRING")) {
-//	        System.out.println(" XYZ ");
+	        System.out.println(" IN STRING");
 			Map<String, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
+			{
+				System.out.println(" IN ASC STRING");
 				mapRes = new TreeMap<>();
+			}
 			else
 			{
 				mapRes = new TreeMap<>(Collections.reverseOrder()); 
@@ -90,11 +121,12 @@ public class orderIterator implements DefaultIterator {
 				
 //	                System.out.println(" " + key);
 				for (Map<String, PrimitiveValue> l : lstObj) {
-//	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
-					if (!mapRes.containsKey(String.valueOf(String.valueOf(l.get(String.valueOf(key)))))) {
-						mapRes.put(String.valueOf(String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
+					if (!mapRes.containsKey(String.valueOf(String.valueOf(l.get(orderDesc))))) {
+//						System.out.println(" here " + Long.valueOf(String.valueOf(l.get(orderDesc))));
+						mapRes.put((String.valueOf(l.get(orderDesc))), new ArrayList<>());
+//						System.out.println(mapRes);
 					}
-					mapRes.get((String.valueOf(String.valueOf(l.get(String.valueOf(key)))))).add(l);
+					mapRes.get(String.valueOf(String.valueOf(l.get(orderDesc)))).add(l);
 				}
 			}
 
@@ -107,7 +139,7 @@ public class orderIterator implements DefaultIterator {
 		// INTEGER
 
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("INTEGER")) {
-//	        System.out.println(" XYZ ");
+	        System.out.println(" IN INTEGER ");
 			Map<Integer, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 				mapRes = new TreeMap<>();
@@ -122,11 +154,13 @@ public class orderIterator implements DefaultIterator {
 				OrderByElement key = orderBy2.get(i);
 //	                System.out.println(" " + key);
 				for (Map<String, PrimitiveValue> l : lstObj) {
-//	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
-					if (!mapRes.containsKey(Integer.valueOf(String.valueOf(l.get(String.valueOf(key)))))) {
-						mapRes.put(Integer.valueOf(String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
+//					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
+					if (!mapRes.containsKey(Long.valueOf(String.valueOf(l.get(orderDesc))))) {
+						System.out.println(" here " + Long.valueOf(String.valueOf(l.get(orderDesc))));
+						mapRes.put(Integer.valueOf(String.valueOf(l.get(orderDesc))), new ArrayList<>());
+//						System.out.println(mapRes);
 					}
-					mapRes.get((Integer.valueOf(String.valueOf(l.get(String.valueOf(key)))))).add(l);
+					mapRes.get(Integer.valueOf(String.valueOf(l.get(orderDesc)))).add(l);
 				}
 			}
 
@@ -138,7 +172,7 @@ public class orderIterator implements DefaultIterator {
 
 		// Double
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("DOUBLE")) {
-//	        System.out.println(" XYZ ");
+	        System.out.println(" DOUBLE ");
 			Map<Double, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 				mapRes = new TreeMap<>();
@@ -152,11 +186,13 @@ public class orderIterator implements DefaultIterator {
 				OrderByElement key = orderBy2.get(i);
 //	                System.out.println(" " + key);
 				for (Map<String, PrimitiveValue> l : lstObj) {
-					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
-					if (!mapRes.containsKey(Double.valueOf(String.valueOf(l.get(String.valueOf(key)))))) {
-						mapRes.put(Double.valueOf(String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
+//					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
+					if (!mapRes.containsKey(Long.valueOf(String.valueOf(l.get(orderDesc))))) {
+						System.out.println(" here " + Long.valueOf(String.valueOf(l.get(orderDesc))));
+						mapRes.put(Double.valueOf(String.valueOf(l.get(orderDesc))), new ArrayList<>());
+//						System.out.println(mapRes);
 					}
-					mapRes.get((Double.valueOf(String.valueOf(l.get(String.valueOf(key)))))).add(l);
+					mapRes.get(Double.valueOf(String.valueOf(l.get(orderDesc)))).add(l);
 				}
 			}
 
@@ -168,7 +204,7 @@ public class orderIterator implements DefaultIterator {
 
 		// Long
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("LONG")) {
-//	        System.out.println(" XYZ ");
+	        System.out.println(" LONG ");
 			Map<Long, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 				mapRes = new TreeMap<>();
@@ -205,7 +241,7 @@ public class orderIterator implements DefaultIterator {
 		}
 		// DATE
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("DATE")) {
-//	        System.out.println(" XYZ ");
+	        System.out.println(" DATE ");
 			
 			Map<Date, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
