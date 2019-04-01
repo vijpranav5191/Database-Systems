@@ -66,11 +66,7 @@ public class orderExternalIterator implements DefaultIterator {
 		while(iterator.hasNext())
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-//<<<<<<< HEAD
 			for(int i=0;i< Config.blockSize && iterator.hasNext();i++)
-//=======
-//			for(int i=0;i<10 && iterator.hasNext();i++)
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
 				mapValue = obj;
@@ -82,7 +78,7 @@ public class orderExternalIterator implements DefaultIterator {
 			List<Map<String, PrimitiveValue>> result = new orderIterator().backTrack(batch, orderBy);
 			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 //			System.out.println("here"); 
-			File filename = new File("F:\\ff\\level"+level+"_file"+filenumber+".dat");
+			File filename = new File("D:\\temp\\"+level+"_file"+filenumber+".dat");
 			queue.add(filename);
 //			System.out.println(filename); 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
@@ -124,8 +120,8 @@ public class orderExternalIterator implements DefaultIterator {
 			File two = queue.poll();
 			itr2 = new fileIterator(two , pmValues , colmnValues);
 			
-			str = "F:\\ff\\level"+level+"_file"+filenumber+".dat";
-			File newF = new File("F:\\ff\\level"+level+"_file"+filenumber+".dat");
+			str = "D:\\temp\\"+level+"_file"+filenumber+".dat";
+			File newF = new File("D:\\temp"+level+"_file"+filenumber+".dat");
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newF));   
 			filenumber++;

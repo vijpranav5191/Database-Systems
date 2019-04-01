@@ -19,7 +19,7 @@ public class ResultIterator implements DefaultIterator{
 	
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		if(this.hasNext()) {
+//		if(this.hasNext()) {
 			Map<String, PrimitiveValue> map = this.iterator.next();
 			if(map != null) {
 				List<String> columns = this.iterator.getColumns();
@@ -35,8 +35,9 @@ public class ResultIterator implements DefaultIterator{
 				}
 				System.out.println("");
 			}
-		}
-		return null;
+			return map;
+//		}
+//		return null;
 	}
 	
 	@Override

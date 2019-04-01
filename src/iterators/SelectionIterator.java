@@ -18,6 +18,30 @@ public class SelectionIterator implements DefaultIterator {
 		this.nextResult = getNextIter();
 	}
 	
+	public DefaultIterator getIterator() {
+		return iterator;
+	}
+
+	public void setIterator(DefaultIterator iterator) {
+		this.iterator = iterator;
+	}
+
+	public Expression getWhereExp() {
+		return whereExp;
+	}
+
+	public void setWhereExp(Expression whereExp) {
+		this.whereExp = whereExp;
+	}
+
+	public Map<String, PrimitiveValue> getNextResult() {
+		return nextResult;
+	}
+
+	public void setNextResult(Map<String, PrimitiveValue> nextResult) {
+		this.nextResult = nextResult;
+	}
+
 	@Override
 	public boolean hasNext() {
 		if(this.nextResult != null) {

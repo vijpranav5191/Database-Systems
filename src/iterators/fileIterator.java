@@ -205,5 +205,11 @@ public class fileIterator implements DefaultIterator {
 		// TODO Auto-generated method stub
 		return this.sendKeys;
 	}
+
+	@Override
+	public DefaultIterator getChildIter() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 		
 }
