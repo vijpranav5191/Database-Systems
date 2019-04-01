@@ -27,6 +27,8 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.SchemaStructure;
+import utils.Optimzer;
+import utils.Utils;
 
 
 public class SelectWrapper{
@@ -55,24 +57,51 @@ public class SelectWrapper{
 		this.limit = this.plainselect.getLimit();
 		this.having = this.plainselect.getHaving();
 		this.flagOrderBy = false;
+		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
+		
+		String leftTable = "CUSTOMER";
+		String rightTable = "ORDERS";
+		
+//		Expression exp = Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable), SchemaStructure.schema.get(leftTable), SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
+//		System.out.print(exp);
+//		
+//		List<Expression> temp = Optimzer.getExpressionForSelectionPredicate(SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
+//		System.out.print(temp);
+		
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
+			List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table, SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
+			if(tempExp != null && tempExp.size() > 0) {
+				Expression exp = Utils.conquerExpression(tempExp);
+				iter = new SelectionIterator(iter, exp);
+			}
 		}
+		
 		DefaultIterator result = iter;
 		while(iter.hasNext()) {
 			if((this.joins = this.plainselect.getJoins()) != null){
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
-						DefaultIterator iter2 = new TableScanIterator((Table) item);
+						Table rightTb = (Table) item;
+						DefaultIterator iter2 = new TableScanIterator(rightTb);
+						List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(rightTb, SchemaStructure.schema.get(rightTb.getName()), SchemaStructure.whrexpressions);
+						if(tempExp != null && tempExp.size() > 0) {
+							Expression exp = Utils.conquerExpression(tempExp);
+							iter2 = new SelectionIterator(iter2, exp);
+						}
 						result = new JoinIterator(result, iter2, join);
 					}
 				}
 			}
 			
 			if (this.whereExp != null) {
-				result = new SelectionIterator(result, this.whereExp);
+				List<Expression> tempExp = SchemaStructure.whrexpressions;
+				if(tempExp != null && tempExp.size() > 0) {
+					Expression exp = Utils.conquerExpression(tempExp);
+					result = new SelectionIterator(result, exp);
+				}
 			}
 			
 			if (this.groupBy!=null) {
