@@ -102,13 +102,10 @@ public class orderIterator implements DefaultIterator {
 		else {
 			orderDesc = orderBy2.get(i).toString();
 		}
-		System.out.println(" asdas " + orderDesc + " " + orderBy2.get(i));
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("STRING")) {
-	        System.out.println(" IN STRING");
-			Map<String, List<Map<String, PrimitiveValue>>> mapRes = null;
+	        Map<String, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 			{
-				System.out.println(" IN ASC STRING");
 				mapRes = new TreeMap<>();
 			}
 			else
@@ -139,8 +136,7 @@ public class orderIterator implements DefaultIterator {
 		// INTEGER
 
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("INTEGER")) {
-	        System.out.println(" IN INTEGER ");
-			Map<Integer, List<Map<String, PrimitiveValue>>> mapRes = null;
+	        Map<Integer, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 				mapRes = new TreeMap<>();
 			else
@@ -156,7 +152,6 @@ public class orderIterator implements DefaultIterator {
 				for (Map<String, PrimitiveValue> l : lstObj) {
 //					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
 					if (!mapRes.containsKey(Long.valueOf(String.valueOf(l.get(orderDesc))))) {
-						System.out.println(" here " + Long.valueOf(String.valueOf(l.get(orderDesc))));
 						mapRes.put(Integer.valueOf(String.valueOf(l.get(orderDesc))), new ArrayList<>());
 //						System.out.println(mapRes);
 					}
@@ -172,8 +167,7 @@ public class orderIterator implements DefaultIterator {
 
 		// Double
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("DOUBLE")) {
-	        System.out.println(" DOUBLE ");
-			Map<Double, List<Map<String, PrimitiveValue>>> mapRes = null;
+	        Map<Double, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 				mapRes = new TreeMap<>();
 			else
@@ -188,7 +182,6 @@ public class orderIterator implements DefaultIterator {
 				for (Map<String, PrimitiveValue> l : lstObj) {
 //					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
 					if (!mapRes.containsKey(Long.valueOf(String.valueOf(l.get(orderDesc))))) {
-						System.out.println(" here " + Long.valueOf(String.valueOf(l.get(orderDesc))));
 						mapRes.put(Double.valueOf(String.valueOf(l.get(orderDesc))), new ArrayList<>());
 //						System.out.println(mapRes);
 					}
@@ -204,8 +197,7 @@ public class orderIterator implements DefaultIterator {
 
 		// Long
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("LONG")) {
-	        System.out.println(" LONG ");
-			Map<Long, List<Map<String, PrimitiveValue>>> mapRes = null;
+	        Map<Long, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 				mapRes = new TreeMap<>();
 			else
@@ -219,11 +211,9 @@ public class orderIterator implements DefaultIterator {
 //	                System.out.println(" " + key);
 				for (Map<String, PrimitiveValue> l : lstObj) {
 
-					System.out.println(" upar " + " " + l + " " + orderDesc);
-//					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
+					System.out.println(" " + l.get(String.valueOf(key)).getType().toString() + " " + l + " " + key);
 
 					if (!mapRes.containsKey(Long.valueOf(String.valueOf(l.get(orderDesc))))) {
-						System.out.println(" here " + Long.valueOf(String.valueOf(l.get(orderDesc))));
 						mapRes.put(Long.valueOf(String.valueOf(l.get(orderDesc))), new ArrayList<>());
 //						System.out.println(mapRes);
 					}
@@ -241,8 +231,7 @@ public class orderIterator implements DefaultIterator {
 		}
 		// DATE
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("DATE")) {
-	        System.out.println(" DATE ");
-			
+	    	
 			Map<Date, List<Map<String, PrimitiveValue>>> mapRes = null;
 			if(orderBy2.get(i).isAsc())
 				mapRes = new TreeMap<>();
