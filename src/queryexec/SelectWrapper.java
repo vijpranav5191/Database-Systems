@@ -65,7 +65,6 @@ public class SelectWrapper
 	
 	public void parse() throws Exception {
 		DefaultIterator iter = null;
-				
 		FromItem fromItem = this.plainselect.getFromItem();
 		this.selectItems = this.plainselect.getSelectItems();
 		this.whereExp = this.plainselect.getWhere();
@@ -75,8 +74,8 @@ public class SelectWrapper
 		this.having = this.plainselect.getHaving();
 		
 		
-		this.flagOrderBy = true;
-//		this.flagGroupBy = Config.isInMemory;
+//		this.flagOrderBy = true;
+		this.flagGroupBy = false;
 		
 		
 		if(fromItem instanceof Table) {
