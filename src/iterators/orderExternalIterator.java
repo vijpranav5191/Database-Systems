@@ -68,6 +68,7 @@ public class orderExternalIterator implements DefaultIterator {
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
 			for(int i=0;i< Config.blockSize && iterator.hasNext();i++)
 			{
+				
 				Map<String,PrimitiveValue> obj = iterator.next();
 				mapValue = obj;
 				batch.add(obj);
@@ -120,8 +121,11 @@ public class orderExternalIterator implements DefaultIterator {
 			File two = queue.poll();
 			itr2 = new fileIterator(two , pmValues , colmnValues);
 			
-			str = "D:\\temp\\"+level+"_file"+filenumber+".dat";
-			File newF = new File("D:\\temp"+level+"_file"+filenumber+".dat");
+			this.str = "F:\\ff\\level"+level+"_file"+filenumber+".dat";
+			File newF = new File("F:\\ff\\level"+level+"_file"+filenumber+".dat");
+
+//			str = "D:\\temp\\"+level+"_file"+filenumber+".dat";
+//			File newF = new File("D:\\temp"+level+"_file"+filenumber+".dat");
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newF));   
 			filenumber++;

@@ -52,6 +52,8 @@ class Main{
 			} else if(query instanceof CreateTable) {
 				cw.createHandler(query);
 			}
+			
+			
 			System.out.println("$>"); // print a prompt after executing each command
 		}
 	}

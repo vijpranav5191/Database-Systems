@@ -3,6 +3,9 @@ package queryexec;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
 import iterators.HavingIterator;
@@ -14,6 +17,7 @@ import iterators.ResultIterator;
 import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
+import iterators.groupByExternal;
 import iterators.orderExternalIterator;
 import iterators.orderIterator;
 import net.sf.jsqlparser.expression.Expression;
@@ -46,6 +50,7 @@ public class SelectWrapper
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
 	private boolean flagOrderBy;
+	private boolean flagGroupBy;
 
 	private List<SelectItem> columns;
 	private List<String> table;
@@ -62,7 +67,6 @@ public class SelectWrapper
 
 	public void parse() throws Exception {
 		DefaultIterator iter = null;
-
 		FromItem fromItem = this.plainselect.getFromItem();
 		this.selectItems = this.plainselect.getSelectItems();
 		this.whereExp = this.plainselect.getWhere();
@@ -79,6 +83,7 @@ public class SelectWrapper
 //		
 //		List<Expression> temp = Optimzer.getExpressionForSelectionPredicate(SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
 //		System.out.print(temp);
+
 		
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
@@ -120,7 +125,10 @@ public class SelectWrapper
 						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
 					}
 				}
-				result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+				if(flagGroupBy)
+					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+				else
+					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
 			}
 			
 			if(this.having!=null) {
@@ -136,13 +144,12 @@ public class SelectWrapper
 					}
 
 				}
+
 				if(this.flagOrderBy == true)
 					result = new orderIterator(result ,this.orderBy );				
 				else
 					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
-
 			}
-			
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
 			}
