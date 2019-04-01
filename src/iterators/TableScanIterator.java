@@ -35,15 +35,23 @@ public class TableScanIterator implements DefaultIterator {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.tab = tab;
-		if(DEBUG) {
-//<<<<<<< HEAD
-			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".tbl";			} else {
-			this.csvFile = "data\\" + tableName.toLowerCase() + ".dat";		
-			}
-			try {
-				
-				br = new BufferedReader(new FileReader(csvFile));
+		if(DEBUG) 
+		{
+
+			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".tbl";			
+		
 			
+//=======
+////			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
+////			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
+//			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";;
+		} 
+		else 
+		{
+			this.csvFile = "data/" + tableName.toLowerCase() + ".csv";		
+		}
+			try {
+				br = new BufferedReader(new FileReader(csvFile));
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 				System.out.println("Error 1 " + tableName);
@@ -56,7 +64,6 @@ public class TableScanIterator implements DefaultIterator {
 	{
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
-//		System.out.println("Tabele " + this.tableName);
 		this.tab = tab;
 		this.isOrderBy = isOrderBy;
 		if(DEBUG) {
@@ -99,7 +106,6 @@ public class TableScanIterator implements DefaultIterator {
 			try {
 				tuple = br.readLine();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			map = new HashMap<String, PrimitiveValue>();

@@ -3,12 +3,13 @@ package queryexec;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
 import iterators.HavingIterator;
-
 import iterators.HashJoinIterator;
-
 import iterators.JoinIterator;
 import iterators.LimitIterator;
 import iterators.ProjectionIterator;
@@ -21,6 +22,7 @@ import iterators.orderExternalIterator;
 import iterators.orderIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -36,6 +38,8 @@ import objects.SchemaStructure;
 import utils.Config;
 import utils.Utils;
 
+import utils.Optimzer;
+import utils.Utils;
 
 
 
@@ -52,17 +56,17 @@ public class SelectWrapper
 
 	private List<SelectItem> columns;
 	private List<String> table;
-	
-	
+
+
 	private Limit limit;
 	private Expression having;
 
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
+
 	public SelectWrapper(PlainSelect plainselect)
 	{
 		this.plainselect = plainselect;
 	}
-	
+
 	public void parse() throws Exception {
 		DefaultIterator iter = null;
 		FromItem fromItem = this.plainselect.getFromItem();
@@ -72,32 +76,54 @@ public class SelectWrapper
 		this.orderBy = this.plainselect.getOrderByElements();
 		this.limit = this.plainselect.getLimit();
 		this.having = this.plainselect.getHaving();
+
+		this.flagOrderBy = Config.isInMemory;
+		this.flagGroupBy = Config.isInMemory;
+		
+		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
+		
+		String leftTable = "CUSTOMER";
+		String rightTable = "ORDERS";
 		
 		
-//		this.flagOrderBy = true;
-		this.flagGroupBy = false;
-		
+
 		
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
+			List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table, SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
+			if(tempExp != null && tempExp.size() > 0) {
+				Expression exp = Utils.conquerExpression(tempExp);
+				iter = new SelectionIterator(iter, exp);
+			}
 		}
-		DefaultIterator result = iter;
-		while(iter.hasNext()) 
 		
-		{
+		DefaultIterator result = iter;
+
+		while(result.hasNext()) {
+			
 			if((this.joins = this.plainselect.getJoins()) != null){
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
 					if(item instanceof Table ) {
-						DefaultIterator iter2 = new TableScanIterator((Table) item);
+						Table rightTb = (Table) item;
+						DefaultIterator iter2 = new TableScanIterator(rightTb);
+						List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(rightTb, SchemaStructure.schema.get(rightTb.getName()), SchemaStructure.whrexpressions);
+						if(tempExp != null && tempExp.size() > 0) {
+							Expression exp = Utils.conquerExpression(tempExp);
+							iter2 = new SelectionIterator(iter2, exp);
+						}
 						result = new JoinIterator(result, iter2, join);
 					}
 				}
 			}
 			
 			if (this.whereExp != null) {
-				result = new SelectionIterator(result, this.whereExp);
+				List<Expression> tempExp = SchemaStructure.whrexpressions;
+				if(tempExp != null && tempExp.size() > 0) {
+					Expression exp = Utils.conquerExpression(tempExp);
+					result = new SelectionIterator(result, exp);
+				}
 			}
 			
 			if (this.groupBy!=null) {
@@ -106,7 +132,6 @@ public class SelectWrapper
 					if(xKey.split("\\.").length == 1){
 						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
 					}
-					
 				}
 				if(flagGroupBy)
 					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
@@ -114,56 +139,64 @@ public class SelectWrapper
 					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
 			
 			}
-
 			if(this.having!=null) {
 				result = new HavingIterator(result, this.having, this.selectItems);
 			}
 			
-			
 			if(this.orderBy != null){
 				for(OrderByElement key : orderBy){
-				 	String xKey = key.getExpression().toString();
+					String xKey = key.getExpression().toString();
 					if(xKey.split("\\.").length == 1){
 						Column cCol = new Column(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem) , xKey);
 						key.setExpression(cCol);
 					}
-					
+
 				}
 
 				if(this.flagOrderBy == true)
 					result = new orderIterator(result ,this.orderBy );				
 				else
 					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
-			
+			}
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
 			}
-			
+
 			if(this.limit != null) {
 				result = new LimitIterator(result, this.limit);
 			}
-			
+
 			ResultIterator res = new ResultIterator(result);
 			while(res.hasNext()) {
 				res.next();
 			}
-		
 		}
-//<<<<<<< HEAD
+	}
+	public DefaultIterator optimize(DefaultIterator root) {
+
+		if(root instanceof SelectionIterator) {
+			SelectionIterator selIter = (SelectionIterator) root;
+			if(selIter.getChildIter() instanceof JoinIterator) {
+				DefaultIterator joiniter = (JoinIterator) selIter.getChildIter();	
+				Expression selExp = selIter.getWhereExp();
+
+			}
 		}
+		return null;
+	}
+	public List<Expression> splitAndClauses(Expression e){
+		List<Expression> ret = new ArrayList<>();
+		if(e instanceof AndExpression){
+			AndExpression a = (AndExpression)e;
+			ret.addAll(splitAndClauses(a.getLeftExpression()));
+			ret.addAll(splitAndClauses(a.getRightExpression()));
+		} else {
+			ret.add(e);
 		}
+		return null;
+	} 
 }
 
 
-//=======
-//	}0
-////	public DefaultIterator optimize(DefaultIterator root) {
-////		
-////		if(root instanceof SelectionIterator) {
-////			SelectionIterator selIter = (SelectionIterator) root;
-////			if(selIter.getChildIter() instance of JoinIterator)
-////		}
-////		return null;
-////	}
-//}
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
+
+

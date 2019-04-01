@@ -2,6 +2,9 @@ package dubstep;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import interfaces.UnionWrapper;
 import net.sf.jsqlparser.parser.CCJSqlParser;
@@ -18,10 +21,11 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
 	
-//<<<<<<< HEAD
-//	public static void main(String args[]) throws Exception {
-//=======
 	public static void main(String args[]) throws Exception {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+		System.out.println(dateFormat.format(date));
+		
 		Config.isInMemory = false;
 		for (String arg : args) {
 			if (arg.equals("--in-mem")){
@@ -56,6 +60,9 @@ class Main{
 			
 			System.out.println("$>"); // print a prompt after executing each command
 		}
+		DateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date1 = new Date();
+		System.out.println("Done" + dateFormat.format(date1));
 	}
 }
 

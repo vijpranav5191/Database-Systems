@@ -82,4 +82,23 @@ public class EvaluateUtils{
 		};
 		return eval.eval(where);
 	}
+	
+//	
+//	public static PrimitiveValue evaluateExpression1(Table table, Map<String, PrimitiveValue> scope, Expression where) throws Exception {
+//		Eval eval = new Eval() {
+//			
+//			public PrimitiveValue eval(Column col){
+//				String name = col.getColumnName();
+//				if(col.getTable() != null && col.getTable().getName() != null){
+//			        name = col.getTable().getName() + "." + col.getColumnName();
+//			        return scope.get(name);
+//			    }j
+//				return scope.get(name);
+//			}
+//			
+//		};
+//		return eval.eval(where);
+//	}
+	
+	
 }
