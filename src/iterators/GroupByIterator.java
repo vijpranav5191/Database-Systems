@@ -7,6 +7,7 @@
 
 package iterators;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 //import java.util.Map;
 
@@ -106,9 +107,9 @@ public class GroupByIterator implements DefaultIterator{
 //	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
 	                    if(!mapRes.containsKey( String.valueOf(String.valueOf(l.get(String.valueOf(key))))))
 	                    {
-	                        mapRes.put(String.valueOf(String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
+	                        mapRes.put((String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
 	                    }
-	                    mapRes.get(( String.valueOf(String.valueOf(l.get(String.valueOf(key)))))).add(l);
+	                    mapRes.get(( (String.valueOf(l.get(String.valueOf(key)))))).add(l);
 	                }
 	            }
 	            
@@ -190,6 +191,35 @@ public class GroupByIterator implements DefaultIterator{
 //	                System.out.println(" " + key);
 	                for(Map<String,PrimitiveValue> l : lstObj)
 	                {
+//	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
+	                    if(!mapRes.containsKey( Long.valueOf(String.valueOf(l.get(String.valueOf(key))))))
+	                    {
+	                        mapRes.put(Long.valueOf(String.valueOf(l.get(String.valueOf(key)))), new ArrayList<>());
+	                    }
+	                    mapRes.get(( Long.valueOf(String.valueOf(l.get(String.valueOf(key)))))).add(l);
+	                }
+	            }
+	            
+	            for(Long n : mapRes.keySet())
+	            {
+	                List<Map<String,PrimitiveValue>> temp = mapRes.get(n);
+	                backTrackUtil(temp, groupBy2, i+1 , res , results);
+	            }
+	    }
+		
+		if( (String.valueOf(lstObj.get(0).get(String.valueOf(groupBy2.get(i))).getType())).equals("DATE") )
+		{
+//	        System.out.println(" XYZ ");
+	            Map< Long  , List<Map<String,PrimitiveValue> >> mapRes = new LinkedHashMap<>(); 
+	            if(i<groupBy2.size())
+	            {   
+					
+					Column key = groupBy2.get(i);
+//	                System.out.println(" " + key);
+	                for(Map<String,PrimitiveValue> l : lstObj)
+	                {
+	                	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					     Date date1 = sdf.parse(String.valueOf(l.get(orderDesc)));
 //	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
 	                    if(!mapRes.containsKey( Long.valueOf(String.valueOf(l.get(String.valueOf(key))))))
 	                    {

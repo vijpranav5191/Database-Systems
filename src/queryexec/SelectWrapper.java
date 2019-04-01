@@ -77,7 +77,7 @@ public class SelectWrapper
 		this.limit = this.plainselect.getLimit();
 		this.having = this.plainselect.getHaving();
 
-		this.flagOrderBy = Config.isInMemory;
+		this.flagOrderBy = false;
 		this.flagGroupBy = Config.isInMemory;
 		
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
@@ -129,9 +129,11 @@ public class SelectWrapper
 			if (this.groupBy!=null) {
 				for(Column key : groupBy) {
 					String xKey = key.getColumnName();
-					if(xKey.split("\\.").length == 1){
+					if(xKey.split("\\.").length == 1)
+					{
 						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
 					}
+					System.out.println(orderBy);
 				}
 				if(flagGroupBy)
 					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
@@ -144,15 +146,20 @@ public class SelectWrapper
 			}
 			
 			if(this.orderBy != null){
+				
+				
 				for(OrderByElement key : orderBy){
+					
 					String xKey = key.getExpression().toString();
+					
+					
 					if(xKey.split("\\.").length == 1){
 						Column cCol = new Column(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem) , xKey);
 						key.setExpression(cCol);
 					}
 
 				}
-
+				System.out.println(orderBy);
 				if(this.flagOrderBy == true)
 					result = new orderIterator(result ,this.orderBy );				
 				else

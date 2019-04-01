@@ -79,7 +79,7 @@ public class orderExternalIterator implements DefaultIterator {
 			List<Map<String, PrimitiveValue>> result = new orderIterator().backTrack(batch, orderBy);
 			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 //			System.out.println("here"); 
-			File filename = new File("D:\\temp\\"+level+"_file"+filenumber+".dat");
+			File filename = new File(this.str = "F:\\ff\\level"+level+"_file"+filenumber+".dat");
 			queue.add(filename);
 //			System.out.println(filename); 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
