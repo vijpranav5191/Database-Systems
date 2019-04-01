@@ -21,10 +21,11 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 
 class Main{
 	
-	public static void main(String args[]) throws SQLException, ParseException, IOException {
+	public static void main(String args[]) throws Exception {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		System.out.println(dateFormat.format(date));
+		
 		Config.isInMemory = false;
 		for (String arg : args) {
 			if (arg.equals("--in-mem")){
@@ -37,13 +38,17 @@ class Main{
 		Statement query;
 		CreateWrapper cw = new CreateWrapper();
 		while((query = parser.Statement()) != null){
-			if(query instanceof Select) {
+			if(query instanceof Select) 
+				{
 			    Select select = (Select) query;
+
 			    SelectBody selectbody = select.getSelectBody();
+			    
 			    if(selectbody instanceof PlainSelect) {
 			    	PlainSelect plainSelect = (PlainSelect) selectbody;
 			    	new SelectWrapper(plainSelect).parse();			
 			    }
+
 			    else {
 			    	Union union = (Union) selectbody;
 			    	new UnionWrapper(union).parse();

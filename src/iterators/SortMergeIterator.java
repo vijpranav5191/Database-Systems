@@ -27,7 +27,7 @@ public class SortMergeIterator implements DefaultIterator{
 	ArrayList<Map<String, PrimitiveValue>> leftTupleList;
 	int index = 0;
 	
-	public SortMergeIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join) {
+	public SortMergeIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join) throws Exception {
 		this.join = join;
 		this.rightTuple = rightIterator.next(); 
 		

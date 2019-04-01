@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+//import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,21 +36,24 @@ public class TableScanIterator implements DefaultIterator {
 		this.tableName = tab.getName();
 		this.tab = tab;
 		if(DEBUG) {
-//			this.csvFile = "C://Users/Amit/Desktop/Sanity_Check_Examples/data/" + tableName.toLowerCase() + ".dat";
-			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
+//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
+//			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
+			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";;
 		} else {
-			this.csvFile = "data/" + tableName + ".csv";
+			this.csvFile = "data/" + tableName.toLowerCase() + ".csv";		
 		}
-		try {
-			br = new BufferedReader(new FileReader(csvFile));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.out.println("Error 1 " + tableName);
-		}
+			try {
+				br = new BufferedReader(new FileReader(csvFile));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				System.out.println("Error 1 " + tableName);
+			}
+
 		tuple = "";
 	}
 	
-	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName ) {
+	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName )
+	{
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.tab = tab;
@@ -97,7 +101,9 @@ public class TableScanIterator implements DefaultIterator {
 				e.printStackTrace();
 			}
 			map = new HashMap<String, PrimitiveValue>();
+//			System.out.println(map);
 			String[] row = tuple.split("\\|");
+//			System.out.println(row[0] + row[1]);
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			for(int j = 0;j < row.length; j++) {
 				ColumnDefs cdef = cdefs.get(j);
