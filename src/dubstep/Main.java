@@ -22,11 +22,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 class Main{
 	
 	public static void main(String args[]) throws Exception {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date = new Date();
-		System.out.println(dateFormat.format(date));
-		
-		Config.isInMemory = false;
+		Config.isInMemory = true;
 		for (String arg : args) {
 			if (arg.equals("--in-mem")){
 				Config.isInMemory = true;
@@ -58,9 +54,6 @@ class Main{
 			}
 			System.out.println("$>"); // print a prompt after executing each command
 		}
-		DateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Date date1 = new Date();
-		System.out.println("Done" + dateFormat.format(date1));
 	}
 }
 

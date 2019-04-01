@@ -31,7 +31,8 @@ public class HashJoinIterator implements DefaultIterator {
 	
 	ArrayList<Map<String, PrimitiveValue>> mapList;
 	int indexMapList = 0;
-	
+	Map<String, PrimitiveValue> nextResult;
+		
 	public HashJoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join){
 		this.leftIterator = leftIterator;
 		this.rightIterator = rightIterator;
@@ -39,6 +40,7 @@ public class HashJoinIterator implements DefaultIterator {
 		this.columns = new ArrayList<String>();
 		this.passMap = new HashMap<String, ArrayList<Map<String, PrimitiveValue>>>();
 		createOnePassHash();
+		this.nextResult = getNextIter();
 	}
 
 	private void createOnePassHash() {
@@ -72,17 +74,19 @@ public class HashJoinIterator implements DefaultIterator {
 
 	@Override
 	public boolean hasNext() {
-		if(!this.rightIterator.hasNext()) {
-			return false;
+		if(this.nextResult != null) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		return this.getNextIter();
+		Map<String, PrimitiveValue> temp = this.nextResult;
+		this.nextResult = getNextIter();
+		return temp;
 	}
-
+	
 	@Override
 	public void reset() {
 		this.leftIterator.reset();
@@ -112,6 +116,9 @@ public class HashJoinIterator implements DefaultIterator {
 				temp.put(key, leftTuple.get(key));
 			}
 		} else {
+			if(!this.rightIterator.hasNext()) {
+				return null;
+			}
 			this.rightTuple = this.rightIterator.next();	
 			PrimitiveValue value = this.rightTuple.get(this.rightExpression);
 			String hashKey;
@@ -119,7 +126,7 @@ public class HashJoinIterator implements DefaultIterator {
 				hashKey = Utils.hashString(value.toString());
 				this.indexMapList = 0;
 				this.mapList = this.passMap.getOrDefault(hashKey, new ArrayList<Map<String, PrimitiveValue>>());
-			} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			temp = getNextIter();

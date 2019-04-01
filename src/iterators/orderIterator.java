@@ -15,7 +15,6 @@ public class orderIterator implements DefaultIterator {
 	DefaultIterator iterator;
 	Table primaryTable;
 	private Expression whereExp;
-//	PriorityQueue<DefaultIterator> pq;
 	List<Map<String, PrimitiveValue>> resultSet;
 	int index;
 
@@ -24,52 +23,25 @@ public class orderIterator implements DefaultIterator {
 	public orderIterator() {
 
 	}
-//<<<<<<< HEAD
-	
 	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy ) throws Exception {
-		// TODO Auto-generated constructor stub
-		 
 		List<Map<String,PrimitiveValue>> lstObj = new ArrayList<>();
-		while(iterator.hasNext())
-		{	
+		this.resultSet = new ArrayList<>();
+		while(iterator.hasNext()){	
 			lstObj.add( iterator.next() );	
 		}
-//		System.out.println(orderBy); 
-//		System.out.println(lstObj.get(0));
-		resultSet = backTrack(lstObj,orderBy);	
-//=======
-//
-//	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy) {
-//		// TODO Auto-generated constructor stub
-//		this.iterator = iterator;
-//		List<Map<String, PrimitiveValue>> lstObj = new ArrayList<>();
-//		while (this.iterator.hasNext()) {
-//			lstObj.add(this.iterator.next());
-//		}
-//		//System.out.println(orderBy);
-//		//System.out.println(lstObj.get(0));
-//		resultSet = backTrack(lstObj, orderBy);
-//		//System.out.println(" results " + resultSet);
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
+		if(lstObj.size() > 0)
+			this.resultSet = backTrack(lstObj,orderBy);	
 		index = 0;
 	}
 
 	public List<Map<String, PrimitiveValue>> backTrack(List<Map<String, PrimitiveValue>> lstObj,
 			List<OrderByElement> orderBy2) throws Exception {
-		// TODO Auto-generated method stub
 		List<Map<String, PrimitiveValue>> temp = new ArrayList<>();
-		// temp for result
-		// 3rd argument is index starting from 0 to traverse through orderby element
-
 		backTrackUtil(lstObj, orderBy2, 0, temp);
 		return temp;
-
-//		return null;
 	}
 
 	private void backTrackUtil(List<Map<String, PrimitiveValue>> lstObj, List<OrderByElement> orderBy2, int i,List<Map<String, PrimitiveValue>> res) throws Exception {
-
-		// TODO Auto-generated method stub
 
 		if (i == orderBy2.size()) {
 			for (Map<String, PrimitiveValue> map : lstObj) {
