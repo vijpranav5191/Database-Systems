@@ -65,7 +65,7 @@ public class orderIterator implements DefaultIterator {
 		List<Map<String, PrimitiveValue>> temp = new ArrayList<>();
 		// temp for result
 		// 3rd argument is index starting from 0 to traverse through orderby element
-		
+//		System.out.println(orderBy2);
 		backTrackUtil(lstObj, orderBy2, 0, temp);
 		return temp;
 
@@ -95,6 +95,7 @@ public class orderIterator implements DefaultIterator {
 		 
 //		    System.out.println( lstObj.get(0).get(orderBy2.get(i).toString()).getType() == lstObj.get(0).get(orderBy2.get(i).toString()).getType().STRING);
 		String orderDesc = null;
+//		System.out.println(orderBy2);
 		if(orderBy2.get(i).toString().split(" ").length == 2)
 		{
 			orderDesc = orderBy2.get(i).toString().split(" ")[0];

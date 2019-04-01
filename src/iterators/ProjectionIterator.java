@@ -147,7 +147,7 @@ public class ProjectionIterator implements DefaultIterator{
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-						}else {
+						} else {
 							String name = func.getName();
 							String key= null;
 							List<Expression> expList = new ArrayList<>();
@@ -163,6 +163,9 @@ public class ProjectionIterator implements DefaultIterator{
 								if(func.isAllColumns()) {
 									key = "COUNT(*)";
 								}
+							}
+							if(selectExpression.getAlias() != null) {
+								selectMap.put(selectExpression.getAlias(), map.get(key));
 							}
 							selectMap.put(key, map.get(key));
 						}
