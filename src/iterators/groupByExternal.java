@@ -34,12 +34,22 @@ public class groupByExternal implements DefaultIterator {
 	private List<PrimitiveValue> pmValues;
 	String str;
 	
-	public groupByExternal(DefaultIterator iterator,List<Column> groupBy , Table primaryTable , List<SelectItem> selectItems) throws IOException {
+	public groupByExternal(DefaultIterator iterator,List<Column> groupBy , Table primaryTable , List<SelectItem> selectItems) throws Exception {
 		// TODO Auto-generated constructor stub
 		this.iterator = iterator;
 		this.groupBy = groupBy;
 		this.primaryTable = primaryTable;
 		this.selectItems = selectItems;
+		
+		List<OrderByElement> ordElem =  new ArrayList<OrderByElement>();
+		for(Column col : groupBy)
+		{
+			OrderByElement ord = new OrderByElement();
+			ord.setExpression(col);
+			
+			ordElem.add( ord);
+			
+		}
 		
 //		System.out.println( " columnValue " + column);
 		int level = 0;
@@ -66,43 +76,30 @@ public class groupByExternal implements DefaultIterator {
 		while(iterator.hasNext())
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-//<<<<<<< HEAD
 			for(int i=0;i<5 && iterator.hasNext();i++)
-//=======
-//			for(int i=0;i<10 && iterator.hasNext();i++)
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
 				mapValue = obj;
 				batch.add(obj);
 			}
-//			System.out.println(primaryTable);
-//			List<ColumnDefs> cdef = SchemaStructure.schema.get(String.valueOf(primaryTable));
-//			System.out.println(cdef);
-			List<List<Map<String, PrimitiveValue>>> result = new GroupByIterator().backTrack(batch, groupBy);
+			List<Map<String, PrimitiveValue>> result = new orderIterator().backTrack(batch, ordElem);
 			System.out.println(result);
-			Iterator<List<Map<String, PrimitiveValue>>> itr = result.iterator();
-//			System.out.println("here"); 
+			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 			File filename = new File("F:\\ff2\\level"+level+"_file"+filenumber+".dat");
 			queue.add(filename);
-//			System.out.println(filename); 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
 			while( itr.hasNext() )
 			{
-				List<Map<String,PrimitiveValue>> listMap = itr.next();
-				for(Map<String,PrimitiveValue> mp : listMap)
-				{
-					String writeInFile = "";
-						
-					for (String x : mp.keySet() )
+				Map<String,PrimitiveValue> listMap = itr.next();
+					String writeInFile = "";	
+					for (String x : itr.next().keySet() )
 					{
-						writeInFile += String.valueOf(mp.get(x))+"|"; 
+						writeInFile += x+"|"; 
 					}
-					System.out.println( " writeFile " +  writeInFile );
+//					System.out.println( " writeFile " +  writeInFile );
 					String writeInFile1 = writeInFile.substring(0, writeInFile.length()-1);
 					writer.write(writeInFile1);
 					writer.newLine();
-				}
 			}
 			filenumber++;
 			writer.close();

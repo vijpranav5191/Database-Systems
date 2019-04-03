@@ -9,6 +9,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 
 public class EvaluateUtils{
  
@@ -60,21 +61,21 @@ public class EvaluateUtils{
 	}
 	
 //	
-//	public static PrimitiveValue evaluateExpression1(Table table, Map<String, PrimitiveValue> scope, Expression where) throws Exception {
-//		Eval eval = new Eval() {
-//			
-//			public PrimitiveValue eval(Column col){
-//				String name = col.getColumnName();
-//				if(col.getTable() != null && col.getTable().getName() != null){
-//			        name = col.getTable().getName() + "." + col.getColumnName();
-//			        return scope.get(name);
-//			    }j
-//				return scope.get(name);
-//			}
-//			
-//		};
-//		return eval.eval(where);
-//	}
+	public static PrimitiveValue evaluateExpression(Table table, Map<String, PrimitiveValue> scope, Expression where) throws Exception {
+		Eval eval = new Eval() {
+			
+			public PrimitiveValue eval(Column col){
+				String name = col.getColumnName();
+				if(col.getTable() != null && col.getTable().getName() != null){
+			        name = col.getTable().getName() + "." + col.getColumnName();
+			        return scope.get(name);
+			    }
+				return scope.get(name);
+			}
+			
+		};
+		return eval.eval(where);
+	}
 	
 	
 }

@@ -64,7 +64,7 @@ public class Optimzer {
 			return lst;
 	}
 	
-	public static Expression getExpressionForJoinPredicate(Table leftTable, List<ColumnDefs> leftcdefs,Table rightTable, List<ColumnDefs> rightcdefs, List<Expression> expressions){
+	public static Expression getExpressionForJoinPredicate(List<String> leftcdefs,List<String> rightcdefs, List<Expression> expressions){
 		Expression result = null; 
 		if(expressions != null) {
 			for(Expression exp: expressions) {
@@ -73,11 +73,11 @@ public class Optimzer {
 					String[] left = equalTo.getLeftExpression().toString().split("\\.");
 					String[] right = equalTo.getRightExpression().toString().split("\\.");
 					
-					if(isContainingExpression(left, leftTable, leftcdefs) && isContainingExpression(right, rightTable, rightcdefs)) {
+					if(isContainingExpression(left, leftcdefs) && isContainingExpression(right, rightcdefs)) {
 						result = exp;
 						break;
 					}
-					if(isContainingExpression(right, leftTable, leftcdefs) && isContainingExpression(left, rightTable, rightcdefs)) {
+					if(isContainingExpression(right, leftcdefs) && isContainingExpression(left, rightcdefs)) {
 						result = exp;
 						break;
 					}
@@ -91,14 +91,14 @@ public class Optimzer {
 	}
 	
 	
-	private static Boolean isContainingExpression(String[] exp, Table table, List<ColumnDefs> cdefs) {
+	private static Boolean isContainingExpression(String[] exp, List<String> cdefs) {
 		for(String value: exp) {
-			if(value.equals(table.getName())) {
-				return true;
-			}
-			for(ColumnDefs cdef: cdefs) {
-				if(value.equals(cdef.cdef.getColumnName())) {
-					return true;
+			for(String cdef: cdefs) {
+				String[] split = cdef.split("\\.");
+				for(String s: split) {
+					if(value.equals(s)) {
+						return true;
+					}
 				}
 			}
 		}

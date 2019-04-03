@@ -27,6 +27,8 @@ public class JoinIterator implements DefaultIterator{
 		this.columns = new ArrayList<String>();
 	}
 	
+	
+	
 	@Override
 	public boolean hasNext() {
 		if(this.nextResult != null) {

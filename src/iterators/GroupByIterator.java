@@ -219,7 +219,7 @@ public class GroupByIterator implements DefaultIterator{
 	                for(Map<String,PrimitiveValue> l : lstObj)
 	                {
 	                	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-					     Date date1 = sdf.parse(String.valueOf(l.get(orderDesc)));
+//					     Date date1 = sdf.parse(String.valueOf(l.get(orderDesc)));
 //	                	System.out.println( " " + l.get(String.valueOf(key)) + " " + l + " " + key); 
 	                    if(!mapRes.containsKey( Long.valueOf(String.valueOf(l.get(String.valueOf(key))))))
 	                    {
