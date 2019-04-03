@@ -68,7 +68,7 @@ public class SortMergeIterator implements DefaultIterator{
 		
 		List<OrderByElement> listLeft = new ArrayList<OrderByElement>();
 		listLeft.add(leftOrderByElement);	
-		this.leftIterator = new orderIterator(leftIterator, listLeft);
+		this.leftIterator = new OrderByIterator(listLeft, leftIterator);
 			
 		// Right Iteration after sorting
 		OrderByElement rightOrderByElement = new OrderByElement();
@@ -82,7 +82,7 @@ public class SortMergeIterator implements DefaultIterator{
 		
 		List<OrderByElement> listRight = new ArrayList<OrderByElement>();
 		listRight.add(rightOrderByElement);
-		this.rightIterator = new orderIterator(rightIterator, listRight);
+		this.rightIterator = new OrderByIterator(listRight, rightIterator);
 		
 //		System.out.println(leftExpression);	
 //		while(this.leftIterator.hasNext()) {
