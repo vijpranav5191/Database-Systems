@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -149,7 +150,10 @@ public class ProjectionIterator implements DefaultIterator{
 								DefaultIterator iter = new SimpleAggregateIterator(this.iterator, func);
 								selectMap.putAll(iter.next());
 								if(selectExpression.getAlias()!=null) {
-									selectMap.put(selectExpression.getAlias(), selectMap.get(0));
+									Set<String> keys  = selectMap.keySet();
+									for (String string : keys) {
+										selectMap.put(selectExpression.getAlias(), selectMap.remove(string));
+									}
 								}
 	
 							} catch (Exception e) {
