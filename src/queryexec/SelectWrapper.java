@@ -138,7 +138,7 @@ public class SelectWrapper
 //				result = new HavingIterator(result, this.having, this.selectItems);
 //			}
 		
-		
+			
 			if(this.orderBy != null){
 //				System.out.println( this.orderBy );
 				for(OrderByElement key : this.orderBy){
