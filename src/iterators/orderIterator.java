@@ -36,26 +36,11 @@ public class orderIterator implements DefaultIterator {
 		while(iterator.hasNext())
 		{	
 			Map<String, PrimitiveValue> mp = iterator.next() ;
-//			System.out.println(mp);
 			lstObj.add(mp );	
 		}
-//		System.out.println(orderBy); 
-//		System.out.println(lstObj.get(0));
+
 		resultSet = backTrack(lstObj,orderBy);	
-//=======
-//
-//	public orderIterator(DefaultIterator iterator, List<OrderByElement> orderBy) {
-//		// TODO Auto-generated constructor stub
-//		this.iterator = iterator;
-//		List<Map<String, PrimitiveValue>> lstObj = new ArrayList<>();
-//		while (this.iterator.hasNext()) {
-//			lstObj.add(this.iterator.next());
-//		}
-//		//System.out.println(orderBy);
-//		//System.out.println(lstObj.get(0));
-//		resultSet = backTrack(lstObj, orderBy);
-//		//System.out.println(" results " + resultSet);
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
+
 		index = 0;
 	}
 

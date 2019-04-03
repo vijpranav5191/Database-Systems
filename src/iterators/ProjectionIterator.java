@@ -50,24 +50,29 @@ public class ProjectionIterator implements DefaultIterator{
 						this.columns.add(column.getColumnName());	
 					}
 				} else if((selectExpression.getExpression() instanceof Function)){
-					Function func = (Function) selectExpression.getExpression();
-					String name = func.getName();
-					if(func.getParameters()!=null) {
-						List<Expression> expList = func.getParameters().getExpressions();
-						StringBuilder sb = new StringBuilder();
-						for(Expression exp : expList) {
-							sb.append(exp.toString());
+					if(selectExpression.getAlias()==null){
+						Function func = (Function) selectExpression.getExpression();
+						String name = func.getName();
+						if(func.getParameters()!=null) {
+							List<Expression> expList = func.getParameters().getExpressions();
+							StringBuilder sb = new StringBuilder();
+							for(Expression exp : expList) {
+								sb.append(exp.toString());
+							}
+							this.columns.add(name+"("+sb.toString()+")");
 						}
-						this.columns.add(name+"("+sb.toString()+")");
-					}
-					else {
-						if(func.isAllColumns()) {
-							this.columns.add("COUNT(*)");
-							if(!this.iterator.hasNext()) {
-								this.zeroAggflag = true;
-								this.catchfunc = "COUNT(*)";
+						else {
+							if(func.isAllColumns()) {
+								this.columns.add("COUNT(*)");
+								if(!this.iterator.hasNext()) {
+									this.zeroAggflag = true;
+									this.catchfunc = "COUNT(*)";
+								}
 							}
 						}
+					}
+					else {
+						this.columns.add(selectExpression.getAlias());
 					}
 				}
 				else {
@@ -142,7 +147,11 @@ public class ProjectionIterator implements DefaultIterator{
 							try {
 								this.iterator.reset();
 								DefaultIterator iter = new SimpleAggregateIterator(this.iterator, func);
-								selectMap.putAll(iter.next());	
+								selectMap.putAll(iter.next());
+								if(selectExpression.getAlias()!=null) {
+									selectMap.put(selectExpression.getAlias(), selectMap.get(0));
+								}
+	
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -164,7 +173,12 @@ public class ProjectionIterator implements DefaultIterator{
 									key = "COUNT(*)";
 								}
 							}
-							selectMap.put(key, map.get(key));
+							if(selectExpression.getAlias()!=null) {
+								selectMap.put(selectExpression.getAlias(), map.get(key));
+							}
+							else {
+								selectMap.put(key, map.get(key));
+							}
 						}
 
 					}

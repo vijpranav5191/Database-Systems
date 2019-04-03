@@ -76,7 +76,7 @@ public class SelectWrapper
 		this.having = this.plainselect.getHaving();
 
 		this.flagOrderBy = Config.isInMemory;
-		this.flagGroupBy = Config.isInMemory;
+		this.flagGroupBy = true;
 		
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
 		
@@ -137,28 +137,28 @@ public class SelectWrapper
 				result = new HavingIterator(result, this.having, this.selectItems);
 			}
 			
-			if(this.orderBy != null){
-				for(OrderByElement key : orderBy){
-					String xKey = key.getExpression().toString();
-					if(xKey.split("\\.").length == 1){
-						Column cCol = new Column(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem) , xKey);
-						key.setExpression(cCol);
-					}
-
-				}
-
-				if(this.flagOrderBy == true)
-					result = new orderIterator(result ,this.orderBy );				
-				else
-					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
-			}
+//			if(this.orderBy != null){
+//				for(OrderByElement key : orderBy){
+//					String xKey = key.getExpression().toString();
+//					if(xKey.split("\\.").length == 1){
+//						Column cCol = new Column(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem) , xKey);
+//						key.setExpression(cCol);
+//					}
+//
+//				}
+//
+//				if(this.flagOrderBy == true)
+//					result = new orderIterator(result ,this.orderBy );				
+//				else
+//					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
+//			}
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
 			}
-
-			if(this.limit != null) {
-				result = new LimitIterator(result, this.limit);
-			}
+//
+//			if(this.limit != null) {
+//				result = new LimitIterator(result, this.limit);
+//			}
 
 			ResultIterator res = new ResultIterator(result);
 			while(res.hasNext()) {
@@ -208,7 +208,7 @@ public class SelectWrapper
 		if(exp != null) {
 			Join join = new Join();
 			join.setOnExpression(exp);
-			if(Config.isInMemory) {
+			if(!Config.isInMemory) {
 				 result = new HashJoinIterator(leftIterator, rightIterator, join);
 			}  else {
 				 try {
