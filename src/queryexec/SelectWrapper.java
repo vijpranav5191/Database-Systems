@@ -12,6 +12,7 @@ import iterators.HavingIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.LimitIterator;
+import iterators.OrderByIterator;
 import iterators.ProjectionIterator;
 import iterators.ResultIterator;
 import iterators.SelectionIterator;
@@ -19,9 +20,7 @@ import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
 import iterators.groupByExternal;
 import iterators.orderExternalIterator;
-import iterators.orderIterator;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -121,27 +120,24 @@ public class SelectWrapper
 				}
 			}
 			
-			if (this.groupBy != null) {
-				for(Column key : groupBy) {
-					String xKey = key.getColumnName();
-					if(xKey.split("\\.").length == 1){
-						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
-					}
-				}
-				if(flagGroupBy) {
-					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
-				} else {
-					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
-				}
-			}
-			
-			if(this.having!=null) {
-				result = new HavingIterator(result, this.having, this.selectItems);
-			}
-			
-			if(this.selectItems != null ) {
-				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
-			}
+//			if (this.groupBy != null) {
+//				for(Column key : groupBy) {
+//					String xKey = key.getColumnName();
+//					if(xKey.split("\\.").length == 1){
+//						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
+//					}
+//				}
+//				if(flagGroupBy) {
+//					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+//				} else {
+//					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
+//				}
+//			}
+//			
+//			if(this.having!=null) {
+//				result = new HavingIterator(result, this.having, this.selectItems);
+//			}
+		
 			
 			if(this.orderBy != null){
 //				System.out.println( this.orderBy );
@@ -163,11 +159,15 @@ public class SelectWrapper
 				}
 //System.out.println( this.orderBy );
 				if(this.flagOrderBy == true)
-					result = new orderIterator(result ,this.orderBy );				
+					result = new OrderByIterator(this.orderBy, result);				
 				else
 					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
 			}
-
+			
+			if(this.selectItems != null ) {
+				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
+			}
+			
 			if(this.limit != null) {
 				result = new LimitIterator(result, this.limit);
 			}
