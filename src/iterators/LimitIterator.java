@@ -19,7 +19,7 @@ public class LimitIterator implements DefaultIterator{
 	
 	@Override
 	public boolean hasNext() {
-		if(this.index < this.limit.getRowCount()) {
+		if(this.iterator.hasNext() && this.index < this.limit.getRowCount()) {
 			return true;
 		}
 		return false;

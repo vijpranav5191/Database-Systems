@@ -296,11 +296,8 @@ public class orderIterator implements DefaultIterator {
 	@Override
 	public DefaultIterator getChildIter() {
 		// TODO Auto-generated method stub
-//<<<<<<< HEAD
-//		return this.getColumns();
-//=======
 		return null;
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
+
 	}
 
 }
