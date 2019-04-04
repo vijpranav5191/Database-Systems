@@ -120,23 +120,23 @@ public class SelectWrapper
 				}
 			}
 			
-//			if (this.groupBy != null) {
-//				for(Column key : groupBy) {
-//					String xKey = key.getColumnName();
-//					if(xKey.split("\\.").length == 1){
-//						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
-//					}
-//				}
-//				if(flagGroupBy) {
-//					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
-//				} else {
-//					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
-//				}
-//			}
-//			
-//			if(this.having!=null) {
-//				result = new HavingIterator(result, this.having, this.selectItems);
-//			}
+			if (this.groupBy != null) {
+				for(Column key : groupBy) {
+					String xKey = key.getColumnName();
+					if(xKey.split("\\.").length == 1){
+						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
+					}
+				}
+				if(flagGroupBy) {
+					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+				} else {
+					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
+				}
+			}
+			
+			if(this.having!=null) {
+				result = new HavingIterator(result, this.having, this.selectItems);
+			}
 		
 			
 			if(this.orderBy != null){
@@ -230,7 +230,7 @@ public class SelectWrapper
 		if(exp != null) {
 			Join join = new Join();
 			join.setOnExpression(exp);
-			if(!Config.isInMemory) {
+			if(Config.isInMemory) {
 				 result = new HashJoinIterator(leftIterator, rightIterator, join);
 			}  else {
 				 try {
