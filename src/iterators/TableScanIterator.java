@@ -36,23 +36,23 @@ public class TableScanIterator implements DefaultIterator {
 		this.tableName = tab.getName();
 		this.tab = tab;
 		if(DEBUG) {
-<<<<<<< HEAD
-//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
-<<<<<<< HEAD
+//<<<<<<< HEAD
+////			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
+//<<<<<<< HEAD
 			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".tbl";			
-//			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";;
-=======
-//			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
-			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".tbl";;
->>>>>>> ff21e83d7b08a5791265401d7ebbecfdb89c3e96
-=======
-			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
-//			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
+////			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";;
+//=======
+////			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
+//			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".tbl";;
+//>>>>>>> ff21e83d7b08a5791265401d7ebbecfdb89c3e96
+//=======
+//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
+////			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
 
 //			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";;
 //			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".tbl";
 
->>>>>>> d055e9d00d16c70de8e1b6691c6eee8aac9cdd0e
+//>>>>>>> d055e9d00d16c70de8e1b6691c6eee8aac9cdd0e
 		} else {
 			this.csvFile = "data/" + tableName + ".csv";		
 		}

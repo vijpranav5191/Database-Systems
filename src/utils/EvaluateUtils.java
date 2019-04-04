@@ -61,7 +61,7 @@ public class EvaluateUtils{
 	}
 	
 //	
-	public static PrimitiveValue evaluateExpression(Table table, Map<String, PrimitiveValue> scope, Expression where) throws Exception {
+	public static PrimitiveValue evaluateExpression( Map<String, PrimitiveValue> scope, Expression where) throws Exception {
 		Eval eval = new Eval() {
 			
 			public PrimitiveValue eval(Column col){

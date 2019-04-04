@@ -25,6 +25,8 @@ public class ProjectionIterator implements DefaultIterator{
 	DefaultIterator iterator;
 	List<String> columns;
 	Table primaryTable;
+	private boolean zeroAggflag;
+	private String catchfunc;
 	
 	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems, Table primaryTable, List<Column> groupBy) {
 		this.selectItems = selectItems;
@@ -59,13 +61,7 @@ public class ProjectionIterator implements DefaultIterator{
 							}
 							this.columns.add(name+"("+sb.toString()+")");
 						}
-<<<<<<< HEAD
-						this.columns.add(name+"("+sb.toString()+")");
-					}
-					else {
-						if(func.isAllColumns()) {
-							this.columns.add("COUNT(*)");
-=======
+
 						else {
 							if(func.isAllColumns()) {
 								this.columns.add("COUNT(*)");
@@ -74,7 +70,6 @@ public class ProjectionIterator implements DefaultIterator{
 									this.catchfunc = "COUNT(*)";
 								}
 							}
->>>>>>> d055e9d00d16c70de8e1b6691c6eee8aac9cdd0e
 						}
 					}
 					else {
@@ -174,8 +169,10 @@ public class ProjectionIterator implements DefaultIterator{
 									key = "COUNT(*)";
 								}
 							}
+							if(selectExpression.getAlias() != null) {
+								selectMap.put(selectExpression.getAlias(), map.get(key));
+							}
 							selectMap.put(key, map.get(key));
-
 						}
 					}
 				}

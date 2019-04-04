@@ -19,6 +19,7 @@ import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
 import iterators.groupByExternal;
+import iterators.newGroupBy;
 import iterators.orderExternalIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -76,7 +77,7 @@ public class SelectWrapper
 		this.having = this.plainselect.getHaving();
 
 		this.flagOrderBy = false;
-		this.flagGroupBy = Config.isInMemory;
+		this.flagGroupBy = true;
 		
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
 		
@@ -120,7 +121,6 @@ public class SelectWrapper
 				}
 			}
 			
-<<<<<<< HEAD
 			if (this.groupBy != null) {
 				for(Column key : groupBy) {
 					String xKey = key.getColumnName();
@@ -128,10 +128,10 @@ public class SelectWrapper
 					{
 						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
 					}
-					System.out.println(orderBy);
+//					System.out.println(orderBy);
 				}
 				if(flagGroupBy) {
-					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+					result = new newGroupBy(result, this.groupBy, (Table) fromItem, this.selectItems);
 				} else {
 					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
 				}
