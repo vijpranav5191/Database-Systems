@@ -103,7 +103,11 @@ public class ProjectionIterator implements DefaultIterator{
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		Map<String, PrimitiveValue> map = this.iterator.next();
 		
-
+		if(map == null && this.zeroAggflag) {
+			this.zeroAggflag = false;
+			map = new HashMap<>();	
+			map.put(this.catchfunc, new LongValue(0));
+		}
 		
 		if(map != null) { // hasNext() not working
 
