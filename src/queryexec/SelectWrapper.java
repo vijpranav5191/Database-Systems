@@ -144,64 +144,44 @@ public class SelectWrapper
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
 			}
-=======
-//			if (this.groupBy != null) {
-//				for(Column key : groupBy) {
-//					String xKey = key.getColumnName();
-//					if(xKey.split("\\.").length == 1){
-//						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
-//					}
-//				}
-//				if(flagGroupBy) {
-//					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
-//				} else {
-//					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
-//				}
-//			}
-//			
-//			if(this.having!=null) {
-//				result = new HavingIterator(result, this.having, this.selectItems);
-//			}
-		
->>>>>>> ff21e83d7b08a5791265401d7ebbecfdb89c3e96
-			
-			if(this.orderBy != null){
-//<<<<<<< HEAD
-				
-				
-				for(OrderByElement key : orderBy){
-					
-//=======
-////				System.out.println( this.orderBy );
-//				for(OrderByElement key : this.orderBy){
-//>>>>>>> ed9f9730ad20818fed9501b7d62937123514609e
-					String xKey = key.getExpression().toString();
-					
-					
-					if(xKey.split("\\.").length == 1){
-						Table defTable = (Table) fromItem;
-						Column cCol = new Column();
-						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName()))) {
-							cCol.setColumnName(xKey);
-							cCol.setTable(SchemaStructure.tableMap.getOrDefault(xKey, defTable));
-						} else {
-							cCol.setColumnName(xKey);
-							cCol.setTable(SchemaStructure.tableMap.getOrDefault(xKey, null));
-						}
-						key.setExpression(cCol);
-					}
 
-				}
-//<<<<<<< HEAD
-//				System.out.println(orderBy);
-//=======
-////System.out.println( this.orderBy );
-//>>>>>>> ed9f9730ad20818fed9501b7d62937123514609e
-				if(this.flagOrderBy == true)
-					result = new OrderByIterator(this.orderBy, result);				
-				else
-					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
-			}
+			
+//			if(this.orderBy != null){
+//				
+//				
+//				for(OrderByElement key : orderBy){
+//					
+////=======
+//////				System.out.println( this.orderBy );
+////				for(OrderByElement key : this.orderBy){
+////>>>>>>> ed9f9730ad20818fed9501b7d62937123514609e
+//					String xKey = key.getExpression().toString();
+//					
+//					
+//					if(xKey.split("\\.").length == 1){
+//						Table defTable = (Table) fromItem;
+//						Column cCol = new Column();
+//						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName()))) {
+//							cCol.setColumnName(xKey);
+//							cCol.setTable(SchemaStructure.tableMap.getOrDefault(xKey, defTable));
+//						} else {
+//							cCol.setColumnName(xKey);
+//							cCol.setTable(SchemaStructure.tableMap.getOrDefault(xKey, null));
+//						}
+//						key.setExpression(cCol);
+//					}
+//
+//				}
+////<<<<<<< HEAD
+////				System.out.println(orderBy);
+////=======
+//////System.out.println( this.orderBy );
+////>>>>>>> ed9f9730ad20818fed9501b7d62937123514609e
+//				if(this.flagOrderBy == true)
+//					result = new OrderByIterator(this.orderBy, result);				
+//				else
+//					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
+//			}
 			
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);

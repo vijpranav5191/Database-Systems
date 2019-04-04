@@ -16,7 +16,7 @@ public class orderIterator implements DefaultIterator {
 
 	private List<OrderByElement> orderBy;
 	DefaultIterator iterator;
-	Table primaryTable;	
+	Table primaryTable;
 	private Expression whereExp;
 //	PriorityQueue<DefaultIterator> pq;
 	List<Map<String, PrimitiveValue>> resultSet;
@@ -56,6 +56,10 @@ public class orderIterator implements DefaultIterator {
 //		resultSet = backTrack(lstObj, orderBy);
 //		//System.out.println(" results " + resultSet);
 //>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
+
+
+		resultSet = backTrack(lstObj,orderBy);	
+
 		index = 0;
 	}
 
@@ -102,8 +106,7 @@ public class orderIterator implements DefaultIterator {
 		else {
 			orderDesc = orderBy2.get(i).toString();
 		}
-		Map<String,PrimitiveValue> m = lstObj.get(0);
-//		System.out.println( m);
+
 		System.out.println(" asdas " + orderDesc + " " + orderBy2.get(i));
 		if ((String.valueOf(lstObj.get(0).get(orderDesc).getType())).equals("STRING")) {
 	        System.out.println(" IN STRING");
@@ -313,11 +316,7 @@ public class orderIterator implements DefaultIterator {
 	@Override
 	public DefaultIterator getChildIter() {
 		// TODO Auto-generated method stub
-//<<<<<<< HEAD
-//		return this.getColumns();
-//=======
 		return null;
-//>>>>>>> ac3a31650d160c9d78c8268effa116c648aa87cb
 	}
-
+	
 }

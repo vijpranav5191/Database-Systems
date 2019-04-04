@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -47,20 +48,37 @@ public class ProjectionIterator implements DefaultIterator{
 						this.columns.add(column.getColumnName());	
 					}
 				} else if((selectExpression.getExpression() instanceof Function)){
-					Function func = (Function) selectExpression.getExpression();
-					String name = func.getName();
-					if(func.getParameters()!=null) {
-						List<Expression> expList = func.getParameters().getExpressions();
-						StringBuilder sb = new StringBuilder();
-						for(Expression exp : expList) {
-							sb.append(exp.toString());
+					if(selectExpression.getAlias()==null){
+						Function func = (Function) selectExpression.getExpression();
+						String name = func.getName();
+						if(func.getParameters()!=null) {
+							List<Expression> expList = func.getParameters().getExpressions();
+							StringBuilder sb = new StringBuilder();
+							for(Expression exp : expList) {
+								sb.append(exp.toString());
+							}
+							this.columns.add(name+"("+sb.toString()+")");
 						}
+<<<<<<< HEAD
 						this.columns.add(name+"("+sb.toString()+")");
 					}
 					else {
 						if(func.isAllColumns()) {
 							this.columns.add("COUNT(*)");
+=======
+						else {
+							if(func.isAllColumns()) {
+								this.columns.add("COUNT(*)");
+								if(!this.iterator.hasNext()) {
+									this.zeroAggflag = true;
+									this.catchfunc = "COUNT(*)";
+								}
+							}
+>>>>>>> d055e9d00d16c70de8e1b6691c6eee8aac9cdd0e
 						}
+					}
+					else {
+						this.columns.add(selectExpression.getAlias());
 					}
 				}
 				else {
@@ -127,7 +145,14 @@ public class ProjectionIterator implements DefaultIterator{
 							try {
 								this.iterator.reset();
 								DefaultIterator iter = new SimpleAggregateIterator(this.iterator, func);
-								selectMap.putAll(iter.next());	
+								selectMap.putAll(iter.next());
+								if(selectExpression.getAlias()!=null) {
+									Set<String> keys  = selectMap.keySet();
+									for (String string : keys) {
+										selectMap.put(selectExpression.getAlias(), selectMap.remove(string));
+									}
+								}
+	
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -150,6 +175,7 @@ public class ProjectionIterator implements DefaultIterator{
 								}
 							}
 							selectMap.put(key, map.get(key));
+
 						}
 					}
 				}

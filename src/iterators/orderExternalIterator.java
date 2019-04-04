@@ -34,6 +34,7 @@ public class orderExternalIterator implements DefaultIterator {
 	private List<SelectItem> column;
 	private List<PrimitiveValue> pmValues;
 	String str;
+	
 	public orderExternalIterator(DefaultIterator iterator, List<OrderByElement> orderBy, Table primaryTable , List<SelectItem> column) throws Exception 
 	{
 		// TODO Auto-generated constructor stub
@@ -76,8 +77,17 @@ public class orderExternalIterator implements DefaultIterator {
 //			System.out.println(primaryTable);
 //			List<ColumnDefs> cdef = SchemaStructure.schema.get(String.valueOf(primaryTable));
 //			System.out.println(cdef);
-			List<Map<String, PrimitiveValue>> result = new orderIterator().backTrack(batch, orderBy);
+			
+			OrderByIterator orderList = new OrderByIterator( orderBy , iterator);
+			
+			List<Map<String, PrimitiveValue>> result = new ArrayList<Map<String,PrimitiveValue>>();
+			while(orderList.hasNext())
+			{
+				result.add(orderList.next());
+			}
 			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
+			
+//			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 //			System.out.println("here"); 
 			File filename = new File(this.str = "F:\\ff\\level"+level+"_file"+filenumber+".dat");
 			queue.add(filename);

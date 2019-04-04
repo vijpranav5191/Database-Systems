@@ -15,6 +15,7 @@ import java.util.Queue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -76,16 +77,32 @@ public class groupByExternal implements DefaultIterator {
 		while(iterator.hasNext())
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-			for(int i=0;i<5 && iterator.hasNext();i++)
+
+
+			for(int i=0;i<Config.blockSize && iterator.hasNext();i++)
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
 				mapValue = obj;
 				batch.add(obj);
 			}
-			List<Map<String, PrimitiveValue>> result = new orderIterator().backTrack(batch, ordElem);
-			System.out.println(result);
+//			Iterator<Map<String, PrimitiveValue>> itr = batch.iterator();
+			OrderByIterator orderList = new OrderByIterator(ordElem, iterator);
+			
+			List<Map<String, PrimitiveValue>> result = new ArrayList<Map<String,PrimitiveValue>>();
+			while(orderList.hasNext())
+			{
+				result.add(orderList.next());
+			}
 			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 			File filename = new File("F:\\ff2\\level"+level+"_file"+filenumber+".dat");
+//=======
+//
+//			List<List<Map<String, PrimitiveValue>>> result = new GroupByIterator().backTrack(batch, groupBy);
+//			System.out.println(result);
+//			Iterator<List<Map<String, PrimitiveValue>>> itr = result.iterator();
+////			System.out.println("here"); 
+//			File filename = new File("D:\\temp\\"+level+"_file"+filenumber+".dat");
+//>>>>>>> d055e9d00d16c70de8e1b6691c6eee8aac9cdd0e
 			queue.add(filename);
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
 			while( itr.hasNext() )
