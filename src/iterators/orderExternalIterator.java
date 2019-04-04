@@ -67,7 +67,7 @@ public class orderExternalIterator implements DefaultIterator {
 		while(iterator.hasNext())
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-			for(int i=0;i< Config.blockSize && iterator.hasNext();i++)
+			for(int i=0;i< 2 && iterator.hasNext();i++)
 			{
 				
 				Map<String,PrimitiveValue> obj = iterator.next();
