@@ -24,9 +24,9 @@ public class ProjectionIterator implements DefaultIterator{
 	private List<Column> groupBy;
 	DefaultIterator iterator;
 	List<String> columns;
+	Table primaryTable;
 	private boolean zeroAggflag;
 	private String catchfunc;
-	Table primaryTable;
 	
 	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems, Table primaryTable, List<Column> groupBy) {
 		this.selectItems = selectItems;
@@ -34,7 +34,6 @@ public class ProjectionIterator implements DefaultIterator{
 		this.columns = new ArrayList<String>();
 		this.primaryTable = primaryTable;
 		this.groupBy = groupBy;
-		this.zeroAggflag = false;
 		
 		for(int index = 0; index < this.selectItems.size();index++) {
 			SelectItem selectItem = this.selectItems.get(index);
@@ -62,6 +61,7 @@ public class ProjectionIterator implements DefaultIterator{
 							}
 							this.columns.add(name+"("+sb.toString()+")");
 						}
+
 						else {
 							if(func.isAllColumns()) {
 								this.columns.add("COUNT(*)");
@@ -78,7 +78,6 @@ public class ProjectionIterator implements DefaultIterator{
 				}
 				else {
 					this.columns.add(selectExpression.getAlias());
-					
 				}
 			} else if(selectItem instanceof AllTableColumns){
 				AllTableColumns allTableColumns = (AllTableColumns) selectItem;
@@ -96,9 +95,6 @@ public class ProjectionIterator implements DefaultIterator{
 	
 	@Override
 	public boolean hasNext() {
-		if(this.zeroAggflag) {
-			return true;
-		}
 		return this.iterator.hasNext();
 	}
 
@@ -109,7 +105,7 @@ public class ProjectionIterator implements DefaultIterator{
 		
 		if(map == null && this.zeroAggflag) {
 			this.zeroAggflag = false;
-			map = new HashMap<>();
+			map = new HashMap<>();	
 			map.put(this.catchfunc, new LongValue(0));
 		}
 		
@@ -160,7 +156,7 @@ public class ProjectionIterator implements DefaultIterator{
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-						} else {
+						}else {
 							String name = func.getName();
 							String key= null;
 							List<Expression> expList = new ArrayList<>();
@@ -181,17 +177,6 @@ public class ProjectionIterator implements DefaultIterator{
 								selectMap.put(selectExpression.getAlias(), map.get(key));
 							}
 							selectMap.put(key, map.get(key));
-
-						}
-
-					}
-					else {
-						try {
-							Expression exp = selectExpression.getExpression();
-							selectMap.put(selectExpression.getAlias(), EvaluateUtils.evaluateExpression(map, exp));
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
 						}
 					}
 				}
@@ -214,6 +199,6 @@ public class ProjectionIterator implements DefaultIterator{
 	@Override
 	public DefaultIterator getChildIter() {
 		// TODO Auto-generated method stub
-		return this.iterator;
+		return null;
 	}
 }

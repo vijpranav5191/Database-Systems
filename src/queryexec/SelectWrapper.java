@@ -49,8 +49,6 @@ public class SelectWrapper
 	private List<Column> groupBy;
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
-	private boolean flagOrderBy;
-	private boolean flagGroupBy;
 
 	private List<SelectItem> columns;
 	private List<String> table;
@@ -73,11 +71,7 @@ public class SelectWrapper
 		this.groupBy = this.plainselect.getGroupByColumnReferences();
 		this.orderBy = this.plainselect.getOrderByElements();
 		this.limit = this.plainselect.getLimit();
-		this.having = this.plainselect.getHaving();
-
-		this.flagOrderBy = Config.isInMemory;
-		this.flagGroupBy = true;
-		
+		this.having = this.plainselect.getHaving();	
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
 		
 //		Expression exp = Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable), SchemaStructure.schema.get(leftTable), SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
@@ -127,8 +121,8 @@ public class SelectWrapper
 						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
 					}
 				}
-				if(flagGroupBy) {
-					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
+				if(Config.isInMemory) {
+					//result = new newGroupBy(result, this.groupBy, (Table) fromItem, this.selectItems);
 				} else {
 					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
 				}
@@ -140,7 +134,6 @@ public class SelectWrapper
 		
 			
 			if(this.orderBy != null){
-//				System.out.println( this.orderBy );
 				for(OrderByElement key : this.orderBy){
 					String xKey = key.getExpression().toString();
 					if(xKey.split("\\.").length == 1){
@@ -154,14 +147,17 @@ public class SelectWrapper
 							cCol.setTable(SchemaStructure.tableMap.getOrDefault(xKey, null));
 						}
 						key.setExpression(cCol);
+						if(Config.isInMemory) {
+							result = new OrderByIterator(this.orderBy, result);
+						} else {
+							result = new orderExternalIterator(result, this.orderBy, (Table) fromItem , this.selectItems);
+						}
 					}
-
 				}
-
-				if(this.flagOrderBy == true)
-					result = new OrderByIterator(this.orderBy, result);				
-				else
-					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
+			}
+			
+			if(this.having!=null) {
+				result = new HavingIterator(result, this.having, this.selectItems);
 			}
 			
 			if(this.selectItems != null ) {
@@ -171,7 +167,6 @@ public class SelectWrapper
 			if(this.limit != null) {
 				result = new LimitIterator(result, this.limit);
 			}
-
 
 			ResultIterator res = new ResultIterator(result);
 			while(res.hasNext()) {

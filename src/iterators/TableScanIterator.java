@@ -39,7 +39,6 @@ public class TableScanIterator implements DefaultIterator {
 //			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
 //			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
 			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
-
 		} else {
 			this.csvFile = "data/" + tableName + ".csv";		
 		}
@@ -62,8 +61,6 @@ public class TableScanIterator implements DefaultIterator {
 		if(DEBUG) {
 			if(isOrderBy)
 				this.csvFile = String.valueOf(fileName);		
-//			else 
-//				this.csvFile = "C:\\Users\\ayush\\git\\JsqlParser-PA2\\data\\" + tableName.toLowerCase() + ".dat";
 		} else {
 			if(isOrderBy == true)
 				this.csvFile = String.valueOf(fileName);
@@ -102,9 +99,7 @@ public class TableScanIterator implements DefaultIterator {
 				e.printStackTrace();
 			}
 			map = new HashMap<String, PrimitiveValue>();
-//			System.out.println(map);
 			String[] row = tuple.split("\\|");
-//			System.out.println(row[0] + row[1]);
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			for(int j = 0;j < row.length; j++) {
 				ColumnDefs cdef = cdefs.get(j);

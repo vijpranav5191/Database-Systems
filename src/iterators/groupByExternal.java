@@ -15,6 +15,7 @@ import java.util.Queue;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -34,12 +35,22 @@ public class groupByExternal implements DefaultIterator {
 	private List<PrimitiveValue> pmValues;
 	String str;
 	
-	public groupByExternal(DefaultIterator iterator,List<Column> groupBy , Table primaryTable , List<SelectItem> selectItems) throws IOException {
+	public groupByExternal(DefaultIterator iterator,List<Column> groupBy , Table primaryTable , List<SelectItem> selectItems) throws Exception {
 		// TODO Auto-generated constructor stub
 		this.iterator = iterator;
 		this.groupBy = groupBy;
 		this.primaryTable = primaryTable;
 		this.selectItems = selectItems;
+		
+		List<OrderByElement> ordElem =  new ArrayList<OrderByElement>();
+		for(Column col : groupBy)
+		{
+			OrderByElement ord = new OrderByElement();
+			ord.setExpression(col);
+			
+			ordElem.add( ord);
+			
+		}
 		
 //		System.out.println( " columnValue " + column);
 		int level = 0;
@@ -67,38 +78,45 @@ public class groupByExternal implements DefaultIterator {
 		{
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
 
-			for(int i=0;i<Config.blockSize && iterator.hasNext();i++)
 
+			for(int i=0;i<Config.blockSize && iterator.hasNext();i++)
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
 				mapValue = obj;
 				batch.add(obj);
 			}
-
-			List<List<Map<String, PrimitiveValue>>> result = new GroupByIterator().backTrack(batch, groupBy);
-			System.out.println(result);
-			Iterator<List<Map<String, PrimitiveValue>>> itr = result.iterator();
-//			System.out.println("here"); 
-			File filename = new File("D:\\temp\\"+level+"_file"+filenumber+".dat");
+//			Iterator<Map<String, PrimitiveValue>> itr = batch.iterator();
+			OrderByIterator orderList = new OrderByIterator(ordElem, iterator);
+			
+			List<Map<String, PrimitiveValue>> result = new ArrayList<Map<String,PrimitiveValue>>();
+			while(orderList.hasNext())
+			{
+				result.add(orderList.next());
+			}
+			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
+			File filename = new File("F:\\ff2\\level"+level+"_file"+filenumber+".dat");
+//=======
+//
+//			List<List<Map<String, PrimitiveValue>>> result = new GroupByIterator().backTrack(batch, groupBy);
+//			System.out.println(result);
+//			Iterator<List<Map<String, PrimitiveValue>>> itr = result.iterator();
+////			System.out.println("here"); 
+//			File filename = new File("D:\\temp\\"+level+"_file"+filenumber+".dat");
+//>>>>>>> d055e9d00d16c70de8e1b6691c6eee8aac9cdd0e
 			queue.add(filename);
-//			System.out.println(filename); 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
 			while( itr.hasNext() )
 			{
-				List<Map<String,PrimitiveValue>> listMap = itr.next();
-				for(Map<String,PrimitiveValue> mp : listMap)
-				{
-					String writeInFile = "";
-						
-					for (String x : mp.keySet() )
+				Map<String,PrimitiveValue> listMap = itr.next();
+					String writeInFile = "";	
+					for (String x : itr.next().keySet() )
 					{
-						writeInFile += String.valueOf(mp.get(x))+"|"; 
+						writeInFile += x+"|"; 
 					}
-					System.out.println( " writeFile " +  writeInFile );
+//					System.out.println( " writeFile " +  writeInFile );
 					String writeInFile1 = writeInFile.substring(0, writeInFile.length()-1);
 					writer.write(writeInFile1);
 					writer.newLine();
-				}
 			}
 			filenumber++;
 			writer.close();
@@ -113,8 +131,8 @@ public class groupByExternal implements DefaultIterator {
 			File two = queue.poll();
 			itr2 = new fileIterator(two , pmValues , colmnValues);
 			
-			this.str = "D:\\temp"+level+"_file"+filenumber+".dat";
-			File newF = new File("D:\\\\temp"+level+"_file"+filenumber+".dat");
+			this.str = "F:\\ff2\\level"+level+"_file"+filenumber+".dat";
+			File newF = new File("F:\\ff2\\level"+level+"_file"+filenumber+".dat");
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newF));   
 			filenumber++;

@@ -9,6 +9,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 
 public class EvaluateUtils{
  
@@ -58,18 +59,17 @@ public class EvaluateUtils{
 		};
 		return eval.eval(where).toBool();
 	}
-
 	
-	
-	public static PrimitiveValue evaluateExpression(Map<String, PrimitiveValue> scope, Expression where) throws Exception {
+//	
+	public static PrimitiveValue evaluateExpression( Map<String, PrimitiveValue> scope, Expression where) throws Exception {
 		Eval eval = new Eval() {
+			
 			public PrimitiveValue eval(Column col){
 				String name = col.getColumnName();
-				if(col.getTable() != null && col.getTable().getName() != null)
-				{
+				if(col.getTable() != null && col.getTable().getName() != null){
 			        name = col.getTable().getName() + "." + col.getColumnName();
 			        return scope.get(name);
-			    } 
+			    }
 				else {
 			    	for(String key: scope.keySet()) {
 			    		if(key.split("\\.")[1].equals(name)) {
@@ -79,26 +79,10 @@ public class EvaluateUtils{
 				}
 				return scope.get(name);
 			}
+			
 		};
 		return eval.eval(where);
 	}
-	
-//	
-//	public static PrimitiveValue evaluateExpression1(Table table, Map<String, PrimitiveValue> scope, Expression where) throws Exception {
-//		Eval eval = new Eval() {
-//			
-//			public PrimitiveValue eval(Column col){
-//				String name = col.getColumnName();
-//				if(col.getTable() != null && col.getTable().getName() != null){
-//			        name = col.getTable().getName() + "." + col.getColumnName();
-//			        return scope.get(name);
-//			    }j
-//				return scope.get(name);
-//			}
-//			
-//		};
-//		return eval.eval(where);
-//	}
 	
 	
 }

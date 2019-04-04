@@ -2,10 +2,14 @@ package utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import iterators.DefaultIterator;
+import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
@@ -36,10 +40,8 @@ public class Optimzer {
 				{
 					for(ColumnDefs cd : cdefs)	
 					{
-//						System.out.println(" cd "+cd.cdef.getColumnName());
 						if(  part.split("\\.")[1].equals(cd.cdef.getColumnName()) )
 						{ 
-//							System.out.println(" inide asds ");
 							lst.add(expression);
 						}
 					}
@@ -102,6 +104,28 @@ public class Optimzer {
 		}
 		
 		return false;
+	}
+
+	public static PrimitiveValue evaluateExpression(Map<String, PrimitiveValue> scope, Expression where) throws Exception {
+		Eval eval = new Eval() {
+			public PrimitiveValue eval(Column col){
+				String name = col.getColumnName();
+				if(col.getTable() != null && col.getTable().getName() != null)
+				{
+			        name = col.getTable().getName() + "." + col.getColumnName();
+			        return scope.get(name);
+			    } 
+				else {
+			    	for(String key: scope.keySet()) {
+			    		if(key.split("\\.")[1].equals(name)) {
+			    			return scope.get(key);
+			    		}
+			    	}
+				}
+				return scope.get(name);
+			}
+		};
+		return eval.eval(where);
 	}
 	
 	
