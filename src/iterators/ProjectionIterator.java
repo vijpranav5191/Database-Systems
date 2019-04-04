@@ -109,7 +109,7 @@ public class ProjectionIterator implements DefaultIterator{
 		
 		if(map == null && this.zeroAggflag) {
 			this.zeroAggflag = false;
-			map = new HashMap<>();
+			map = new HashMap<>();	
 			map.put(this.catchfunc, new LongValue(0));
 		}
 		
