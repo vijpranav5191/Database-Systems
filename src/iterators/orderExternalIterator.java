@@ -74,7 +74,7 @@ public class orderExternalIterator implements DefaultIterator {
 				mapValue = obj;
 				batch.add(obj);
 			}
-//			System.out.println(primaryTable);
+//			System.out.println(b);
 //			List<ColumnDefs> cdef = SchemaStructure.schema.get(String.valueOf(primaryTable));
 //			System.out.println(cdef);
 			
