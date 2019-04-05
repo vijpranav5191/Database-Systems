@@ -51,9 +51,6 @@ public class SelectWrapper
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
 
-	private List<SelectItem> columns;
-	private List<String> table;
-
 
 	private Limit limit;
 	private Expression having;
