@@ -24,6 +24,8 @@ public class OrderByIterator implements DefaultIterator{
 	final public int SortDESC = -1;
 	int outerPointer = 0; 
 	int innerPointer = 0;
+	
+	List<String> coulmnsForExternal;
 	Map<String, PrimitiveValue> nextResult;
 	
 	public ArrayList<ArrayList<Map<String, PrimitiveValue>>> sortedList; 
@@ -34,17 +36,30 @@ public class OrderByIterator implements DefaultIterator{
 		this.iterator = iterator;
 		this.sortedList = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
 		this.currentList = new ArrayList<Map<String, PrimitiveValue>>();
-		orderDataByElement();
-		this.nextResult = this.getNextIter();
-	}
-	
-	private void orderDataByElement() {
 		ArrayList<Map<String, PrimitiveValue>> list = new ArrayList<Map<String, PrimitiveValue>>();
 		while(this.iterator.hasNext()) {
 			list.add(this.iterator.next());
 		}
 		this.sortedList.add(list);
-		
+		orderDataByElement();
+		this.nextResult = this.getNextIter();
+	}
+	
+	public OrderByIterator(List<OrderByElement> orderbyelements, List<Map<String, PrimitiveValue>> iterator, List<String> coulmnsForExternal){
+		this.orderbyelements = orderbyelements;
+		this.coulmnsForExternal = coulmnsForExternal;
+		this.sortedList = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
+		this.currentList = new ArrayList<Map<String, PrimitiveValue>>();
+		ArrayList<Map<String, PrimitiveValue>> list = new ArrayList<Map<String, PrimitiveValue>>();
+		for(Map<String, PrimitiveValue> obj: iterator) {
+			list.add(obj);
+		}
+		this.sortedList.add(list);
+		orderDataByElement();
+		this.nextResult = this.getNextIter();
+	}
+	
+	private void orderDataByElement() {
 		for(OrderByElement orderByElement: this.orderbyelements) {
 			for(ArrayList<Map<String, PrimitiveValue>> x :this.sortedList) {
 				if(orderByElement.isAsc()) {
@@ -140,7 +155,10 @@ public class OrderByIterator implements DefaultIterator{
 
 	@Override
 	public List<String> getColumns() {
-		return this.iterator.getColumns();
+		if(this.iterator != null) {
+			return this.iterator.getColumns();
+		}
+		return coulmnsForExternal;
 	}
 
 	

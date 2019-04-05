@@ -1,13 +1,8 @@
 package queryexec;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
-
 import iterators.DefaultIterator;
-import iterators.GroupByIterator;
 import iterators.HavingIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
@@ -25,14 +20,11 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
@@ -152,11 +144,6 @@ public class SelectWrapper
 				} else {
 					result = new orderExternalIterator(result, this.orderBy, (Table) fromItem , this.selectItems);
 				}
-			}
-
-
-			if(this.having!=null) {
-				result = new HavingIterator(result, this.having, this.selectItems);
 			}
 
 			if(this.selectItems != null ) {
