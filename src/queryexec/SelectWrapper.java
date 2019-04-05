@@ -50,8 +50,6 @@ public class SelectWrapper
 	private List<Column> groupBy;
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
-	private boolean flagOrderBy;
-	private boolean flagGroupBy;
 
 	private List<SelectItem> columns;
 	private List<String> table;
@@ -74,30 +72,26 @@ public class SelectWrapper
 		this.groupBy = this.plainselect.getGroupByColumnReferences();
 		this.orderBy = this.plainselect.getOrderByElements();
 		this.limit = this.plainselect.getLimit();
-		this.having = this.plainselect.getHaving();
-
-		this.flagOrderBy = false;
-		this.flagGroupBy = true;
-		
+		this.having = this.plainselect.getHaving();	
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
-		
-//		Expression exp = Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable), SchemaStructure.schema.get(leftTable), SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
-//		System.out.print(exp);
-//		
-//		List<Expression> temp = Optimzer.getExpressionForSelectionPredicate(SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
-//		System.out.print(temp);
 
-		
+		//		Expression exp = Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable), SchemaStructure.schema.get(leftTable), SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
+		//		System.out.print(exp);
+		//		
+		//		List<Expression> temp = Optimzer.getExpressionForSelectionPredicate(SchemaStructure.tableMap.get(rightTable), SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
+		//		System.out.print(temp);
+
+
 		if(fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
 			iter = pushDownSelectPredicate(table, iter);
 		}
-		
+
 		DefaultIterator result = iter;
 
 		while(result.hasNext()) {
-			
+
 			if((this.joins = this.plainselect.getJoins()) != null){
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
@@ -107,12 +101,12 @@ public class SelectWrapper
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
 						List<String> leftColumns = result.getColumns();
 						List<String> rightColumns = iter2.getColumns();
-						
+
 						result = pushDownJoinPredicate(leftColumns, rightColumns, result, iter2, join);
 					}
 				}
 			}
-			
+
 			if (this.whereExp != null) {
 				List<Expression> tempExp = SchemaStructure.whrexpressions;
 				if(tempExp != null && tempExp.size() > 0) {
@@ -120,25 +114,27 @@ public class SelectWrapper
 					result = new SelectionIterator(result, exp);
 				}
 			}
-			
+
 			if (this.groupBy != null) {
 				for(Column key : groupBy) {
 					String xKey = key.getColumnName();
-					if(xKey.split("\\.").length == 1)
-					{
+					if(key.getTable() == null){
 						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
 					}
-//					System.out.println(orderBy);
 				}
-				if(flagGroupBy) {
+				if(Config.isInMemory) {
 					result = new newGroupBy(result, this.groupBy, (Table) fromItem, this.selectItems);
 				} else {
 					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
 				}
 			}
-			
+
+			if(this.having!=null) {
+				result = new HavingIterator(result, this.having, this.selectItems);
+			}
+
+
 			if(this.orderBy != null){
-//				System.out.println( this.orderBy );
 				for(OrderByElement key : this.orderBy){
 					String xKey = key.getExpression().toString();
 					if(xKey.split("\\.").length == 1){
@@ -153,23 +149,18 @@ public class SelectWrapper
 						}
 						key.setExpression(cCol);
 					}
-
 				}
+				if(Config.isInMemory) {
+					result = new OrderByIterator(this.orderBy, result);
+				} else {
+					result = new orderExternalIterator(result, this.orderBy, (Table) fromItem , this.selectItems);
+				}
+			}
 
-				if(this.flagOrderBy == true)
-					result = new OrderByIterator(this.orderBy, result);				
-				else
-					result = new orderExternalIterator(result,this.orderBy, (Table) fromItem , this.selectItems);
-			}
-			
-			if(this.having!=null) {
-				result = new HavingIterator(result, this.having, this.selectItems);
-			}
-			
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
 			}
-			
+
 			if(this.limit != null) {
 				result = new LimitIterator(result, this.limit);
 			}
@@ -201,7 +192,7 @@ public class SelectWrapper
 		}
 		return null;
 	}
-	
+
 	public List<Expression> splitAndClauses(Expression e){
 		List<Expression> ret = new ArrayList<>();
 		if(e instanceof AndExpression){
@@ -213,7 +204,7 @@ public class SelectWrapper
 		}
 		return null;
 	} 
-	
+
 	public DefaultIterator pushDownSelectPredicate(Table table, DefaultIterator iter) {
 		List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table, SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
 		if(tempExp != null && tempExp.size() > 0) {
@@ -222,19 +213,19 @@ public class SelectWrapper
 		}
 		return iter;
 	}
-	
+
 	public DefaultIterator pushDownJoinPredicate(List<String> leftColumns, List<String> rightColumns, 
-												 DefaultIterator leftIterator, DefaultIterator rightIterator, Join joinDefault) {
-		
+			DefaultIterator leftIterator, DefaultIterator rightIterator, Join joinDefault) {
+
 		DefaultIterator result = null;
 		Expression exp = Optimzer.getExpressionForJoinPredicate(leftColumns, rightColumns, SchemaStructure.whrexpressions);
 		if(exp != null) {
 			Join join = new Join();
 			join.setOnExpression(exp);
 			if(Config.isInMemory) {
-				 result = new HashJoinIterator(leftIterator, rightIterator, join);
+				result = new HashJoinIterator(leftIterator, rightIterator, join);
 			}  else {
-				 try {
+				try {
 					result = new SortMergeIterator(leftIterator, rightIterator, join);
 				} catch (Exception e) {
 					e.printStackTrace();

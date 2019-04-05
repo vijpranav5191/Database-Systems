@@ -36,23 +36,9 @@ public class TableScanIterator implements DefaultIterator {
 		this.tableName = tab.getName();
 		this.tab = tab;
 		if(DEBUG) {
-//<<<<<<< HEAD
-////			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
-//<<<<<<< HEAD
-			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".tbl";			
-////			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";;
-//=======
-////			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
-//			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".tbl";;
-//>>>>>>> ff21e83d7b08a5791265401d7ebbecfdb89c3e96
-//=======
 //			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
-////			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
-
-//			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";;
-//			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".tbl";
-
-//>>>>>>> d055e9d00d16c70de8e1b6691c6eee8aac9cdd0e
+			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
+//			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
 		} else {
 			this.csvFile = "data/" + tableName + ".csv";		
 		}
@@ -75,8 +61,6 @@ public class TableScanIterator implements DefaultIterator {
 		if(DEBUG) {
 			if(isOrderBy)
 				this.csvFile = String.valueOf(fileName);		
-//			else 
-//				this.csvFile = "C:\\Users\\ayush\\git\\JsqlParser-PA2\\data\\" + tableName.toLowerCase() + ".dat";
 		} else {
 			if(isOrderBy == true)
 				this.csvFile = String.valueOf(fileName);
@@ -115,9 +99,7 @@ public class TableScanIterator implements DefaultIterator {
 				e.printStackTrace();
 			}
 			map = new HashMap<String, PrimitiveValue>();
-//			System.out.println(map);
 			String[] row = tuple.split("\\|");
-//			System.out.println(row[0] + row[1]);
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			for(int j = 0;j < row.length; j++) {
 				ColumnDefs cdef = cdefs.get(j);

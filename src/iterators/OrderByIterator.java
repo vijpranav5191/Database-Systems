@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import iterators.DefaultIterator;
+import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -46,9 +48,19 @@ public class OrderByIterator implements DefaultIterator{
 		for(OrderByElement orderByElement: this.orderbyelements) {
 			for(ArrayList<Map<String, PrimitiveValue>> x :this.sortedList) {
 				if(orderByElement.isAsc()) {
-					this.sortByCol(x, 1, orderByElement.getExpression().toString());
+					Column col= (Column) orderByElement.getExpression();
+					if(col.getTable() != null) {
+						this.sortByCol(x, -1, col.toString());	
+					} else {
+						this.sortByCol(x, -1, col.getColumnName());		
+					}
 				} else {
-					this.sortByCol(x, -1, orderByElement.getExpression().toString());	
+					Column col= (Column) orderByElement.getExpression();
+					if(col.getTable() != null) {
+						this.sortByCol(x, -1, col.toString());	
+					} else {
+						this.sortByCol(x, -1, col.getColumnName());		
+					}
 				}
 			}
 			this.sortedList = disIntegrateList(orderByElement);
@@ -56,7 +68,13 @@ public class OrderByIterator implements DefaultIterator{
 	}
 
 	private ArrayList<ArrayList<Map<String, PrimitiveValue>>> disIntegrateList(OrderByElement orderByElement) {
-		String byKey = orderByElement.getExpression().toString();
+		String byKey = null;
+		Column col= (Column) orderByElement.getExpression();
+		if(col.getTable() != null) {
+			byKey = col.toString();	
+		} else {
+			byKey = col.getColumnName();		
+		}
 		ArrayList<ArrayList<Map<String, PrimitiveValue>>> temp = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
 		
 		for(ArrayList<Map<String, PrimitiveValue>> list: this.sortedList) {
@@ -155,10 +173,20 @@ public class OrderByIterator implements DefaultIterator{
 				scope.put(table.getName() + ".B", bValue);
 				
 				try {
-					if(EvaluateUtils.evaluate(scope, gtt)) {
-						value = 10;
-					} else {
-						value = -10;
+					if(aValue instanceof StringValue) {
+						return aValue.toString().compareTo(bValue.toString()) * sortDirection;
+					} else if(aValue instanceof DoubleValue){
+						if(aValue.toDouble() > bValue.toDouble()) {
+							return 10 * sortDirection;
+						} else {
+							return -10 * sortDirection;	
+						}
+					}else {
+						if(EvaluateUtils.evaluate(scope, gtt)) {
+							value = 10;
+						} else {
+							value = -10;
+						}
 					}
 				} catch (Exception e) {
 					// TODO Auto-generated catch block

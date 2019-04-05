@@ -144,11 +144,12 @@ public class ProjectionIterator implements DefaultIterator{
 							try {
 								this.iterator.reset();
 								DefaultIterator iter = new SimpleAggregateIterator(this.iterator, func);
-								selectMap.putAll(iter.next());
+								Map<String, PrimitiveValue> temp = iter.next();
+								selectMap.putAll(temp);
 								if(selectExpression.getAlias()!=null) {
-									Set<String> keys  = selectMap.keySet();
+									Set<String> keys  = temp.keySet();
 									for (String string : keys) {
-										selectMap.put(selectExpression.getAlias(), selectMap.remove(string));
+										selectMap.put(selectExpression.getAlias(), selectMap.get(string));
 									}
 								}
 	
