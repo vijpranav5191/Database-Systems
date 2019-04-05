@@ -157,11 +157,6 @@ public class SelectWrapper
 				}
 			}
 
-
-			if(this.having!=null) {
-				result = new HavingIterator(result, this.having, this.selectItems);
-			}
-
 			if(this.selectItems != null ) {
 				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
 			}
