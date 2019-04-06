@@ -61,7 +61,6 @@ public class newGroupBy implements DefaultIterator{
 //		}
 		arrayList = new ArrayList<Set<Map<String,PrimitiveValue>>>();
 		
-		System.out.println( "CHANGES"  );
 //		this.resultSet = getArrayList( lstObj , ordElem );
 		this.resultSet = getArrayList(lstObj,ordElem);
 		
