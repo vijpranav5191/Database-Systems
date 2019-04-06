@@ -23,7 +23,7 @@ public class CreateWrapper {
 			ColumnDefs c = new ColumnDefs();
 			c.cdef = cd;
 			cdfList.add(c);
-			SchemaStructure.tableMap.put(cd.getColumnName(), tbal);		
+			SchemaStructure.columnTableMap.put(cd.getColumnName(), tbal);		
 		}
 		SchemaStructure.schema.put(tbal.getName(), cdfList);
 		SchemaStructure.tableMap.put(tbal.getName(), tbal);

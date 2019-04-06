@@ -27,17 +27,17 @@ public class ProjectionIterator implements DefaultIterator{
 	Table primaryTable;
 	private boolean zeroAggflag;
 	private String catchfunc;
-	
+
 	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems, Table primaryTable, List<Column> groupBy) {
 		this.selectItems = selectItems;
 		this.iterator = iterator;
 		this.columns = new ArrayList<String>();
 		this.primaryTable = primaryTable;
 		this.groupBy = groupBy;
-		
+
 		for(int index = 0; index < this.selectItems.size();index++) {
 			SelectItem selectItem = this.selectItems.get(index);
-			
+
 			if(selectItem instanceof SelectExpressionItem) {
 				SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
 				if(selectExpression.getExpression() instanceof Column) {
@@ -92,7 +92,7 @@ public class ProjectionIterator implements DefaultIterator{
 			}	
 		}
 	}
-	
+
 	@Override
 	public boolean hasNext() {
 		return this.iterator.hasNext();
@@ -102,18 +102,18 @@ public class ProjectionIterator implements DefaultIterator{
 	public Map<String, PrimitiveValue> next() {
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		Map<String, PrimitiveValue> map = this.iterator.next();
-		
+
 		if(map == null && this.zeroAggflag) {
 			this.zeroAggflag = false;
 			map = new HashMap<>();	
 			map.put(this.catchfunc, new LongValue(0));
 		}
-		
+
 		if(map != null) { // hasNext() not working
 
 			for(int index = 0; index < this.selectItems.size();index++) {
 				SelectItem selectItem = this.selectItems.get(index);
-				
+
 				if(selectItem instanceof AllTableColumns) {
 					AllTableColumns allTableColumns = (AllTableColumns) selectItem;
 					allTableColumns.getTable();
@@ -127,12 +127,21 @@ public class ProjectionIterator implements DefaultIterator{
 						Column column = (Column) selectExpression.getExpression();
 						if(column.getTable().getName() != null && column.getColumnName() != null) {
 							selectMap.put(column.getTable().getName() + "." + column.getColumnName(), map.get(column.getTable().getName() + "." + column.getColumnName()));
+							if(selectExpression.getAlias() != null) {
+								selectMap.put(selectExpression.getAlias(), map.get(column.getTable().getName() + "." + column.getColumnName()));	
+							}
 						} else if(column.getTable().getAlias() != null && column.getColumnName() != null) {
 							selectMap.put(column.getTable().getAlias() + "." + column.getColumnName(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
+							if(selectExpression.getAlias() != null) {
+								selectMap.put(selectExpression.getAlias(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
+							}
 						} else if(column.getTable().getAlias() == null && column.getTable().getName() == null){
 							for(String key: map.keySet()) {
 								if(key.split("\\.")[1].equals(column.getColumnName())) {
 									selectMap.put(key.split("\\.")[1], map.get(key));					
+									if(selectExpression.getAlias() != null) {
+										selectMap.put(selectExpression.getAlias(), map.get(key));					
+									}
 									break;
 								}
 							}
@@ -152,7 +161,7 @@ public class ProjectionIterator implements DefaultIterator{
 										selectMap.put(selectExpression.getAlias(), selectMap.get(string));
 									}
 								}
-	
+
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -178,6 +187,18 @@ public class ProjectionIterator implements DefaultIterator{
 								selectMap.put(selectExpression.getAlias(), map.get(key));
 							}
 							selectMap.put(key, map.get(key));
+						}
+					} else {
+						try {
+							Expression exp = selectExpression.getExpression();
+							if(selectExpression.getAlias() != null) {
+								selectMap.put(selectExpression.getAlias(), EvaluateUtils.evaluateExpression(map, exp));
+								selectMap.put(exp.toString(), EvaluateUtils.evaluateExpression(map, exp));	
+							} else {
+								selectMap.put(exp.toString(), EvaluateUtils.evaluateExpression(map, exp));	
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
 						}
 					}
 				}

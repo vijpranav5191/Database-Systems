@@ -66,15 +66,17 @@ public class OrderByIterator implements DefaultIterator{
 				if(orderByElement.isAsc()) {
 					Column col= (Column) orderByElement.getExpression();
 					if(col.getTable() != null) {
-						this.sortByCol(x, 1, col.toString());	
+
+						this.sortByCol(x, SortASC, col.toString());	
 					} else {
+						this.sortByCol(x, SortASC, col.getColumnName());		
 					}
 				} else {
 					Column col= (Column) orderByElement.getExpression();
 					if(col.getTable() != null) {
-						this.sortByCol(x, -1, col.toString());	
+						this.sortByCol(x, SortDESC, col.toString());	
 					} else {
-						this.sortByCol(x, -1, col.getColumnName());		
+						this.sortByCol(x, SortDESC, col.getColumnName());		
 					}
 				}
 			}
