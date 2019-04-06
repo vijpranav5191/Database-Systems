@@ -108,7 +108,7 @@ public class SelectWrapper
 				for(Column key : groupBy) {
 					String xKey = key.getColumnName();
 					if(key.getTable() == null){
-						key.setTable(SchemaStructure.tableMap.getOrDefault(xKey, (Table) fromItem));
+						key.setTable(SchemaStructure.columnTableMap.getOrDefault(xKey, (Table) fromItem));
 					}
 				}
 				if(Config.isInMemory) {
@@ -121,7 +121,10 @@ public class SelectWrapper
 			if(this.having!=null) {
 				result = new HavingIterator(result, this.having, this.selectItems);
 			}
-
+			
+			if(this.selectItems != null ) {
+				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
+			}
 
 			if(this.orderBy != null){
 				for(OrderByElement key : this.orderBy){
@@ -129,12 +132,13 @@ public class SelectWrapper
 					if(xKey.split("\\.").length == 1){
 						Table defTable = (Table) fromItem;
 						Column cCol = new Column();
-						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName()))) {
+						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName())) || SchemaStructure.columnTableMap.containsKey(xKey)) {
 							cCol.setColumnName(xKey);
-							cCol.setTable(SchemaStructure.tableMap.getOrDefault(xKey, defTable));
+							cCol.setTable(SchemaStructure.columnTableMap.getOrDefault(xKey, defTable));
 						} else {
+							// case for alias
 							cCol.setColumnName(xKey);
-							cCol.setTable(SchemaStructure.tableMap.getOrDefault(xKey, null));
+							cCol.setTable(SchemaStructure.columnTableMap.getOrDefault(xKey, null));
 						}
 						key.setExpression(cCol);
 					}
@@ -146,9 +150,6 @@ public class SelectWrapper
 				}
 			}
 
-			if(this.selectItems != null ) {
-				result = new ProjectionIterator(result, this.selectItems, (Table) fromItem , this.groupBy);
-			}
 
 			if(this.limit != null) {
 				result = new LimitIterator(result, this.limit);
