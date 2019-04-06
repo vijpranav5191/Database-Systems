@@ -8,53 +8,45 @@ import java.util.Map;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
+import utils.EvaluateUtils;
 
 public class SortMergeIterator implements DefaultIterator{
 	DefaultIterator leftIterator;
 	DefaultIterator rightIterator;
-
-	
 	Join join;
 	List<String> columns;
 	String leftExpression;
 	String rightExpression;
+	EqualsTo equalTo;
+	GreaterThan gtt;
+	Map<String, PrimitiveValue> nextResult;
+	
 	Map<String, PrimitiveValue> rightTuple;
 	Map<String, PrimitiveValue> leftTuple;
-	ArrayList<Map<String, PrimitiveValue>> leftTupleList;
+	ArrayList<Map<String, PrimitiveValue>> rightTupleList;
 	int index = 0;
 	
 	public SortMergeIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join) throws Exception {
 		this.join = join;
-		this.rightTuple = rightIterator.next(); 
-		
+		this.columns = new ArrayList<String>();
+		this.rightTupleList = new ArrayList<Map<String, PrimitiveValue>>();
+		this.equalTo = new EqualsTo(); 
+		this.gtt = new GreaterThan();
 		if(this.join.getOnExpression() instanceof EqualsTo) {
 			EqualsTo exp = (EqualsTo) this.join.getOnExpression();
 			this.leftExpression = exp.getLeftExpression().toString(); // need to check this approach
 			this.rightExpression = exp.getRightExpression().toString();
-			if(!this.rightTuple.containsKey(this.rightExpression)) {
+			if(!isContainingColumns(this.leftExpression, leftIterator.getColumns())) {
 				String temp = this.leftExpression;
 				this.leftExpression = this.rightExpression;
 				this.rightExpression = temp;
 			}
 		}
-		
-//		System.out.println(leftExpression);	
-//		while(leftIterator.hasNext()) {
-//			System.out.println(leftIterator.next());
-//		}
-//		
-//		System.out.println(rightExpression);	
-//		while(rightIterator.hasNext()) {
-//			System.out.println(rightIterator.next());
-//		}
-		
-		rightIterator.reset();
-		//leftIterator.reset();
-			
 		
 		// Left Iteration after sorting
 		OrderByElement leftOrderByElement = new OrderByElement();
@@ -65,6 +57,7 @@ public class SortMergeIterator implements DefaultIterator{
 		colLeft.setColumnName(this.leftExpression.split("\\.")[1]);
 		colLeft.setTable(tableLeft);
 		leftOrderByElement.setExpression(colLeft);
+		leftOrderByElement.setAsc(true);
 		
 		List<OrderByElement> listLeft = new ArrayList<OrderByElement>();
 		listLeft.add(leftOrderByElement);	
@@ -79,44 +72,89 @@ public class SortMergeIterator implements DefaultIterator{
 		colRight.setColumnName(this.rightExpression.split("\\.")[1]);
 		colRight.setTable(tableRight);
 		rightOrderByElement.setExpression(colRight);
+		rightOrderByElement.setAsc(true);
+		
+		this.equalTo.setLeftExpression(colLeft);
+		this.equalTo.setRightExpression(colRight);
+		
+		this.gtt.setLeftExpression(colLeft);
+		this.gtt.setRightExpression(colRight);
+		
 		
 		List<OrderByElement> listRight = new ArrayList<OrderByElement>();
 		listRight.add(rightOrderByElement);
 		this.rightIterator = new OrderByIterator(listRight, rightIterator);
 		
-//		System.out.println(leftExpression);	
-//		while(this.leftIterator.hasNext()) {
-//			System.out.println(this.leftIterator.next());
-//		}
-//		
-//		System.out.println(rightExpression);	
-//		while(this.rightIterator.hasNext()) {
-//			System.out.println(this.rightIterator.next());
-//		}
-//		
-//		this.rightIterator.reset();
-//		this.leftIterator.reset();
-		
-		
 		this.rightTuple = this.rightIterator.next();
 		this.leftTuple = this.leftIterator.next();
 		setNextLeftIterator();
-		
-		this.columns = new ArrayList<String>();
-		
+		this.nextResult = this.getNextIter();
 	}
 	
+	private boolean isContainingColumns(String leftExpression, List<String> columns) {
+		for(String column: columns) {
+			if(column.equals(leftExpression)) {
+				return true;
+			}
+			String[] columnSplt = column.split("\\.");
+			for(String split: columnSplt) {
+				if(split.equals(leftExpression)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
 	@Override
 	public boolean hasNext() {
-		if(index == 0 && this.rightTuple == null) {
-			return false;
+		if(this.nextResult != null) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		return getNextIter();
+		Map<String, PrimitiveValue> temp = this.nextResult;
+		this.nextResult = getNextIter();
+		return temp;
+	}
+
+	public Map<String, PrimitiveValue> getNextIter(){
+		Map<String, PrimitiveValue> rightTuple = this.rightTupleList.get(this.index);
+		Map<String, PrimitiveValue> result = pushTogetherMap(rightTuple, this.leftTuple);
+		this.index++;
+		
+		if(index >= this.rightTupleList.size()) {
+			Map<String, PrimitiveValue> temp = this.rightIterator.next();
+			this.index = 0;
+			if(temp != null && !temp.get(this.rightExpression).equals(this.rightTuple.get(this.rightExpression))) {
+				setNextLeftIterator();
+			}
+			this.rightTuple = temp;
+		}
+		return result;
+	}
+	
+	
+	// this.rightTuple is preComputed
+	public void setNextLeftIterator() {
+		this.rightTupleList = new ArrayList<Map<String, PrimitiveValue>>();
+		if(this.rightTuple == null) {
+			return;
+		}
+		this.rightTupleList.add(this.rightTuple);
+		Map<String, PrimitiveValue> next = this.rightIterator.next();
+		
+		while(next != null && this.rightTuple.get(this.rightExpression).equals(next.get(this.rightExpression))) {
+			this.rightTuple = next;
+			next = this.rightIterator.next();
+			this.rightTupleList.add(this.rightTuple);
+		}
+		this.rightTuple = next;
+		
 	}
 
 	@Override
@@ -125,7 +163,10 @@ public class SortMergeIterator implements DefaultIterator{
 		this.rightIterator.reset();
 	}
 	
-	public Map<String, PrimitiveValue> pushTogetherMap(Map<String, PrimitiveValue> leftTuple,Map<String, PrimitiveValue> rightTuple){
+	public Map<String, PrimitiveValue> pushTogetherMap(Map<String, PrimitiveValue> leftTuple, Map<String, PrimitiveValue> rightTuple){
+		if(leftTuple == null || rightTuple == null) {
+			return null;
+		}
 		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();
 		
 		for(String key: rightTuple.keySet()) {
@@ -144,33 +185,6 @@ public class SortMergeIterator implements DefaultIterator{
 			this.columns.addAll(this.rightIterator.getColumns());
 		}
 		return this.columns;
-	}
-	
-	public Map<String, PrimitiveValue> getNextIter(){
-		Map<String, PrimitiveValue> leftTuple = this.leftTupleList.get(this.index);
-		Map<String, PrimitiveValue> result = pushTogetherMap(leftTuple, this.rightTuple);
-		this.index++;
-		if(index >= this.leftTupleList.size()) {
-			Map<String, PrimitiveValue> temp = this.rightIterator.next();
-			this.index = 0;
-			if(temp != null && !temp.get(this.rightExpression).equals(this.rightTuple.get(this.rightExpression))) {
-				setNextLeftIterator();
-			}
-			this.rightTuple = temp;
-		}
-		return result;
-	}
-	
-	public void setNextLeftIterator() {
-		this.leftTupleList = new ArrayList<Map<String, PrimitiveValue>>();
-		this.leftTupleList.add(this.leftTuple);
-		Map<String, PrimitiveValue> next = this.leftIterator.next();
-		while(next != null && this.leftTuple.get(leftExpression).equals(next.get(leftExpression))) {
-			this.leftTuple = next;
-			next = this.leftIterator.next();
-			this.leftTupleList.add(this.leftTuple);
-		}
-		this.leftTuple = next;
 	}
 
 	@Override
