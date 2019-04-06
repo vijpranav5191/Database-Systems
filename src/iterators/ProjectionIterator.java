@@ -77,11 +77,19 @@ public class ProjectionIterator implements DefaultIterator{
 						}
 					}
 					else {
-						this.columns.add(selectExpression.getAlias());
+						if(selectExpression.getAlias()==null) {
+							this.columns.add(selectItem.toString());
+						}else {
+							this.columns.add(selectExpression.getAlias());
+						}
 					}
 				}
 				else {
-					this.columns.add(selectExpression.getAlias());
+					if(selectExpression.getAlias() != null) {
+						this.columns.add(selectExpression.getAlias());
+					} else {
+						this.columns.add(selectExpression.getExpression().toString());	
+					}
 				}
 			} else if(selectItem instanceof AllTableColumns){
 				AllTableColumns allTableColumns = (AllTableColumns) selectItem;

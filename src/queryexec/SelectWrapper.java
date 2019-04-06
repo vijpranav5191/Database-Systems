@@ -132,9 +132,9 @@ public class SelectWrapper
 					if(xKey.split("\\.").length == 1){
 						Table defTable = (Table) fromItem;
 						Column cCol = new Column();
-						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName())) || SchemaStructure.columnTableMap.containsKey(xKey)) {
+						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName()))) {
 							cCol.setColumnName(xKey);
-							cCol.setTable(SchemaStructure.columnTableMap.getOrDefault(xKey, defTable));
+							cCol.setTable(defTable);
 						} else {
 							// case for alias
 							cCol.setColumnName(xKey);
