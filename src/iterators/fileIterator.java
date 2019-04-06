@@ -37,6 +37,8 @@ public class fileIterator implements DefaultIterator {
 	private List<SelectItem> selectItems;
 	private List<String> colKeys;
 	private List<String> sendKeys;
+	private List<String> columns;
+	
 //	private List<OrderByElement> orderBy;
 	//	List<List<String>> tableCol;
 	boolean isFinalMerge;
@@ -70,7 +72,8 @@ public class fileIterator implements DefaultIterator {
 			this.selectItems = selectItems;
 			this.colKeys = colKeys;
 			this.pm = pm;
-			sendKeys = new ArrayList<String>();
+			this.columns = colKeys;
+			this.sendKeys = new ArrayList<String>();
 			for(String  col : colKeys)
 			{
 				
@@ -79,13 +82,13 @@ public class fileIterator implements DefaultIterator {
 				{
 					if((s.toString().split("\\.")).length == 2 && !sendKeys.contains(s.toString()))
 					{
-						sendKeys.add(s.toString());
+						this.sendKeys.add(s.toString());
 					}
 					else
 					{
 						if(x.equals(s.toString()) && !sendKeys.contains(s.toString()))
 						{
-							sendKeys.add(col);
+							this.sendKeys.add(col);
 						}
 					}
 				}
@@ -203,7 +206,7 @@ public class fileIterator implements DefaultIterator {
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return this.sendKeys;
+		return this.columns;
 	}
 
 	@Override

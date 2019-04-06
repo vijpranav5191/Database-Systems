@@ -9,6 +9,7 @@ import java.util.Map;
 
 import iterators.DefaultIterator;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
@@ -199,6 +200,8 @@ public class OrderByIterator implements DefaultIterator{
 						} else {
 							return -10 * sortDirection;	
 						}
+					} else if(aValue instanceof LongValue){
+						return (int) ((aValue.toLong() - bValue.toLong()) * sortDirection);	
 					}else {
 						if(EvaluateUtils.evaluate(scope, gtt)) {
 							value = 10;
