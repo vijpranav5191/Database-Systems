@@ -86,7 +86,9 @@ public class groupByExternal implements DefaultIterator {
 				batch.add(obj);
 			}
 //			Iterator<Map<String, PrimitiveValue>> itr = batch.iterator();
-			OrderByIterator orderList = new OrderByIterator(ordElem, iterator);
+//			OrderByIterator orderList = new OrderByIterator(ordElem, iterator);
+//			
+			OrderByIterator orderList = new OrderByIterator(ordElem, batch, colmnValues);
 			
 			List<Map<String, PrimitiveValue>> result = new ArrayList<Map<String,PrimitiveValue>>();
 			while(orderList.hasNext())

@@ -78,7 +78,9 @@ public class orderExternalIterator implements DefaultIterator {
 //			List<ColumnDefs> cdef = SchemaStructure.schema.get(String.valueOf(primaryTable));
 //			System.out.println(cdef);
 			
-			OrderByIterator orderList = new OrderByIterator( orderBy , iterator);
+//			OrderByIterator orderList = new OrderByIterator( orderBy , iterator);
+			
+			OrderByIterator orderList = new OrderByIterator(orderBy, batch, colmnValues);
 			
 			List<Map<String, PrimitiveValue>> result = new ArrayList<Map<String,PrimitiveValue>>();
 			while(orderList.hasNext())

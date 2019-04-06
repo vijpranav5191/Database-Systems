@@ -47,6 +47,7 @@ public class OrderByIterator implements DefaultIterator{
 	
 	public OrderByIterator(List<OrderByElement> orderbyelements, List<Map<String, PrimitiveValue>> iterator, List<String> coulmnsForExternal){
 		this.orderbyelements = orderbyelements;
+//		this.iterator = iterator;
 		this.coulmnsForExternal = coulmnsForExternal;
 		this.sortedList = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
 		this.currentList = new ArrayList<Map<String, PrimitiveValue>>();
@@ -65,9 +66,8 @@ public class OrderByIterator implements DefaultIterator{
 				if(orderByElement.isAsc()) {
 					Column col= (Column) orderByElement.getExpression();
 					if(col.getTable() != null) {
-						this.sortByCol(x, -1, col.toString());	
+						this.sortByCol(x, 1, col.toString());	
 					} else {
-						this.sortByCol(x, -1, col.getColumnName());		
 					}
 				} else {
 					Column col= (Column) orderByElement.getExpression();
