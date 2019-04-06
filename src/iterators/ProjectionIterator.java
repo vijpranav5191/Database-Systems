@@ -42,12 +42,16 @@ public class ProjectionIterator implements DefaultIterator{
 				SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
 				if(selectExpression.getExpression() instanceof Column) {
 					Column column = (Column) selectExpression.getExpression();
-					if(column.getTable().getName() != null) {
-						this.columns.add(column.getTable().getName() + "." + column.getColumnName());
-					} else if(column.getTable().getAlias() != null) {
-						this.columns.add(column.getTable().getAlias() + "." + column.getColumnName());
+					if(selectExpression.getAlias() != null) {
+						this.columns.add(selectExpression.getAlias());
 					} else {
-						this.columns.add(column.getColumnName());	
+						if(column.getTable().getName() != null) {
+							this.columns.add(column.getTable().getName() + "." + column.getColumnName());
+						} else if(column.getTable().getAlias() != null) {
+							this.columns.add(column.getTable().getAlias() + "." + column.getColumnName());
+						} else {
+							this.columns.add(column.getColumnName());	
+						}
 					}
 				} else if((selectExpression.getExpression() instanceof Function)){
 					if(selectExpression.getAlias()==null){
@@ -100,8 +104,8 @@ public class ProjectionIterator implements DefaultIterator{
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		Map<String, PrimitiveValue> map = this.iterator.next();
+		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>(map);
 
 		if(map == null && this.zeroAggflag) {
 			this.zeroAggflag = false;
@@ -166,7 +170,7 @@ public class ProjectionIterator implements DefaultIterator{
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-						}else {
+						} else {
 							String name = func.getName();
 							String key= null;
 							List<Expression> expList = new ArrayList<>();
