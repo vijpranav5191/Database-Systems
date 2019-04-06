@@ -214,6 +214,7 @@ public class SelectWrapper
 			join.setOnExpression(exp);
 			if(Config.isInMemory) {
 				result = new HashJoinIterator(leftIterator, rightIterator, join);
+				//result = new JoinIterator(leftIterator, rightIterator, joinDefault); 
 			}  else {
 				try {
 					result = new SortMergeIterator(leftIterator, rightIterator, join);

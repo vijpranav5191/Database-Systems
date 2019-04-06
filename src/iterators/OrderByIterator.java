@@ -195,11 +195,7 @@ public class OrderByIterator implements DefaultIterator{
 					if(aValue instanceof StringValue) {
 						return aValue.toString().compareTo(bValue.toString()) * sortDirection;
 					} else if(aValue instanceof DoubleValue){
-						if(aValue.toDouble() > bValue.toDouble()) {
-							return 10 * sortDirection;
-						} else {
-							return -10 * sortDirection;	
-						}
+						return (int) ((aValue.toDouble() - bValue.toDouble()) * sortDirection);
 					} else if(aValue instanceof LongValue){
 						return (int) ((aValue.toLong() - bValue.toLong()) * sortDirection);	
 					}else {

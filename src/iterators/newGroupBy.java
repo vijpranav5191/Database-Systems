@@ -1,5 +1,5 @@
 package iterators;
-
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -24,12 +24,13 @@ public class newGroupBy implements DefaultIterator{
 	DefaultIterator iterator;
 	private List<SelectItem> selectItems;
 	private Expression having;
-	private List<List<Map<String,PrimitiveValue>>> arrayList;
-	List<List<Map<String, PrimitiveValue>>> resultSet ;
+	private List<Set<Map<String,PrimitiveValue>>> arrayList;
+//	List<List<Map<String, PrimitiveValue>>> resultSet ;
 	List<OrderByElement> ordElem;
 	private int index;
 	private ArrayList<Map<String,PrimitiveValue>> lstObj;
-	private ArrayList<Map<String, PrimitiveValue>> tempList;
+	private Set<Map<String, PrimitiveValue>> tempList;
+	private List<Set<Map<String, PrimitiveValue>>> resultSet;
 	
 	public newGroupBy(DefaultIterator iterator, List<Column> groupBy, Table primaryTable, List<SelectItem> selectItems) throws Exception {
 		this.selectItems = selectItems;
@@ -58,8 +59,13 @@ public class newGroupBy implements DefaultIterator{
 //		{
 //			System.out.println(obj); 
 //		}
-		arrayList = new ArrayList<List<Map<String,PrimitiveValue>>>();
-		this.resultSet = getArrayList( lstObj , ordElem );
+		arrayList = new ArrayList<Set<Map<String,PrimitiveValue>>>();
+		
+		System.out.println( "CHANGES"  );
+//		this.resultSet = getArrayList( lstObj , ordElem );
+		this.resultSet = getArrayList(lstObj,ordElem);
+		
+		
 //		for(List<Map<String,PrimitiveValue>> l : arrayList)
 //		{
 //			System.out.println(l);
@@ -84,7 +90,7 @@ public class newGroupBy implements DefaultIterator{
 	
 	
 	
-	private List<List<Map<String, PrimitiveValue>>> getArrayList(ArrayList<Map<String, PrimitiveValue>> lstObj,
+	private List<Set<Map<String, PrimitiveValue>>> getArrayList(ArrayList<Map<String, PrimitiveValue>> lstObj,
 			List<OrderByElement> ordElem) {
 		// TODO Auto-generated method stub
 		Iterator< Map<String,PrimitiveValue> > itr = lstObj.iterator();
@@ -96,7 +102,7 @@ public class newGroupBy implements DefaultIterator{
 			if(pm == null)
 			{	pm=itr.next();
 			}
-			this.tempList = new ArrayList<Map<String,PrimitiveValue>>();
+			this.tempList = new HashSet<Map<String,PrimitiveValue>>();
 
 			tempList.add(pm);
 			boolean flag = true;
@@ -138,7 +144,7 @@ public class newGroupBy implements DefaultIterator{
 		// TODO Auto-generated method stub
 		Map<String, PrimitiveValue> selectMap = new LinkedHashMap<>();
 		if(this.hasNext()) {
-			List<Map<String, PrimitiveValue>> group = this.resultSet.get(index++);
+			Set<Map<String, PrimitiveValue>> group = this.resultSet.get(index++);
 			Iterator iter = group.iterator();
 			Map<String, PrimitiveValue> map = (Map<String, PrimitiveValue>) iter.next();
 			if(map!=null) {
