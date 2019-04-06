@@ -61,7 +61,6 @@ public class ProjectionIterator implements DefaultIterator{
 							}
 							this.columns.add(name+"("+sb.toString()+")");
 						}
-
 						else {
 							if(func.isAllColumns()) {
 								this.columns.add("COUNT(*)");
@@ -77,8 +76,12 @@ public class ProjectionIterator implements DefaultIterator{
 					}
 				}
 				else {
-					this.columns.add(selectExpression.getAlias());
-				}
+					if(selectExpression.getAlias()==null) {
+						this.columns.add(selectItem.toString());
+					}else {
+						this.columns.add(selectExpression.getAlias());
+					}
+				}	
 			} else if(selectItem instanceof AllTableColumns){
 				AllTableColumns allTableColumns = (AllTableColumns) selectItem;
 				Table table = allTableColumns.getTable();
@@ -102,7 +105,7 @@ public class ProjectionIterator implements DefaultIterator{
 	public Map<String, PrimitiveValue> next() {
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		Map<String, PrimitiveValue> map = this.iterator.next();
-
+		selectMap = map;
 		if(map == null && this.zeroAggflag) {
 			this.zeroAggflag = false;
 			map = new HashMap<>();	
