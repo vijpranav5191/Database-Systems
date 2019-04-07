@@ -32,6 +32,9 @@ public class OrderByIterator implements DefaultIterator{
 	public ArrayList<ArrayList<Map<String, PrimitiveValue>>> sortedList; 
 	public ArrayList<Map<String, PrimitiveValue>> currentList;
 	
+	
+	
+	
 	public OrderByIterator(List<OrderByElement> orderbyelements, DefaultIterator iterator){
 		this.orderbyelements = orderbyelements;
 		this.iterator = iterator;
