@@ -31,6 +31,7 @@ public class orderExternalIterator implements DefaultIterator {
 	DefaultIterator deItr;
 	DefaultIterator dummy;
 	private List<String> colmnValues;
+	private List<String> upDatescolmnValues;
 	private List<SelectItem> column;
 	private List<PrimitiveValue> pmValues;
 	String str;
@@ -41,7 +42,7 @@ public class orderExternalIterator implements DefaultIterator {
 		this.iterator = iterator;
 		this.orderBy = orderBy;
 		this.column = column;
-		
+		this.upDatescolmnValues = new ArrayList<String>();
 //		System.out.println( " columnValue " + column);
 		int level = 0;
  		int filenumber = 1;
@@ -54,11 +55,13 @@ public class orderExternalIterator implements DefaultIterator {
 		
 		Map<String ,PrimitiveValue> mapValue = this.iterator.next();
 		this.iterator.reset();
-
+		
+//		System.out.println(mapValue);
+		
 		for(String  key : mapValue.keySet())
 		{
 			PrimitiveValue pm = mapValue.get(key);
-//			System.out.println(key);
+//			System.out.println(mapValue);
 			colmnValues.add(key);
 			pmValues.add(pm);
 		}
@@ -74,13 +77,14 @@ public class orderExternalIterator implements DefaultIterator {
 				mapValue = obj;
 				batch.add(obj);
 			}
-//			System.out.println(b);
+			System.out.println(batch);
 //			List<ColumnDefs> cdef = SchemaStructure.schema.get(String.valueOf(primaryTable));
 //			System.out.println(cdef);
 			
 //			OrderByIterator orderList = new OrderByIterator( orderBy , iterator);
 			
 			OrderByIterator orderList = new OrderByIterator(orderBy, batch, colmnValues);
+
 			
 			List<Map<String, PrimitiveValue>> result = new ArrayList<Map<String,PrimitiveValue>>();
 			while(orderList.hasNext())
@@ -91,7 +95,7 @@ public class orderExternalIterator implements DefaultIterator {
 			
 //			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 //			System.out.println("here"); 
-			File filename = new File(this.str = "F:\\ff\\level"+level+"_file"+filenumber+".dat");
+			File filename = new File("F:\\ff3\\level_"+level+"_file"+filenumber+".dat");
 			queue.add(filename);
 //			System.out.println(filename); 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
@@ -99,7 +103,6 @@ public class orderExternalIterator implements DefaultIterator {
 			{
 				Map<String,PrimitiveValue> mp = itr.next();
 //				System.out.println(" " + mp);
-				
 				
 				String writeInFile = "";
 				
@@ -124,38 +127,50 @@ public class orderExternalIterator implements DefaultIterator {
 		DefaultIterator  itr1 = null;
 		DefaultIterator  itr2 = null;
 		level = 1; 
-//		System.out.println( );
+		System.out.println( colmnValues);
+		Map<String,PrimitiveValue> firstPtr = null;;
+		Map<String,PrimitiveValue> secondPtr = null;
 		while(queue.size()!=1)
 		{
 			File one = queue.poll();
-			itr1 = new fileIterator(one , pmValues , colmnValues);
+			itr1 = new fileIterator(one , pmValues , colmnValues , mapValue);
 			
 			File two = queue.poll();
-			itr2 = new fileIterator(two , pmValues , colmnValues);
-			
-			this.str = "F:\\ff\\level"+level+"_file"+filenumber+".dat";
-			File newF = new File("F:\\ff\\level"+level+"_file"+filenumber+".dat");
+			itr2 = new fileIterator(two , pmValues , colmnValues, mapValue);
+//			this.str = "/Users/pranavvij/Desktop/data/level"+level+"_file"+filenumber+".dat";
+			this.str = "F:\\ff3\\level_"+level+"_file"+filenumber+".dat";
+			File newF = new File("F:\\ff3\\level_"+level+"_file"+filenumber+".dat");
 
 //			str = "D:\\temp\\"+level+"_file"+filenumber+".dat";
 //			File newF = new File("D:\\temp"+level+"_file"+filenumber+".dat");
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newF));   
 			filenumber++;
-			Map<String,PrimitiveValue> firstPtr = itr1.next();
-			Map<String,PrimitiveValue> secondPtr = itr2.next();
-			
+			firstPtr = itr1.next();
+			secondPtr = itr2.next();
+//			if(upDatescolmnValues != null)
+//				this.upDatescolmnValues.clear();
+//			for(String key : firstPtr.keySet())
+//			{
+//				System.out.println("here");
+//				this.upDatescolmnValues.add(key);
+//			}
 			while(firstPtr != null && secondPtr != null)
 			{
 				
 				boolean insertedFlag = false;
 				for( OrderByElement orderElem : orderBy )
 				{
+					System.out.println(firstPtr + "  + " + secondPtr);
 					if(String.valueOf(firstPtr.get(String.valueOf(orderElem))).compareTo(String.valueOf(secondPtr.get(String.valueOf(orderElem)))) == 0)
 					{
+						System.out.println("  one " );
 						continue;
+
 					}
 					else if(String.valueOf(firstPtr.get(String.valueOf(orderElem))).compareTo(String.valueOf(secondPtr.get(String.valueOf(orderElem)))) > 0)
 					{
+						System.out.println("  two " );
 //						Map<String,PrimitiveValue> mp = firstPtr;
 //						System.out.println(" " + mp);
 						String writeB = "";
@@ -172,6 +187,7 @@ public class orderExternalIterator implements DefaultIterator {
 					}
 					else if(String.valueOf(firstPtr.get(String.valueOf(orderElem))).compareTo(String.valueOf(secondPtr.get(String.valueOf(orderElem)))) < 0)
 					{
+						System.out.println("  three " + firstPtr.keySet());
 						String writeA = "";
 						for (String object : firstPtr.keySet())
 						{
@@ -188,7 +204,7 @@ public class orderExternalIterator implements DefaultIterator {
 				}
 				if(!insertedFlag)
 				{
-					
+					System.out.println(" not inserted ");
 					String writeEA = "";
 					
 					for (String object : firstPtr.keySet())
@@ -237,6 +253,7 @@ public class orderExternalIterator implements DefaultIterator {
 		        writer.newLine();
 		        secondPtr = itr2.next();
 			}
+			
 //			System.out.println(" ithe " + itr1.next() );
 //			System.out.println(" ithe " + itr2.next() );
 			writer.close();
@@ -250,9 +267,11 @@ public class orderExternalIterator implements DefaultIterator {
 		
 		// merging start
 		File fileName = queue.poll();
+		
 		String fr = String.valueOf(fileName);		
-		deItr = new fileIterator(fr , column , colmnValues , pmValues);
-
+		
+		this.deItr = new fileIterator(fr , column , colmnValues , pmValues);
+		
 		 
 	}
 	@Override

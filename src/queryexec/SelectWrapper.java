@@ -14,7 +14,9 @@ import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
 import iterators.groupByExternal;
+import iterators.newExternal;
 import iterators.newGroupBy;
+import iterators.newGroupByExternal;
 import iterators.orderExternalIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -104,7 +106,8 @@ public class SelectWrapper
 				}
 			}
 
-			if (this.groupBy != null) {
+			if (this.groupBy != null) 
+			{
 				for(Column key : groupBy) {
 					String xKey = key.getColumnName();
 					if(key.getTable() == null){
@@ -114,7 +117,7 @@ public class SelectWrapper
 				if(Config.isInMemory) {
 					result = new newGroupBy(result, this.groupBy, (Table) fromItem, this.selectItems);
 				} else {
-					result = new groupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
+					result = new newGroupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
 				}
 			}
 
@@ -132,9 +135,9 @@ public class SelectWrapper
 					if(xKey.split("\\.").length == 1){
 						Table defTable = (Table) fromItem;
 						Column cCol = new Column();
-						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName())) || SchemaStructure.columnTableMap.containsKey(xKey)) {
+						if(isContainingColumn(xKey, SchemaStructure.schema.get(defTable.getName()))) {
 							cCol.setColumnName(xKey);
-							cCol.setTable(SchemaStructure.columnTableMap.getOrDefault(xKey, defTable));
+							cCol.setTable(defTable);
 						} else {
 							// case for alias
 							cCol.setColumnName(xKey);
@@ -146,7 +149,7 @@ public class SelectWrapper
 				if(Config.isInMemory) {
 					result = new OrderByIterator(this.orderBy, result);
 				} else {
-					result = new orderExternalIterator(result, this.orderBy, (Table) fromItem , this.selectItems);
+					result = new newExternal(result, this.orderBy, (Table) fromItem , this.selectItems );
 				}
 			}
 

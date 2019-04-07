@@ -1,5 +1,7 @@
 package iterators;
 
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import iterators.DefaultIterator;
+import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
@@ -31,6 +35,8 @@ public class OrderByIterator implements DefaultIterator{
 	public ArrayList<ArrayList<Map<String, PrimitiveValue>>> sortedList; 
 	public ArrayList<Map<String, PrimitiveValue>> currentList;
 	
+	
+	
 	public OrderByIterator(List<OrderByElement> orderbyelements, DefaultIterator iterator){
 		this.orderbyelements = orderbyelements;
 		this.iterator = iterator;
@@ -42,6 +48,7 @@ public class OrderByIterator implements DefaultIterator{
 		}
 		this.sortedList.add(list);
 		orderDataByElement();
+
 		this.nextResult = this.getNextIter();
 	}
 	
@@ -56,7 +63,9 @@ public class OrderByIterator implements DefaultIterator{
 			list.add(obj);
 		}
 		this.sortedList.add(list);
+//		System.out.println( " NOT SORTED LIST " + this.sortedList);
 		orderDataByElement();
+//		System.out.println( " SORTED LIST " + this.sortedList);
 		this.nextResult = this.getNextIter();
 	}
 	
@@ -195,13 +204,28 @@ public class OrderByIterator implements DefaultIterator{
 				try {
 					if(aValue instanceof StringValue) {
 						return aValue.toString().compareTo(bValue.toString()) * sortDirection;
-					} else if(aValue instanceof DoubleValue){
+					} 
+					else if(aValue instanceof DoubleValue){
 						if(aValue.toDouble() > bValue.toDouble()) {
 							return 10 * sortDirection;
 						} else {
 							return -10 * sortDirection;	
 						}
-					}else {
+					} 
+					else if(aValue instanceof LongValue){
+						return (int) ((aValue.toLong() - bValue.toLong()) * sortDirection);	
+					}
+					else if(aValue instanceof DateValue){
+						
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+						Date dateFirst = sdf.parse( String.valueOf(aValue) );
+						Date dateSecond = sdf.parse(String.valueOf(bValue));
+					
+						
+						return  ((dateFirst.compareTo(dateSecond)) * sortDirection);	
+					}
+					else {
+
 						if(EvaluateUtils.evaluate(scope, gtt)) {
 							value = 10;
 						} else {

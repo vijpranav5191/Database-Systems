@@ -128,10 +128,10 @@ public class groupByExternal implements DefaultIterator {
 		while(queue.size()!=1)
 		{
 			File one = queue.poll();
-			itr1 = new fileIterator(one , pmValues , colmnValues);
+			itr1 = new fileIterator(one , pmValues , colmnValues , mapValue);
 			
 			File two = queue.poll();
-			itr2 = new fileIterator(two , pmValues , colmnValues);
+			itr2 = new fileIterator(two , pmValues , colmnValues , mapValue);
 			
 			this.str = "F:\\ff2\\level"+level+"_file"+filenumber+".dat";
 			File newF = new File("F:\\ff2\\level"+level+"_file"+filenumber+".dat");
