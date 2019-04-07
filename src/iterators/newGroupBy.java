@@ -56,12 +56,12 @@ public class newGroupBy implements DefaultIterator{
 			ordElem.add( ord);	
 		}
 		
-		OrderByIterator ordItr = new OrderByIterator(ordElem , iterator);
+//		OrderByIterator ordItr = new OrderByIterator(ordElem , iterator);
 		
-		while(ordItr.hasNext())
+		while(this.iterator.hasNext())
 		{	
 			
-			lstObj.add( ordItr.next() );
+			lstObj.add( this.iterator.next() );
 		}
 		
 //		for(Map obj : lstObj)
