@@ -8,19 +8,18 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-//import javafx.scene.control.TableColumn;
+
 
 import java.util.ArrayList;
+import java.util.Arrays;
 //import java.util.Arrays;
 import java.util.HashMap;
-
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
 //import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectItem;
 //import objects.ColumnDefs;
 //import objects.SchemaStructure;
@@ -32,9 +31,8 @@ public class fileIterator implements DefaultIterator {
 //	private String tableName;
 	private BufferedReader br;
 	private String tuple;
-//	private Table tab;
-	private Map<String, PrimitiveValue> map;
 	private List<SelectItem> selectItems;
+	
 	private List<String> colKeys;
 	private List<String> sendKeys;
 	private List<String> columns;
@@ -42,13 +40,15 @@ public class fileIterator implements DefaultIterator {
 //	private List<OrderByElement> orderBy;
 	//	List<List<String>> tableCol;
 	boolean isFinalMerge;
+	private Map<String, PrimitiveValue> map;
 	
 	
-	public fileIterator(File file, List<PrimitiveValue> pm , List<String> colKeys)
+	public fileIterator(File file, List<PrimitiveValue> pm , List<String> colKeys , Map<String , PrimitiveValue> map)
 	{
 		this.csvFile= file.toString();
 		this.pm = pm;	
 		this.colKeys = colKeys;
+//		this.map = map;
 		try 
 		{
 			this.br = new BufferedReader(new FileReader(csvFile));
@@ -66,36 +66,24 @@ public class fileIterator implements DefaultIterator {
 	
 	public fileIterator(String fileName, List<SelectItem> selectItems , List<String> colKeys , List<PrimitiveValue> pm) 
 	{
-		
-//		System.out.println(" here " + selectItems + " pmvalue " + pm + " colKeys " + colKeys );
 			this.csvFile = fileName;
 			this.selectItems = selectItems;
 			this.colKeys = colKeys;
 			this.pm = pm;
-			this.columns = colKeys;
+			this.columns = new ArrayList<String>();
 			this.sendKeys = new ArrayList<String>();
-			for(String  col : colKeys)
+//			
+			for(String col : colKeys)
 			{
-				
-				String x = (col.split("\\."))[1]; 
-				for(SelectItem s : selectItems)
-				{
-					if((s.toString().split("\\.")).length == 2 && !sendKeys.contains(s.toString()))
-					{
-						this.sendKeys.add(s.toString());
-					}
-					else
-					{
-						if(x.equals(s.toString()) && !sendKeys.contains(s.toString()))
-						{
-							this.sendKeys.add(col);
-						}
-					}
-				}
-				
-				
+//				System.out.println( " col " + col);
+				sendKeys.add(col);
 			}
-			
+//			
+			for(SelectItem sel : selectItems)
+			{
+//				System.out.println(" value " + sel);
+				columns.add(sel.toString());
+			}
 			try {
 
 				this.br = new BufferedReader(new FileReader(csvFile));
@@ -107,15 +95,8 @@ public class fileIterator implements DefaultIterator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//			this.tableCol = new ArrayList<List<String>>();
-//			for(int sVar=0; sVar< selectItems.size(); sVar++)
-//			{
-//				tableCol.add(sVar , new ArrayList<String>(Arrays.asList( selectItems.get(sVar).split("\\.")[0] , selectItems.get(sVar).split("\\.")[1] )) );
-//			}
-		// TODO Auto-generated constructor stub
 			tuple = "";
-			
-//			System.out.println( " send Keys "  + sendKeys);
+			this.isFinalMerge  = true;
 	}
 
 	@Override
@@ -133,7 +114,7 @@ public class fileIterator implements DefaultIterator {
 			return false;
 			
 		}
-	}
+	} 
 
 	@Override
 	public Map<String, PrimitiveValue> next() {
@@ -149,29 +130,33 @@ public class fileIterator implements DefaultIterator {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			map = new HashMap<String , PrimitiveValue>();
+//			Map<String,PrimitiveValue> map = this.map;
+			
+			map = new HashMap<String, PrimitiveValue>();
 			
 			String row[] = tuple.split("\\|");
+//			System.out.println();
+//			System.out.println( new ArrayList<String>(Arrays.asList(row)) + " col " + this.colKeys + " ppm " + pm);
 //			System.out.println(" brefore " + row[0]);
 			for (int i = 0; i < row.length; i++) {				
 				String value = row[i];
 				PrimitiveValue pmVal;
 //					System.out.println( " " + pm.get(i).getType().toString());
-				switch(pm.get(i).getType().toString())
+				switch(pm.get(i).getType().toString().toLowerCase())
 				 {
-					case "INTEGER":
+					case "int":
 						pmVal = new LongValue(value);
 						break;
-					case "STRING":
+					case "string":
 						pmVal = new StringValue(value);
 						break;
-					case "LONG":
+					case "long":
 						pmVal = new LongValue(value);
 						break;	
-					case "DOUBLE":
+					case "double":
 						pmVal = new DoubleValue(value);
 						break;
-					case "DATE":
+					case "date":
 						pmVal = new DateValue(value);
 						break;
 					default:
@@ -179,9 +164,11 @@ public class fileIterator implements DefaultIterator {
 						break;
 					}
 				if(isFinalMerge)
+				{
 					map.put(sendKeys.get(i) , pmVal);
+				}
 				else
-					map.put(colKeys.get(i),pmVal);
+				map.put(colKeys.get(i),pmVal);
 			}
 //			System.out.println(" create " + map);
 			return map;
