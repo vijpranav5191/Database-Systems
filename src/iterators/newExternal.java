@@ -468,7 +468,7 @@ public class newExternal implements DefaultIterator{
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return this.mapColumn;
+		return this.iterator.getColumns();
 	}
 
 	@Override
