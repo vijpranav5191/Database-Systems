@@ -145,10 +145,10 @@ public class SelectWrapper {
 						key.setExpression(cCol);
 					}
 				}
-				if (!Config.isInMemory) {
+				if (Config.isInMemory) {
 					result = new OrderByIterator(this.orderBy, result);
 				} else {
-					result = new newExternal(result, this.orderBy, (Table) fromItem, this.selectItems);
+					result = new newExternal(result, this.orderBy, this.selectItems);
 				}
 			}
 
@@ -219,7 +219,7 @@ public class SelectWrapper {
 				result = new HashJoinIterator(leftIterator, rightIterator, join);
 			} else {
 				try {
-					result = new SortMergeIterator(leftIterator, rightIterator, join);
+					result = new SortMergeIterator(leftIterator, rightIterator, join, this.selectItems);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

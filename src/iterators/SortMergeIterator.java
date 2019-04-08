@@ -13,6 +13,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import utils.EvaluateUtils;
 
 public class SortMergeIterator implements DefaultIterator{
@@ -25,7 +26,7 @@ public class SortMergeIterator implements DefaultIterator{
 	EqualsTo equalTo;
 	GreaterThan gtt;
 	Map<String, PrimitiveValue> nextResult;
-	
+	List<SelectItem> selectItem;
 	Map<String, PrimitiveValue> rightNextTuple;
 	Map<String, PrimitiveValue> leftNextTuple;
 	
@@ -36,8 +37,9 @@ public class SortMergeIterator implements DefaultIterator{
 	int indexLeft = 0;
 	int indexRight = 0;
 	
-	public SortMergeIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join) throws Exception {
+	public SortMergeIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join, List<SelectItem> selectItem) throws Exception {
 		this.join = join;
+		this.selectItem = selectItem;
 		this.columns = new ArrayList<String>();
 		this.equalTo = new EqualsTo(); 
 		this.gtt = new GreaterThan();
@@ -65,7 +67,8 @@ public class SortMergeIterator implements DefaultIterator{
 		
 		List<OrderByElement> listLeft = new ArrayList<OrderByElement>();
 		listLeft.add(leftOrderByElement);	
-		this.leftIterator = new OrderByIterator(listLeft, leftIterator);
+		this.leftIterator = new newExternal(leftIterator, listLeft, this.selectItem);
+		//this.leftIterator = new OrderByIterator(listLeft, leftIterator);
 			
 		// Right Iteration after sorting
 		OrderByElement rightOrderByElement = new OrderByElement();
@@ -87,7 +90,8 @@ public class SortMergeIterator implements DefaultIterator{
 		
 		List<OrderByElement> listRight = new ArrayList<OrderByElement>();
 		listRight.add(rightOrderByElement);
-		this.rightIterator = new OrderByIterator(listRight, rightIterator);
+		this.rightIterator = new newExternal(rightIterator, listRight, this.selectItem);
+		//this.rightIterator = new OrderByIterator(listRight, rightIterator);
 		
 		this.rightNextTuple = this.rightIterator.next();
 		this.leftNextTuple = this.leftIterator.next();
