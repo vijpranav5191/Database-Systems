@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -68,12 +69,12 @@ public class newGroupByExternal implements DefaultIterator{
 		// TODO Auto-generated method stub
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		
-		if(this.deItr.hasNext())
-		{
-			Map<String, PrimitiveValue> pm = this.deItr.next();
-			ArrayList<Map<String, PrimitiveValue>> group = getArrayList( this.deItr , pm , groupBy);
+//		if(this.deItr.hasNext())
+//		{
+			Map<String, PrimitiveValue> map = this.deItr.next();
+			ArrayList<Map<String, PrimitiveValue>> group = getArrayList( this.deItr , map , groupBy);
 			Iterator iter = group.iterator();
-			Map<String, PrimitiveValue> map = (Map<String, PrimitiveValue>) iter.next();
+//			Map<String, PrimitiveValue> map = (Map<String, PrimitiveValue>) iter.next();
 			if(map!=null) {
 				for(int index = 0; index < this.selectItems.size();index++) {
 					SelectItem selectItem = this.selectItems.get(index);
@@ -108,7 +109,14 @@ public class newGroupByExternal implements DefaultIterator{
 									Function func = (Function) exp;
 									iter = group.iterator();
 									DefaultIterator iter1 = new SimpleAggregateIterator(iter, func);
-									selectMap.putAll(iter1.next());	
+									Map<String, PrimitiveValue> temp = iter1.next();
+									selectMap.putAll(temp);
+									if(selectExpression.getAlias()!=null) {
+										Set<String> keys  = temp.keySet();
+										for (String string : keys) {
+											selectMap.put(selectExpression.getAlias(), selectMap.get(string));
+										}
+									}
 								}
 							} catch (Exception e) {
 								// TODO Auto-generated catch block
@@ -119,7 +127,7 @@ public class newGroupByExternal implements DefaultIterator{
 				}
 			}
 			
-		}
+//		}
 		return selectMap;
 		
 	}
