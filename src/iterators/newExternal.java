@@ -27,6 +27,7 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectItem;
+import utils.Config;
 
 public class newExternal implements DefaultIterator{
 	DefaultIterator iterator;
@@ -70,7 +71,7 @@ public class newExternal implements DefaultIterator{
 		{
 			
 			List<Map<String,PrimitiveValue>> batch = new ArrayList<Map<String,PrimitiveValue>>();
-			for(int i=0;i< 5000 && this.iterator.hasNext();i++)
+			for(int i=0;i< Config.blockSize && this.iterator.hasNext();i++)
 			{
 				Map<String,PrimitiveValue> obj = iterator.next();
 				
@@ -105,7 +106,7 @@ public class newExternal implements DefaultIterator{
 //			System.out.println(result);
 			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 			
-			File filename = new File("F:\\ff\\level_"+level+"_file"+fileNumber+".dat");
+			File filename = new File(utils.Config.fileName+level+"_file"+fileNumber+"_"+System.currentTimeMillis()+".dat");
 			queue.add(filename);
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
@@ -137,10 +138,10 @@ public class newExternal implements DefaultIterator{
 			
 			File two = queue.poll();
 			itr2 = new fileIterator(two , pmValues , mapColumn, map);
-			this.str = "F:\\ff\\level_"+level+"_file"+fileNumber+".dat";
+			this.str = utils.Config.fileName+level+"_file"+fileNumber+".dat";
 			
 
-			File newF = new File("F:\\ff\\level_"+level+"_file"+fileNumber+".dat");
+			File newF = new File(utils.Config.fileName+level+"_file"+fileNumber+"_"+System.currentTimeMillis()+".dat");
 //			System.out.println( " 1 " +  one.toString() + " 2 " +two.toString() + " 3 "+ newF.toString());
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newF));   
 			fileNumber++;
@@ -467,7 +468,7 @@ public class newExternal implements DefaultIterator{
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return this.deItr.getColumns();
+		return this.mapColumn;
 	}
 
 	@Override
