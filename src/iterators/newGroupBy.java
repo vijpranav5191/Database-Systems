@@ -82,19 +82,6 @@ public class newGroupBy implements DefaultIterator{
 		this.index = 0;
 	}
 	
-//	while(itr.hasNext())
-//	{
-//		Map<String, PrimitiveValue> pmNew = itr.next();  
-//		for(Column group : groupBy)
-//		{
-//			if( !pmNew.get(group.toString()).equals(pm.get(group.toString())) )
-//			{
-//				this.deItr = itr;
-//				return resultList;
-//			}	
-//		}
-//		resultList.add(pmNew);
-////	}
 	
 	private void orderDataByElement(List<OrderByElement> ordElem) {
 		for(OrderByElement orderByElement: ordElem) {

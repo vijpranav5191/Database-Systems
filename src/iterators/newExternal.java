@@ -440,6 +440,7 @@ public class newExternal implements DefaultIterator{
 		String writeA = "";
 		for (String object : mapColumn)
 		{
+			
 	         writeA += (toWrite.get(object) + "|").toString() ;
 	    }
 		writeA = writeA.substring(0,writeA.length()-1);
