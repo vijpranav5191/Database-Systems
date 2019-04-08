@@ -76,7 +76,7 @@ public class fileIterator implements DefaultIterator {
 			for(String col : colKeys)
 			{
 //				System.out.println( " col " + col);
-				sendKeys.add(col);
+				this.sendKeys.add(col);
 			}
 //			
 			for(SelectItem sel : selectItems)
@@ -165,7 +165,7 @@ public class fileIterator implements DefaultIterator {
 					}
 				if(isFinalMerge)
 				{
-					map.put(sendKeys.get(i) , pmVal);
+					map.put(this.sendKeys.get(i) , pmVal);
 				}
 				else
 				map.put(colKeys.get(i),pmVal);
