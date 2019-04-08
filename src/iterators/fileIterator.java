@@ -148,7 +148,7 @@ public class fileIterator implements DefaultIterator {
 						pmVal = new LongValue(value);
 						break;
 					case "string":
-						value = value.replace("'", "");
+						value = value.replace("\'", "");
 						pmVal = new StringValue(value);
 						break;
 					case "long":
@@ -161,6 +161,7 @@ public class fileIterator implements DefaultIterator {
 						pmVal = new DateValue(value);
 						break;
 					default:
+						value = value.replace("\'", "");
 						pmVal = new StringValue(value);
 						break;
 					}
