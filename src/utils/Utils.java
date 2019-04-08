@@ -110,4 +110,19 @@ public class Utils {
 		}
 		return result;
 	}
+	
+	public static boolean isContainingColumns(String leftExpression, List<String> columns) {
+		for(String column: columns) {
+			if(column.equals(leftExpression)) {
+				return true;
+			}
+			String[] columnSplt = column.split("\\.");
+			for(String split: columnSplt) {
+				if(split.equals(leftExpression)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

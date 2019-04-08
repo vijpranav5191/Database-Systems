@@ -54,7 +54,6 @@ public class OrderByIterator implements DefaultIterator{
 	
 	public OrderByIterator(List<OrderByElement> orderbyelements, List<Map<String, PrimitiveValue>> iterator, List<String> coulmnsForExternal){
 		this.orderbyelements = orderbyelements;
-//		this.iterator = iterator;
 		this.coulmnsForExternal = coulmnsForExternal;
 		this.sortedList = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
 		this.currentList = new ArrayList<Map<String, PrimitiveValue>>();
@@ -63,9 +62,7 @@ public class OrderByIterator implements DefaultIterator{
 			list.add(obj);
 		}
 		this.sortedList.add(list);
-//		System.out.println( " NOT SORTED LIST " + this.sortedList);
 		orderDataByElement();
-//		System.out.println( " SORTED LIST " + this.sortedList);
 		this.nextResult = this.getNextIter();
 	}
 	

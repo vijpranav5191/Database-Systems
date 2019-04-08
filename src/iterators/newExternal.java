@@ -41,7 +41,7 @@ public class newExternal implements DefaultIterator{
 	DefaultIterator deItr;
 	String str;
 	
-	public newExternal(DefaultIterator iterator, List<OrderByElement> orderBy, Table primaryTable , List<SelectItem> selectItem) throws IOException, InvalidPrimitive, ParseException  
+	public newExternal(DefaultIterator iterator, List<OrderByElement> orderBy, List<SelectItem> selectItem) throws IOException, InvalidPrimitive, ParseException  
 	{
 		this.iterator = iterator;
 		this.orderBy = orderBy;
@@ -469,7 +469,7 @@ public class newExternal implements DefaultIterator{
 	@Override
 	public List<String> getColumns() {
 		// TODO Auto-generated method stub
-		return this.mapColumn;
+		return this.iterator.getColumns();
 	}
 
 	@Override

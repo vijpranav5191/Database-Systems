@@ -13,6 +13,7 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
+import net.sf.jsqlparser.statement.select.SelectItem;
 import utils.EvaluateUtils;
 
 public class SortMergeIterator implements DefaultIterator{
@@ -25,16 +26,21 @@ public class SortMergeIterator implements DefaultIterator{
 	EqualsTo equalTo;
 	GreaterThan gtt;
 	Map<String, PrimitiveValue> nextResult;
+	List<SelectItem> selectItem;
+	Map<String, PrimitiveValue> rightNextTuple;
+	Map<String, PrimitiveValue> leftNextTuple;
 	
-	Map<String, PrimitiveValue> rightTuple;
-	Map<String, PrimitiveValue> leftTuple;
-	ArrayList<Map<String, PrimitiveValue>> rightTupleList;
-	int index = 0;
+	ArrayList<Map<String, PrimitiveValue>> rightBufferList;
+	ArrayList<Map<String, PrimitiveValue>> leftBufferList;
 	
-	public SortMergeIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join) throws Exception {
+	
+	int indexLeft = 0;
+	int indexRight = 0;
+	
+	public SortMergeIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join, List<SelectItem> selectItem) throws Exception {
 		this.join = join;
+		this.selectItem = selectItem;
 		this.columns = new ArrayList<String>();
-		this.rightTupleList = new ArrayList<Map<String, PrimitiveValue>>();
 		this.equalTo = new EqualsTo(); 
 		this.gtt = new GreaterThan();
 		if(this.join.getOnExpression() instanceof EqualsTo) {
@@ -61,33 +67,33 @@ public class SortMergeIterator implements DefaultIterator{
 		
 		List<OrderByElement> listLeft = new ArrayList<OrderByElement>();
 		listLeft.add(leftOrderByElement);	
-		this.leftIterator = new OrderByIterator(listLeft, leftIterator);
+		this.leftIterator = new newExternal(leftIterator, listLeft, this.selectItem);
+		//this.leftIterator = new OrderByIterator(listLeft, leftIterator);
 			
 		// Right Iteration after sorting
 		OrderByElement rightOrderByElement = new OrderByElement();
 		Column colRight = new Column();
-
 		Table  tableRight = new Table();
 		tableRight.setName(this.rightExpression.split("\\.")[0]);
 		colRight.setColumnName(this.rightExpression.split("\\.")[1]);
 		colRight.setTable(tableRight);
 		rightOrderByElement.setExpression(colRight);
 		rightOrderByElement.setAsc(true);
+
+		List<OrderByElement> listRight = new ArrayList<OrderByElement>();
+		listRight.add(rightOrderByElement);
+		this.rightIterator = new newExternal(rightIterator, listRight, this.selectItem);
+		//this.rightIterator = new OrderByIterator(listRight, rightIterator);
 		
 		this.equalTo.setLeftExpression(colLeft);
 		this.equalTo.setRightExpression(colRight);
-		
 		this.gtt.setLeftExpression(colLeft);
 		this.gtt.setRightExpression(colRight);
 		
+		this.rightNextTuple = this.rightIterator.next();
+		this.leftNextTuple = this.leftIterator.next();
+		this.setBuffers();
 		
-		List<OrderByElement> listRight = new ArrayList<OrderByElement>();
-		listRight.add(rightOrderByElement);
-		this.rightIterator = new OrderByIterator(listRight, rightIterator);
-		
-		this.rightTuple = this.rightIterator.next();
-		this.leftTuple = this.leftIterator.next();
-		setNextLeftIterator();
 		this.nextResult = this.getNextIter();
 	}
 	
@@ -118,45 +124,97 @@ public class SortMergeIterator implements DefaultIterator{
 	@Override
 	public Map<String, PrimitiveValue> next() {
 		Map<String, PrimitiveValue> temp = this.nextResult;
-		this.nextResult = getNextIter();
+		try {
+			this.nextResult = getNextIter();
+		} catch (Exception e) {
+			this.nextResult = null;
+			e.printStackTrace();
+		}
 		return temp;
 	}
 
-	public Map<String, PrimitiveValue> getNextIter(){
-		Map<String, PrimitiveValue> rightTuple = this.rightTupleList.get(this.index);
-		Map<String, PrimitiveValue> result = pushTogetherMap(rightTuple, this.leftTuple);
-		this.index++;
+	public Map<String, PrimitiveValue> getNextIter() throws Exception{
+		Map<String, PrimitiveValue> leftTuple = null;
+		Map<String, PrimitiveValue> rightTuple = null;
+		Map<String, PrimitiveValue> result = null;
 		
-		if(index >= this.rightTupleList.size()) {
-			Map<String, PrimitiveValue> temp = this.rightIterator.next();
-			this.index = 0;
-			if(temp != null && !temp.get(this.rightExpression).equals(this.rightTuple.get(this.rightExpression))) {
-				setNextLeftIterator();
+		if(this.indexLeft < this.leftBufferList.size()) {
+			leftTuple = this.leftBufferList.get(this.indexLeft);
+			rightTuple = this.rightBufferList.get(this.indexRight);
+			result = this.pushTogetherMap(leftTuple, rightTuple);
+			this.indexRight++;
+			if(this.indexRight >= this.rightBufferList.size()) {
+				this.indexLeft++;
+				this.indexRight = 0;
 			}
-			this.rightTuple = temp;
+		} else {
+			this.indexRight = 0;
+			this.indexLeft = 0;
+			this.setBuffers();
+			if(this.nextResult != null) {
+				result = this.getNextIter();
+			}
 		}
 		return result;
 	}
 	
+	public void setBuffers() throws Exception {
+		Map<String, PrimitiveValue> leftTuple = this.leftNextTuple;
+		Map<String, PrimitiveValue> rightTuple = this.rightNextTuple;
+		Map<String, PrimitiveValue> result = pushTogetherMap(leftTuple, rightTuple);
+		if(leftTuple != null && rightTuple != null) {
+			if(result !=null && EvaluateUtils.evaluate(result, this.equalTo)) {
+				this.setRightBufferIterator();
+				this.setLeftBufferIterator();
+			} else if(result!=null && EvaluateUtils.evaluate(result, this.gtt)) { // left is greater
+				this.setRightBufferIterator();
+				this.setBuffers();
+			} else {// right is greater
+				this.setLeftBufferIterator();
+				this.setBuffers();
+			}
+		} else {
+			this.nextResult = null;
+		}
+	}
+	
 	
 	// this.rightTuple is preComputed
-	public void setNextLeftIterator() {
-		this.rightTupleList = new ArrayList<Map<String, PrimitiveValue>>();
-		if(this.rightTuple == null) {
+	public void setRightBufferIterator() {
+		this.rightBufferList = new ArrayList<Map<String, PrimitiveValue>>();
+		if(this.rightNextTuple == null) {
 			return;
 		}
-		this.rightTupleList.add(this.rightTuple);
+		this.rightBufferList.add(this.rightNextTuple);
 		Map<String, PrimitiveValue> next = this.rightIterator.next();
 		
-		while(next != null && this.rightTuple.get(this.rightExpression).equals(next.get(this.rightExpression))) {
-			this.rightTuple = next;
+		while(next != null && this.rightNextTuple.get(this.rightExpression).equals(next.get(this.rightExpression))) {
+			this.rightNextTuple = next;
 			next = this.rightIterator.next();
-			this.rightTupleList.add(this.rightTuple);
+			this.rightBufferList.add(this.rightNextTuple);
 		}
-		this.rightTuple = next;
+		this.rightNextTuple = next;
 		
 	}
-
+	
+	// this.rightTuple is preComputed
+	public void setLeftBufferIterator() {
+		this.leftBufferList = new ArrayList<Map<String, PrimitiveValue>>();
+		if(this.leftNextTuple == null) {
+			return;
+		}
+		this.leftBufferList.add(this.leftNextTuple);
+		Map<String, PrimitiveValue> next = this.leftIterator.next();
+		
+		while(next != null && this.leftNextTuple.get(this.leftExpression).equals(next.get(this.leftExpression))) {
+			this.leftNextTuple = next;
+			next = this.leftIterator.next();
+			this.leftBufferList.add(this.leftNextTuple);
+		}
+		this.leftNextTuple = next;
+		
+	}
+	
 	@Override
 	public void reset() {
 		this.leftIterator.reset();

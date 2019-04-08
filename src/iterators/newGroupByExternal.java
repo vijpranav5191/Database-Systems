@@ -49,7 +49,7 @@ public class newGroupByExternal implements DefaultIterator{
 		}
 		
 		
-		this.deItr = new newExternal(iterator, ordElem, fromItem, selectItems);		
+		this.deItr = new newExternal(iterator, ordElem, selectItems);		
 		// TODO Auto-generated constructor stub
 	}
 
