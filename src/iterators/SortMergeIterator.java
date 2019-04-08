@@ -73,25 +73,22 @@ public class SortMergeIterator implements DefaultIterator{
 		// Right Iteration after sorting
 		OrderByElement rightOrderByElement = new OrderByElement();
 		Column colRight = new Column();
-
 		Table  tableRight = new Table();
 		tableRight.setName(this.rightExpression.split("\\.")[0]);
 		colRight.setColumnName(this.rightExpression.split("\\.")[1]);
 		colRight.setTable(tableRight);
 		rightOrderByElement.setExpression(colRight);
 		rightOrderByElement.setAsc(true);
-		
-		this.equalTo.setLeftExpression(colLeft);
-		this.equalTo.setRightExpression(colRight);
-		
-		this.gtt.setLeftExpression(colLeft);
-		this.gtt.setRightExpression(colRight);
-		
-		
+
 		List<OrderByElement> listRight = new ArrayList<OrderByElement>();
 		listRight.add(rightOrderByElement);
 		this.rightIterator = new newExternal(rightIterator, listRight, this.selectItem);
 		//this.rightIterator = new OrderByIterator(listRight, rightIterator);
+		
+		this.equalTo.setLeftExpression(colLeft);
+		this.equalTo.setRightExpression(colRight);
+		this.gtt.setLeftExpression(colLeft);
+		this.gtt.setRightExpression(colRight);
 		
 		this.rightNextTuple = this.rightIterator.next();
 		this.leftNextTuple = this.leftIterator.next();
