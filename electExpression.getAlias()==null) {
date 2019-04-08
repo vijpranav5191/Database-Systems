@@ -1,59 +1,0 @@
-[1mdiff --git a/bin/iterators/ProjectionIterator.class b/bin/iterators/ProjectionIterator.class[m
-[1mindex 6286a05..92303b4 100644[m
-Binary files a/bin/iterators/ProjectionIterator.class and b/bin/iterators/ProjectionIterator.class differ
-[1mdiff --git a/bin/iterators/TableScanIterator.class b/bin/iterators/TableScanIterator.class[m
-[1mindex 4472f01..2cd6cda 100644[m
-Binary files a/bin/iterators/TableScanIterator.class and b/bin/iterators/TableScanIterator.class differ
-[1mdiff --git a/src/iterators/ProjectionIterator.java b/src/iterators/ProjectionIterator.java[m
-[1mindex b9f548c..9b195ae 100644[m
-[1m--- a/src/iterators/ProjectionIterator.java[m
-[1m+++ b/src/iterators/ProjectionIterator.java[m
-[36m@@ -61,7 +61,6 @@[m [mpublic class ProjectionIterator implements DefaultIterator{[m
- 							}[m
- 							this.columns.add(name+"("+sb.toString()+")");[m
- 						}[m
-[31m-[m
- 						else {[m
- 							if(func.isAllColumns()) {[m
- 								this.columns.add("COUNT(*)");[m
-[36m@@ -77,8 +76,12 @@[m [mpublic class ProjectionIterator implements DefaultIterator{[m
- 					}[m
- 				}[m
- 				else {[m
-[31m-					this.columns.add(selectExpression.getAlias());[m
-[31m-				}[m
-[32m+[m					[32mif(selectExpression.getAlias()==null) {[m[41m[m
-[32m+[m						[32mthis.columns.add(selectItem.toString());[m[41m[m
-[32m+[m					[32m}else {[m[41m[m
-[32m+[m						[32mthis.columns.add(selectExpression.getAlias());[m[41m[m
-[32m+[m					[32m}[m[41m[m
-[32m+[m				[32m}[m[41m	[m
- 			} else if(selectItem instanceof AllTableColumns){[m
- 				AllTableColumns allTableColumns = (AllTableColumns) selectItem;[m
- 				Table table = allTableColumns.getTable();[m
-[36m@@ -102,7 +105,7 @@[m [mpublic class ProjectionIterator implements DefaultIterator{[m
- 	public Map<String, PrimitiveValue> next() {[m
- 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();[m
- 		Map<String, PrimitiveValue> map = this.iterator.next();[m
-[31m-[m
-[32m+[m		[32mselectMap = map;[m[41m[m
- 		if(map == null && this.zeroAggflag) {[m
- 			this.zeroAggflag = false;[m
- 			map = new HashMap<>();	[m
-[1mdiff --git a/src/iterators/TableScanIterator.java b/src/iterators/TableScanIterator.java[m
-[1mindex 050ba43..1ccb2d9 100644[m
-[1m--- a/src/iterators/TableScanIterator.java[m
-[1m+++ b/src/iterators/TableScanIterator.java[m
-[36m@@ -36,10 +36,10 @@[m [mpublic class TableScanIterator implements DefaultIterator {[m
- 		this.tableName = tab.getName();[m
- 		this.tab = tab;[m
- 		if(DEBUG) {[m
-[31m-//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";[m
-[32m+[m			[32mthis.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";[m[41m[m
- //			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";[m
- //			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			[m
-[31m-			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";[m
-[32m+[m[32m//			this.csvFile = "/Users/pranavvij/Desktop/data/" + tableName.toLowerCase() + ".dat";[m[41m[m
- //			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";[m
- [m
- 		} else {[m

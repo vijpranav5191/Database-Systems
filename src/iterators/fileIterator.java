@@ -134,6 +134,7 @@ public class fileIterator implements DefaultIterator {
 			
 			map = new HashMap<String, PrimitiveValue>();
 			
+			//System.out.println(tuple);
 			String row[] = tuple.split("\\|");
 //			System.out.println();
 //			System.out.println( new ArrayList<String>(Arrays.asList(row)) + " col " + this.colKeys + " ppm " + pm);
@@ -141,34 +142,38 @@ public class fileIterator implements DefaultIterator {
 			for (int i = 0; i < row.length; i++) {				
 				String value = row[i];
 				PrimitiveValue pmVal;
-//					System.out.println( " " + pm.get(i).getType().toString());
-				switch(pm.get(i).getType().toString().toLowerCase())
-				 {
-					case "int":
-						pmVal = new LongValue(value);
-						break;
-					case "string":
-						pmVal = new StringValue(value);
-						break;
-					case "long":
-						pmVal = new LongValue(value);
-						break;	
-					case "double":
-						pmVal = new DoubleValue(value);
-						break;
-					case "date":
-						pmVal = new DateValue(value);
-						break;
-					default:
-						pmVal = new StringValue(value);
-						break;
+				
+				if(!value.toString().equals("null") && value != null) {
+					switch(pm.get(i).getType().toString().toLowerCase())
+					 {
+						case "int":
+							pmVal = new LongValue(value);
+							break;
+						case "string":
+							pmVal = new StringValue(value);
+							break;
+						case "long":
+							pmVal = new LongValue(value);
+							break;	
+						case "double":
+							pmVal = new DoubleValue(value);
+							break;
+						case "date":
+							//System.out.println(value);
+							pmVal = new DateValue(value);
+							break;
+						default:
+							pmVal = new StringValue(value);
+							break;
+						}
+					if(isFinalMerge){
+						map.put(sendKeys.get(i) , pmVal);
+					} else {
+						map.put(colKeys.get(i),pmVal);
 					}
-				if(isFinalMerge)
-				{
-					map.put(sendKeys.get(i) , pmVal);
 				}
-				else
-				map.put(colKeys.get(i),pmVal);
+				
+				
 			}
 //			System.out.println(" create " + map);
 			return map;

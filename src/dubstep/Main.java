@@ -22,7 +22,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 class Main{
 	
 	public static void main(String args[]) throws Exception {
-		Config.isInMemory = true;
+		Config.isInMemory = false;
 		for (String arg : args) {
 			if (arg.equals("--in-mem")){
 				Config.isInMemory = true;

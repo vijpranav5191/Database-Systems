@@ -144,7 +144,7 @@ public class newExternal implements DefaultIterator{
 			Map<String,PrimitiveValue> firstPtr = itr1.next();
 			Map<String,PrimitiveValue> secondPtr = itr2.next();
 			
-			while( firstPtr != null && secondPtr != null )
+			while( firstPtr != null && secondPtr != null && secondPtr.keySet().size() > 0 && firstPtr.keySet().size() > 0)
 			{
 				ArrayList<Map<String,PrimitiveValue>> temp = new ArrayList<Map<String,PrimitiveValue>>(Arrays.asList(firstPtr,secondPtr));
 				for( OrderByElement order : orderBy)
@@ -156,13 +156,44 @@ public class newExternal implements DefaultIterator{
 						//						temp1 = new OrderByIterator().sortByCol(temp, 1 , ord);
 						Map<String,PrimitiveValue> toWrite = new HashMap<String, PrimitiveValue>();
 //						Map<String,PrimitiveValue> twoWrite = new HashMap<String, PrimitiveValue>();
-						switch(firstPtr.get(ord).getType().toString().toLowerCase() )
-						{
-							case "int":
-							case "long":
+						//System.out.println(firstPtr);
+						//System.out.println(ord);
+						if(firstPtr!= null && secondPtr!=null && secondPtr.keySet().size() > 0 && firstPtr.keySet().size() > 0) {
+							switch(firstPtr.get(ord).getType().toString().toLowerCase() )
 							{
-//								System.out.println(" here " );
-									if(firstPtr.get(ord).toLong()-secondPtr.get(ord).toLong() <=0)
+								case "int":
+								case "long":
+								{
+				
+										if(firstPtr.get(ord).toLong()-secondPtr.get(ord).toLong() <=0)
+										{
+											toWrite = firstPtr;
+											firstPtr = itr1.next();
+										}
+										else
+										{
+											toWrite = secondPtr;
+											secondPtr = itr2.next();
+										}
+										break;
+								}
+								case "string":
+								{
+									if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) <=0)
+									{
+										toWrite = firstPtr;
+										firstPtr = itr1.next();
+									}
+									else
+									{
+										toWrite = secondPtr;
+										secondPtr = itr2.next();
+									}
+									break;	
+								}
+								case "double":
+								{
+									if(firstPtr.get(ord).toDouble()-(secondPtr.get(ord).toDouble()) <=0)
 									{
 										toWrite = firstPtr;
 										firstPtr = itr1.next();
@@ -173,64 +204,36 @@ public class newExternal implements DefaultIterator{
 										secondPtr = itr2.next();
 									}
 									break;
+								}
+								case "date":
+									SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+									Date dateFirst = (Date) sdf.parse( String.valueOf(firstPtr.get(ord)) );
+									Date dateSecond = (Date) sdf.parse( String.valueOf(secondPtr.get(ord)) );
+									if(dateFirst.compareTo(dateSecond) <= 0)
+									{
+										toWrite = firstPtr;
+										firstPtr = itr1.next();
+									}
+									else
+									{
+										toWrite = secondPtr;
+										secondPtr = itr2.next();
+									}	
+									break;
+								default:
+									if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) >=0)
+									{
+										toWrite = firstPtr;
+										firstPtr = itr1.next();
+									}
+									else
+									{
+										toWrite = secondPtr;
+										secondPtr = itr2.next();
+									}
+									break;	
 							}
-							case "string":
-							{
-								if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) <=0)
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								else
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}
-								break;	
-							}
-							case "double":
-							{
-								if(firstPtr.get(ord).toDouble()-(secondPtr.get(ord).toDouble()) <=0)
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								else
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}
-								break;
-							}
-							case "date":
-								SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-								Date dateFirst = (Date) sdf.parse( String.valueOf(firstPtr.get(ord)) );
-								Date dateSecond = (Date) sdf.parse( String.valueOf(secondPtr.get(ord)) );
-								if(dateFirst.compareTo(dateSecond) <= 0)
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								else
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}	
-								break;
-							default:
-								if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) >=0)
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								else
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}
-								break;	
 						}
-						
 						String writeA = "";
 						for (String object : mapColumn)
 						{
@@ -246,13 +249,42 @@ public class newExternal implements DefaultIterator{
 						String ord = order.getExpression().toString();
 						ArrayList<Map<String,PrimitiveValue>> temp1 = null;
 						Map<String,PrimitiveValue> toWrite = new HashMap<String, PrimitiveValue>();
-						switch(firstPtr.get(ord).getType().toString().toLowerCase() )
-						{
-							case "int":
-							case "long":
+						if(firstPtr!= null && secondPtr!=null && secondPtr.keySet().size() > 0 && firstPtr.keySet().size() > 0) {
+							switch(firstPtr.get(ord).getType().toString().toLowerCase() )
 							{
-//								System.out.println(" here " );
-									if(firstPtr.get(ord).toLong()-secondPtr.get(ord).toLong() <=0)
+								case "int":
+								case "long":
+								{
+	//								System.out.println(" here " );
+										if(firstPtr.get(ord).toLong()-secondPtr.get(ord).toLong() <=0)
+										{
+											toWrite = secondPtr;
+											secondPtr = itr2.next();
+										}
+										else
+										{
+											toWrite = firstPtr;
+											firstPtr = itr1.next();
+										}
+										break;
+								}
+								case "string":
+								{
+									if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) <=0)
+									{
+										toWrite = secondPtr;
+										secondPtr = itr2.next();
+									}
+									else
+									{
+										toWrite = firstPtr;
+										firstPtr = itr1.next();
+									}
+									break;	
+								}
+								case "double":
+								{
+									if(firstPtr.get(ord).toDouble()-(secondPtr.get(ord).toDouble()) <=0)
 									{
 										toWrite = secondPtr;
 										secondPtr = itr2.next();
@@ -263,64 +295,37 @@ public class newExternal implements DefaultIterator{
 										firstPtr = itr1.next();
 									}
 									break;
+								}
+								case "date":
+									SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+									Date dateFirst = sdf.parse( String.valueOf(firstPtr.get(ord)) );
+									Date dateSecond = sdf.parse( String.valueOf(secondPtr.get(ord)) );
+									if(dateFirst.compareTo(dateSecond) <= 0)
+									{
+										toWrite = secondPtr;
+										secondPtr = itr2.next();
+									}
+									else
+									{
+										toWrite = firstPtr;
+										firstPtr = itr1.next();
+									}
+									break;
+								default:
+									if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) >=0)
+									{
+										toWrite = secondPtr;
+										secondPtr = itr2.next();
+									}
+									else
+									{
+										toWrite = firstPtr;
+										firstPtr = itr1.next();
+									}
+									break;	
 							}
-							case "string":
-							{
-								if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) <=0)
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}
-								else
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								break;	
-							}
-							case "double":
-							{
-								if(firstPtr.get(ord).toDouble()-(secondPtr.get(ord).toDouble()) <=0)
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}
-								else
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								break;
-							}
-							case "date":
-								SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-								Date dateFirst = sdf.parse( String.valueOf(firstPtr.get(ord)) );
-								Date dateSecond = sdf.parse( String.valueOf(secondPtr.get(ord)) );
-								if(dateFirst.compareTo(dateSecond) <= 0)
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}
-								else
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								break;
-							default:
-								if(firstPtr.get(ord).toString().compareTo(secondPtr.get(ord).toString()) >=0)
-								{
-									toWrite = secondPtr;
-									secondPtr = itr2.next();
-								}
-								else
-								{
-									toWrite = firstPtr;
-									firstPtr = itr1.next();
-								}
-								break;	
 						}
-						
+						if(firstPtr!= null && secondPtr!=null && secondPtr.keySet().size() > 0 && firstPtr.keySet().size() > 0) {
 						String writeA = "";
 						for (String object : mapColumn)
 						{
@@ -329,6 +334,7 @@ public class newExternal implements DefaultIterator{
 						writeA = writeA.substring(0,writeA.length()-1);
 						writer.write(writeA);
 						writer.newLine();	
+						}
 					
 					}
 				}	
