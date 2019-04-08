@@ -1,5 +1,6 @@
 package dubstep;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -23,6 +24,8 @@ class Main{
 	
 	public static void main(String args[]) throws Exception {
 		Config.isInMemory = false;
+		File f = new File(Config.fileName); 
+		f.mkdirs();
 		for (String arg : args) {
 			if (arg.equals("--in-mem")){
 				Config.isInMemory = true;
