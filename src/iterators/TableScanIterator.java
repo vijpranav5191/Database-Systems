@@ -29,7 +29,7 @@ import queryexec.CreateWrapper;
 
 
 public class TableScanIterator implements DefaultIterator {
-	private Boolean DEBUG = false;
+	private Boolean DEBUG = true;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
@@ -97,12 +97,16 @@ public class TableScanIterator implements DefaultIterator {
 			FileInputStream readOb = new FileInputStream("createdir/"+this.tableName.toLowerCase()+".txt");
 			CCJSqlParser parser2 = new CCJSqlParser(readOb);
 			Statement query = parser2.Statement();
+			readOb.close();
 			CreateWrapper cw = new CreateWrapper();
 			cw.createHandler(query);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
