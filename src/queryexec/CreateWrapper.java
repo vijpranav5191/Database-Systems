@@ -1,5 +1,8 @@
 package queryexec;
 
+
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +14,22 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 
 public class CreateWrapper {
-
+	
+	public void saveCreateStructure(Statement query) {
+		CreateTable createtab = (CreateTable) query;
+		Table tbal = createtab.getTable();
+		
+		try {
+			FileWriter temp = new FileWriter("createdir/"+tbal.getName().toLowerCase()+".txt");
+			System.out.println(query.toString());
+			temp.write(query.toString());
+			temp.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Error storing create data");
+			e.printStackTrace();
+		}
+	}
 	public void createHandler(Statement query) {
 		CreateTable createtab = (CreateTable) query;
 		Table tbal = createtab.getTable();

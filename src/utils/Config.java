@@ -7,4 +7,5 @@ public class Config {
 	public static String bucket_location = "bucket/";	
 	public static String fileName = "tempfolder/level_";
 	public static String folderName = "tempfolder/";
+	public static String createfiles = "createdir/";
 }	

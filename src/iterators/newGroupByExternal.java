@@ -29,7 +29,7 @@ public class newGroupByExternal implements DefaultIterator{
 	List<SelectItem> selectItems;
 	private List<String> colmnValues;
 	private List<PrimitiveValue> pmValues;
-	
+	Map<String, PrimitiveValue> next;
 	public newGroupByExternal(DefaultIterator iterator, List<Column> groupBy, Table fromItem,
 			List<SelectItem> selectItems) throws InvalidPrimitive, IOException, ParseException {
 		
@@ -51,6 +51,7 @@ public class newGroupByExternal implements DefaultIterator{
 		
 		this.deItr = new newExternal(iterator, ordElem, selectItems);		
 		// TODO Auto-generated constructor stub
+		this.next = this.deItr.next();
 	}
 
 	@Override
@@ -69,12 +70,11 @@ public class newGroupByExternal implements DefaultIterator{
 		// TODO Auto-generated method stub
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		
-//		if(this.deItr.hasNext())
-//		{
-			Map<String, PrimitiveValue> map = this.deItr.next();
-			ArrayList<Map<String, PrimitiveValue>> group = getArrayList( this.deItr , map , groupBy);
+
+		if(this.deItr.hasNext()) {
+			ArrayList<Map<String, PrimitiveValue>> group = getArrayList( this.deItr , groupBy);
 			Iterator iter = group.iterator();
-//			Map<String, PrimitiveValue> map = (Map<String, PrimitiveValue>) iter.next();
+			Map<String, PrimitiveValue> map = (Map<String, PrimitiveValue>) iter.next();
 			if(map!=null) {
 				for(int index = 0; index < this.selectItems.size();index++) {
 					SelectItem selectItem = this.selectItems.get(index);
@@ -127,24 +127,22 @@ public class newGroupByExternal implements DefaultIterator{
 				}
 			}
 			
-//		}
+		}
 		return selectMap;
 		
 	}
 
-	private ArrayList<Map<String, PrimitiveValue>> getArrayList(DefaultIterator itr,
-			Map<String, PrimitiveValue> pm , List<Column> groupBy) {
+	private ArrayList<Map<String, PrimitiveValue>> getArrayList(DefaultIterator itr, List<Column> groupBy) {
 		// TODO Auto-generated method stub
 		ArrayList<Map<String, PrimitiveValue>> resultList = new ArrayList<Map<String,PrimitiveValue>>();
-		resultList.add( pm );
-		while(itr.hasNext())
-		{
+		resultList.add(this.next);
+		Map<String, PrimitiveValue> prev = this.next;
+		while(itr.hasNext()){
 			Map<String, PrimitiveValue> pmNew = itr.next();  
-			for(Column group : groupBy)
-			{
-				if( !pmNew.get(group.toString()).equals(pm.get(group.toString())) )
-				{
+			for(Column group : groupBy){
+				if( !pmNew.get(group.toString()).equals(prev.get(group.toString())) ){
 					this.deItr = itr;
+					this.next = pmNew;
 					return resultList;
 				}	
 			}
