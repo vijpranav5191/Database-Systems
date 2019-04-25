@@ -29,7 +29,7 @@ import queryexec.CreateWrapper;
 
 
 public class TableScanIterator implements DefaultIterator {
-	private Boolean DEBUG = true;
+	private Boolean DEBUG = false;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
