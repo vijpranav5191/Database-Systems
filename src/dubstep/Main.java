@@ -23,7 +23,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 class Main{
 	
 	public static void main(String args[]) throws Exception {
-		Config.isInMemory = true;
+		Config.isInMemory = false;
 		File f = new File(Config.fileName); 
 		File create = new File(Config.createfiles);
 		create.mkdirs();
