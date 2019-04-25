@@ -1,8 +1,14 @@
 package queryexec;
 
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,14 +21,19 @@ import objects.SchemaStructure;
 
 public class CreateWrapper {
 	
-	public void saveCreateStructure(Statement query) {
+	public void saveCreateStructure(Statement query, String querystr) {
+		
 		CreateTable createtab = (CreateTable) query;
 		Table tbal = createtab.getTable();
 		
 		try {
-			FileWriter temp = new FileWriter("createdir/"+tbal.getName().toLowerCase()+".txt");
-			temp.write(query.toString());
-			temp.close();
+			File f = new File("createdir/"+tbal.getName().toLowerCase()+".txt");
+//			Writer temp = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
+//			temp.write(query.toString());
+			BufferedWriter bfw = new BufferedWriter(new FileWriter(f,false));
+			bfw.write(querystr);
+			bfw.close();
+//			temp.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			System.out.println("Error storing create data");

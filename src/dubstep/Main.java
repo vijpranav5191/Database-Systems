@@ -1,7 +1,11 @@
 package dubstep;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,6 +21,8 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
 import queryexec.SelectWrapper;
+import sun.misc.IOUtils;
+import sun.nio.ch.IOUtil;
 import utils.Config;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
@@ -33,12 +39,14 @@ class Main{
 				Config.isInMemory = true;
 	        }
 		}
-		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
-		
-		Statement query;
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		String querystr;
 		CreateWrapper cw = new CreateWrapper();
-		while((query = parser.Statement()) != null){
+		while((querystr = br.readLine()) != null){
+			StringReader str = new StringReader(querystr);
+			CCJSqlParser parser = new CCJSqlParser(str);
+			Statement query = parser.Statement();
 			if(query instanceof Select) 
 				{
 			    Select select = (Select) query;
@@ -56,7 +64,7 @@ class Main{
 			    }
 			} else if(query instanceof CreateTable) {
 //				cw.createHandler(query);
-				cw.saveCreateStructure(query);
+				cw.saveCreateStructure(query,querystr);
 			}
 			
 			

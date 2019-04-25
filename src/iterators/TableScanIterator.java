@@ -139,9 +139,10 @@ public class TableScanIterator implements DefaultIterator {
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			if(cdefs==null) {
 				try {
-					FileInputStream readOb = new FileInputStream("createdir/"+this.tableName.toLowerCase()+".txt");
-					CCJSqlParser parser = new CCJSqlParser(readOb);
-					Statement query = parser.Statement();
+					File readOb = new File("createdir/"+this.tableName.toLowerCase()+".txt");
+					FileReader frd = new FileReader(readOb);
+					CCJSqlParser parser2 = new CCJSqlParser(frd);
+					Statement query = parser2.Statement();
 					CreateWrapper cw = new CreateWrapper();
 					cw.createHandler(query);
 					cdefs = SchemaStructure.schema.get(this.tableName);
