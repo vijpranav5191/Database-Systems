@@ -21,7 +21,6 @@ public class CreateWrapper {
 		
 		try {
 			FileWriter temp = new FileWriter("createdir/"+tbal.getName().toLowerCase()+".txt");
-			System.out.println(query.toString());
 			temp.write(query.toString());
 			temp.close();
 		} catch (IOException e) {

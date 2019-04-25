@@ -45,8 +45,8 @@ public class TableScanIterator implements DefaultIterator {
 		this.tab = tab;
 		if(DEBUG) {
 
-			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
-//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";
+//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";
+			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";
 
 //			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".tbl";			
 //			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";
@@ -64,6 +64,10 @@ public class TableScanIterator implements DefaultIterator {
 			}
 
 		tuple = "";
+		List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
+		if(cdefs==null) {
+			getCreateFromDisk();
+		}
 	}
 	
 	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName )
@@ -88,7 +92,21 @@ public class TableScanIterator implements DefaultIterator {
 		}
 		tuple = "";
 	}
-	
+	public void getCreateFromDisk() {
+		try {
+			FileInputStream readOb = new FileInputStream("createdir/"+this.tableName.toLowerCase()+".txt");
+			CCJSqlParser parser = new CCJSqlParser(readOb);
+			Statement query = parser.Statement();
+			CreateWrapper cw = new CreateWrapper();
+			cw.createHandler(query);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	@Override
 	public boolean hasNext() {
 		try {
@@ -186,22 +204,6 @@ public class TableScanIterator implements DefaultIterator {
 	public List<String> getColumns() {
 		if(this.columns.size() == 0) {
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
-			if(cdefs==null) {
-				try {
-					FileInputStream readOb = new FileInputStream("createdir/"+this.tableName.toLowerCase()+".txt");
-					CCJSqlParser parser = new CCJSqlParser(readOb);
-					Statement query = parser.Statement();
-					CreateWrapper cw = new CreateWrapper();
-					cw.createHandler(query);
-					cdefs = SchemaStructure.schema.get(this.tableName);
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 			for(int j = 0;j < cdefs.size(); j++) {
 				if(this.tab.getAlias() != null){
 					this.columns.add(this.tab.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
