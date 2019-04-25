@@ -95,8 +95,8 @@ public class TableScanIterator implements DefaultIterator {
 	public void getCreateFromDisk() {
 		try {
 			FileInputStream readOb = new FileInputStream("createdir/"+this.tableName.toLowerCase()+".txt");
-			CCJSqlParser parser = new CCJSqlParser(readOb);
-			Statement query = parser.Statement();
+			CCJSqlParser parser2 = new CCJSqlParser(readOb);
+			Statement query = parser2.Statement();
 			CreateWrapper cw = new CreateWrapper();
 			cw.createHandler(query);
 		} catch (FileNotFoundException e) {
