@@ -1,5 +1,6 @@
 package utils;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -124,5 +125,15 @@ public class Utils {
 			}
 		}
 		return false;
+	}
+	
+	public static boolean isFileExists(String path) {
+		File tmpDir = new File(path);
+	    return tmpDir.exists();
+	}
+	
+	public static void createDirectory(String folderName) {
+		File f = new File(folderName);
+		f.mkdirs();
 	}
 }

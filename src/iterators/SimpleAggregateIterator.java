@@ -63,13 +63,13 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			}
 			break;
 		case "AVG":
-			long sum2 = 0,count=0;
+			double sum2 = 0,count=0;
 			while(this.iterator.hasNext()) {
 				map = this.iterator.next();
 				for (int i = 0; i < expList.size(); i++) {
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						sum2 = sum2+ pv.toLong();
+						sum2 = sum2+ pv.toDouble();
 						count++;
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -195,13 +195,13 @@ public class SimpleAggregateIterator implements DefaultIterator {
 			}
 			break;
 		case "AVG":
-			long sum2 = 0,count=0;
+			double sum2 = 0,count=0;
 			while(this.iterator2.hasNext()) {
 				map = this.iterator2.next();
 				for (int i = 0; i < expList.size(); i++) {
 					try {
 						pv = EvaluateUtils.evaluateExpression(map, (Expression) expList.get(i));
-						sum2 = sum2+ pv.toLong();
+						sum2 = sum2+ pv.toDouble();
 						count++;
 					} catch (Exception e) {
 						// TODO Auto-generated catch block

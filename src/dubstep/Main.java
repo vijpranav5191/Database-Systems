@@ -6,7 +6,6 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import interfaces.UnionWrapper;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
@@ -18,50 +17,41 @@ import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
 import queryexec.SelectWrapper;
 import utils.Config;
+import utils.Utils;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 
-class Main{
-	
+class Main {
+
 	public static void main(String args[]) throws Exception {
+		Utils.createDirectory(Config.folderName);
+		Utils.createDirectory(Config.createFileDir);
+		
 		Config.isInMemory = true;
-		File f = new File(Config.fileName); 
-		File create = new File(Config.createfiles);
-		create.mkdirs();
-		f.mkdirs();
 		for (String arg : args) {
-			if (arg.equals("--in-mem")){
+			if (arg.equals("--in-mem")) {
 				Config.isInMemory = true;
-	        }
+			}
 		}
 		CCJSqlParser parser = new CCJSqlParser(System.in);
 		System.out.println("$> "); // print a prompt
-		
+
 		Statement query;
 		CreateWrapper cw = new CreateWrapper();
-		while((query = parser.Statement()) != null){
-			if(query instanceof Select) 
-				{
-			    Select select = (Select) query;
-
-			    SelectBody selectbody = select.getSelectBody();
-			    
-			    if(selectbody instanceof PlainSelect) {
-			    	PlainSelect plainSelect = (PlainSelect) selectbody;
-			    	new SelectWrapper(plainSelect).parse();			
-			    }
-
-			    else {
-			    	Union union = (Union) selectbody;
-			    	new UnionWrapper(union).parse();
-			    }
-			} else if(query instanceof CreateTable) {
-//				cw.createHandler(query);
-				cw.saveCreateStructure(query);
+		while ((query = parser.Statement()) != null) {
+			if (query instanceof Select) {
+				Select select = (Select) query;
+				SelectBody selectbody = select.getSelectBody();
+				if (selectbody instanceof PlainSelect) {
+					PlainSelect plainSelect = (PlainSelect) selectbody;
+					new SelectWrapper(plainSelect).parse();
+				} else {
+					Union union = (Union) selectbody;
+					new UnionWrapper(union).parse();
+				}
+			} else if (query instanceof CreateTable) {
+				cw.createHandler(query);
 			}
-			
-			
 			System.out.println("$>"); // print a prompt after executing each command
 		}
 	}
 }
-
