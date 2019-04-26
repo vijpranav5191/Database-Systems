@@ -24,7 +24,7 @@ class Main {
 
 	public static void main(String args[]) throws Exception {
 		Utils.createDirectory(Config.folderName);
-		Utils.createDirectory(Config.createFileDir);
+		Utils.createDirectory(Config.createFileDir);		
 		
 		Config.isInMemory = true;
 		for (String arg : args) {
