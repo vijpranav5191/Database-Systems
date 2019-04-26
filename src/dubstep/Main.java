@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Scanner;
 
 import interfaces.UnionWrapper;
 import net.sf.jsqlparser.parser.CCJSqlParser;
@@ -40,11 +41,18 @@ class Main{
 	        }
 		}
 		System.out.println("$> "); // print a prompt
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String querystr;
 		CreateWrapper cw = new CreateWrapper();
-		while((querystr = br.readLine()) != null){
-			StringReader str = new StringReader(querystr);
+		while(true){
+			Scanner br = new Scanner(System.in).useDelimiter("\r\n");
+			StringBuilder sb = new StringBuilder();
+            while (br.hasNext()) {
+            	sb = sb.append(br.next());
+            }
+            if(sb.toString().equals("\r")) {
+            	break;
+            }
+			StringReader str = new StringReader(sb.toString());
 			CCJSqlParser parser = new CCJSqlParser(str);
 			Statement query = parser.Statement();
 			if(query instanceof Select) 
@@ -64,7 +72,7 @@ class Main{
 			    }
 			} else if(query instanceof CreateTable) {
 //				cw.createHandler(query);
-				cw.saveCreateStructure(query,querystr);
+				cw.saveCreateStructure(query,sb.toString());
 			}
 			
 			

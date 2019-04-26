@@ -29,7 +29,7 @@ import queryexec.CreateWrapper;
 
 
 public class TableScanIterator implements DefaultIterator {
-	private Boolean DEBUG = false;
+	private Boolean DEBUG = true;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
@@ -137,23 +137,6 @@ public class TableScanIterator implements DefaultIterator {
 			map = new HashMap<String, PrimitiveValue>();
 			String[] row = tuple.split("\\|");
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
-			if(cdefs==null) {
-				try {
-					File readOb = new File("createdir/"+this.tableName.toLowerCase()+".txt");
-					FileReader frd = new FileReader(readOb);
-					CCJSqlParser parser2 = new CCJSqlParser(frd);
-					Statement query = parser2.Statement();
-					CreateWrapper cw = new CreateWrapper();
-					cw.createHandler(query);
-					cdefs = SchemaStructure.schema.get(this.tableName);
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 			for(int j = 0;j < row.length; j++) {
 				ColumnDefs cdef = cdefs.get(j);
 				String value = row[j];
