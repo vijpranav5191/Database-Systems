@@ -40,7 +40,7 @@ class Main {
 		File f = new File(Config.fileName); 
 		f.mkdirs();
 		Utils.createDirectory(Config.folderName);
-		Utils.createDirectory(Config.createFileDir);
+		Utils.createDirectory(Config.createFileDir);		
 		
 
 		for (String arg : args) {
