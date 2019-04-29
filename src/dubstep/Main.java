@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import bPlusTree.BPlusTreeBuilder;
 import interfaces.UnionWrapper;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
@@ -25,7 +27,10 @@ class Main {
 	public static void main(String args[]) throws Exception {
 		Utils.createDirectory(Config.folderName);
 		Utils.createDirectory(Config.createFileDir);		
-		
+		Utils.createDirectory(Config.bPlusTreeDir);
+//		BPlusTreeBuilder bPlusTreeBuilder = new BPlusTreeBuilder(null);
+//		bPlusTreeBuilder.build("LINEITEM.ORDERKEY");
+
 		Config.isInMemory = true;
 		for (String arg : args) {
 			if (arg.equals("--in-mem")) {

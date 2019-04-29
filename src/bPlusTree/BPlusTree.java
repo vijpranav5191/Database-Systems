@@ -1,5 +1,11 @@
 package bPlusTree;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,22 +23,29 @@ import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import utils.Config;
 
 
 public class BPlusTree {
 	private Node root;
 	private final int DEFAULT_BRANCHING_FACTOR = 128;
 	
-	int branchingFactor;
+	private String prevPath;
+	File filename;
+	BufferedWriter writer;
 	
-	public BPlusTree(){
+	int branchingFactor;
+	String indexStr;
+	public BPlusTree(String indexStr){
 		this.branchingFactor = DEFAULT_BRANCHING_FACTOR;
 		this.root = new LeafNode();
+		this.indexStr = indexStr;
 	}
 	
-	public BPlusTree(int branchingFactor){
+	public BPlusTree(int branchingFactor, String indexStr){
 		this.branchingFactor = branchingFactor;
 		this.root = new LeafNode();
+		this.indexStr = indexStr;
 	}
 	
 	public void insert(PrimitiveValue key, Map<String, PrimitiveValue> value) {
@@ -65,7 +78,7 @@ public class BPlusTree {
 						}
 					} else {
 						LeafNode node1  = (BPlusTree.LeafNode) node;
-						for(Map<String, PrimitiveValue> x: node1.values) {
+						for(PrimitiveValue x: node1.keys) {
 							System.out.print(x.toString() + " , ");
 						}	
 					}
@@ -109,20 +122,23 @@ public class BPlusTree {
 	
 	class LeafNode extends Node{
 		
-		List<Map<String, PrimitiveValue>> values;
 		LeafNode next;
 
 		LeafNode() {
 			keys = new ArrayList<PrimitiveValue>();
-			values = new ArrayList<Map<String, PrimitiveValue>>();
 		}
 		
 		@Override
 		Node insertValue(PrimitiveValue key, Map<String, PrimitiveValue> value) {
 			int loc = binarySearch(keys, key);
+			int size = this.keyNumber();
 			int valueIndex = loc >= 0 ? loc : -loc - 1;
+			try {
+				writeMapToFile(Config.bPlusTreeDir + key, value);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			keys.add(valueIndex, key);
-			values.add(valueIndex, value);
 			if(isOverflow()) {
 				return split(); 
 			}
@@ -139,10 +155,8 @@ public class BPlusTree {
 			LeafNode sibling = new LeafNode();
 			int from = (keyNumber() + 1) / 2, to = keyNumber();
 			sibling.keys.addAll(keys.subList(from, to));
-			sibling.values.addAll(values.subList(from, to));
 
 			keys.subList(from, to).clear();
-			values.subList(from, to).clear();
 
 			sibling.next = next;
 			next = sibling;
@@ -151,7 +165,7 @@ public class BPlusTree {
 		
 		@Override
 		boolean isOverflow() {
-			return values.size() > branchingFactor - 1;
+			return keys.size() > branchingFactor - 1;
 		}
 
 		@Override
@@ -253,4 +267,23 @@ public class BPlusTree {
 		return loc;
 	}
 	
+	public void writeMapToFile(String path, Map<String, PrimitiveValue> map) throws IOException {
+		if(prevPath != null && prevPath.equals(path) && writer != null) {
+			writer.write(map.toString());
+			writer.newLine();
+		} else {
+			prevPath = path;
+			if(writer != null) {
+				writer.close();
+			}
+			filename = new File(path);
+		    writer = new BufferedWriter(new FileWriter(filename));   
+		}
+	}
+	
+	public void close() throws IOException {
+		if(writer!=null) {
+			writer.close();
+		}
+	}
 }

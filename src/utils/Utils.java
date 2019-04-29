@@ -1,6 +1,10 @@
 package utils;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -135,5 +139,22 @@ public class Utils {
 	public static void createDirectory(String folderName) {
 		File f = new File(folderName);
 		f.mkdirs();
+	}
+	
+	private static RandomAccessFile raf = null;
+	
+	public static String readTuple(String path, int index) {
+		String tuple = null;
+		try {
+			if(raf == null) {
+				raf = new RandomAccessFile(path, "rw");
+			}
+			raf.seek(index);
+			tuple =  raf.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return tuple;
+
 	}
 }

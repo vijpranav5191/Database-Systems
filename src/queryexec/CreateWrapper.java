@@ -50,9 +50,9 @@ public class CreateWrapper {
 		if(!Utils.isFileExists(path)) {
 			try {
 				WriteOutputFile.writeObjectInFile(path, createtab.toString());
-				//TableScanIterator iter = new TableScanIterator(tbal);
-				//BPlusTreeBuilder bPlusTreeBuilder = new BPlusTreeBuilder(iter);
-				//bPlusTreeBuilder.build("LINEITEM.ORDERKEY");
+				TableScanIterator iter = new TableScanIterator(tbal);
+				BPlusTreeBuilder bPlusTreeBuilder = new BPlusTreeBuilder(iter);
+				bPlusTreeBuilder.build("LINEITEM.ORDERKEY");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

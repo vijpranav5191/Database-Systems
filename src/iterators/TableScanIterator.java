@@ -41,7 +41,7 @@ public class TableScanIterator implements DefaultIterator {
 		this.tab = tab;
 		if(DEBUG) {
 //			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";
-			this.csvFile = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint2_big/" + tableName.toLowerCase() + ".csv";
+			this.csvFile = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
 		} else {
 			this.csvFile = "data/" + tableName + ".csv";		
 		}
