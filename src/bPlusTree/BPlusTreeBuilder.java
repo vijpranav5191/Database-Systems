@@ -5,6 +5,7 @@ import java.util.Map;
 import iterators.DefaultIterator;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.statement.select.Join;
 
 public class BPlusTreeBuilder {
 	
@@ -24,5 +25,10 @@ public class BPlusTreeBuilder {
 		}
 		System.out.print("BPlus Tree Done");
 		return this.bPlusTree;
+	}
+
+	public DefaultIterator search(Map<String, PrimitiveValue> lefttuple, Join join) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
