@@ -2,6 +2,7 @@ package iterators;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,14 +12,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
+
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.Statement;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
+import queryexec.CreateWrapper;
 
 public class TableScanIterator implements DefaultIterator {
 	private Boolean DEBUG = true;
@@ -30,14 +36,17 @@ public class TableScanIterator implements DefaultIterator {
 	private Map<String, PrimitiveValue> map;
 	private List<String> columns;
 	private Boolean isOrderBy;
+	CreateWrapper createWrapper;
 	
 	public TableScanIterator(Table tab ) {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
+		this.createWrapper = new CreateWrapper();
+		this.createWrapper.createHandler(tab);
 		this.tab = tab;
 		if(DEBUG) {
 
-			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".csv";			
+		this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".csv";			
 //			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";
 //			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";			
 //			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
@@ -52,8 +61,8 @@ public class TableScanIterator implements DefaultIterator {
 			}
 
 		tuple = "";
+
 	}
-	
 	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName )
 	{
 		this.columns = new ArrayList<String>();
@@ -76,7 +85,6 @@ public class TableScanIterator implements DefaultIterator {
 		}
 		tuple = "";
 	}
-	
 	@Override
 	public boolean hasNext() {
 		try {
@@ -174,5 +182,4 @@ public class TableScanIterator implements DefaultIterator {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
 }

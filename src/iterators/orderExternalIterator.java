@@ -95,7 +95,11 @@ public class orderExternalIterator implements DefaultIterator {
 			
 //			Iterator<Map<String, PrimitiveValue>> itr = result.iterator();
 //			System.out.println("here"); 
-			File filename = new File("F:\\ff3\\level_"+level+"_file"+filenumber+".dat");
+
+			File filename = new File(this.str = "D:\\temp\\"+level+"_file"+filenumber+".dat");
+
+//			File filename = new File("F:\\ff3\\level_"+level+"_file"+filenumber+".dat");
+
 			queue.add(filename);
 //			System.out.println(filename); 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
@@ -136,13 +140,19 @@ public class orderExternalIterator implements DefaultIterator {
 			itr1 = new fileIterator(one , pmValues , colmnValues , mapValue);
 			
 			File two = queue.poll();
+//			itr2 = new fileIterator(two , pmValues , colmnValues);
+//			this.str = "/Users/pranavvij/Desktop/data/level"+level+"_file"+filenumber+".dat";
+			
+//			File newF = new File("/Users/pranavvij/Desktop/data/level"+level+"_file"+filenumber+".dat");
+
 			itr2 = new fileIterator(two , pmValues , colmnValues, mapValue);
 //			this.str = "/Users/pranavvij/Desktop/data/level"+level+"_file"+filenumber+".dat";
-			this.str = "F:\\ff3\\level_"+level+"_file"+filenumber+".dat";
-			File newF = new File("F:\\ff3\\level_"+level+"_file"+filenumber+".dat");
+//			this.str = "F:\\ff3\\level_"+level+"_file"+filenumber+".dat";
+//			File newF = new File("F:\\ff3\\level_"+level+"_file"+filenumber+".dat");
 
-//			str = "D:\\temp\\"+level+"_file"+filenumber+".dat";
-//			File newF = new File("D:\\temp"+level+"_file"+filenumber+".dat");
+
+			this.str = "D:\\temp\\"+level+"_file"+filenumber+".dat";
+			File newF = new File("D:\\temp"+level+"_file"+filenumber+".dat");
 			
 			BufferedWriter writer = new BufferedWriter(new FileWriter(newF));   
 			filenumber++;

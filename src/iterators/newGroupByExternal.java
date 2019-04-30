@@ -70,6 +70,7 @@ public class newGroupByExternal implements DefaultIterator{
 		// TODO Auto-generated method stub
 		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>();
 		
+
 		if(this.deItr.hasNext()) {
 			ArrayList<Map<String, PrimitiveValue>> group = getArrayList( this.deItr , groupBy);
 			Iterator iter = group.iterator();
