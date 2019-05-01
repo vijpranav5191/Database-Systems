@@ -22,20 +22,19 @@ public class IndexJoinIterator implements DefaultIterator {
 	private BPlusTreeBuilder btree;
 	private List<String> columns;
 	Column indexedColumn, nonIndexedColumn;
-	
+	private Map<String, PrimitiveValue> leftTuple;
 	public IndexJoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join,
 			Column indexedColumn, Column nonIndexedColumn) {
 		this.leftIterator = leftIterator;
 		this.join = join;
 		this.indexedColumn = indexedColumn;
 		this.nonIndexedColumn = nonIndexedColumn;
-		HashMap<String, BPlusTreeBuilder> bTreeMap = SchemaStructure.bTreeMap;
-		Table table = this.indexedColumn.getTable();
-		this.btree = bTreeMap.get(table.getName());
+		this.leftTuple=null;
 		List<ColumnDefinition> cdefs = new ArrayList<ColumnDefinition>();
 		for(ColumnDefs cdef: SchemaStructure.schema.get(indexedColumn.getTable().getName())) {
 			cdefs.add(cdef.cdef);
 		}
+		this.btree = SchemaStructure.bTreeMap.get(indexedColumn.getTable().getName());
 	}
 
 	@Override
@@ -45,11 +44,12 @@ public class IndexJoinIterator implements DefaultIterator {
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();
-		try {
-			while(this.leftIterator.hasNext()) {
-				Map<String, PrimitiveValue> leftTuple = leftIterator.next();
+	public Map<String, PrimitiveValue> next() {		
+		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();		
+	
+		if(this.leftIterator.hasNext()) {
+			if(this.rightIterator == null || !this.rightIterator.hasNext()) {
+				this.leftTuple = leftIterator.next();
 				try {
 					String nonIndexedColumn =  this.nonIndexedColumn.getTable().getName() + "." + this.nonIndexedColumn.getColumnName();
 					String indexedColumn =  this.indexedColumn.getTable().getName() + "." + this.indexedColumn.getColumnName();
@@ -57,41 +57,22 @@ public class IndexJoinIterator implements DefaultIterator {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				while(this.rightIterator.hasNext()) {
-					this.rightIterator.next().get("LINEITEM.ORDERKEY");
-				}
 			}
-		} catch (Exception e) {
-			System.out.print("dsdssddssdds");
-			e.printStackTrace();
+		}else {
+			return null;
 		}
-		
-		
-//		
-//		if(this.leftIterator.hasNext()) {
-//			Map<String, PrimitiveValue> leftTuple = leftIterator.next();
-//			if(this.rightIterator == null || !this.rightIterator.hasNext()) {
-//				if(this.rightIterator != null) {
-//					System.out.println(this.rightIterator.hasNext());
-//				}
-//				try {
-//					String nonIndexedColumn =  this.nonIndexedColumn.getTable().getName() + "." + this.nonIndexedColumn.getColumnName();
-//					String indexedColumn =  this.indexedColumn.getTable().getName() + "." + this.indexedColumn.getColumnName();
-//					this.rightIterator = this.btree.search(leftTuple.get(nonIndexedColumn), indexedColumn);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//			Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
-//			for(String key: rightTuple.keySet()) {
-//				temp.put(key, rightTuple.get(key));
-//			}
-//			for(String key: leftTuple.keySet()) {
-//				temp.put(key, leftTuple.get(key));
-//			}
-//			return temp;	
-//		}
-		return null;
+		Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
+		if(rightTuple==null) {
+			return null;
+		}
+		for(String key: rightTuple.keySet()) {
+			temp.put(key, rightTuple.get(key));
+		}
+		for(String key: this.leftTuple.keySet()) {
+			temp.put(key, this.leftTuple.get(key));
+		}	
+
+		return temp;
 	}
 
 	@Override
