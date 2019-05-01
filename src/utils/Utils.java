@@ -1,11 +1,17 @@
 package utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -155,6 +161,13 @@ public class Utils {
 			e.printStackTrace();
 		}
 		return tuple;
-
+	}
+	
+	public static BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
+		RandomAccessFile raf = new RandomAccessFile(path, "rw");
+		raf.seek(seekPosition);
+		InputStream is = Channels.newInputStream(raf.getChannel());
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		return br;
 	}
 }

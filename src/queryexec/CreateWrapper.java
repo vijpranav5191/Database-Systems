@@ -12,6 +12,7 @@ import java.util.List;
 
 import FileUtils.WriteOutputFile;
 import bPlusTree.BPlusTreeBuilder;
+import iterators.FileReaderIterator;
 import iterators.TableScanIterator;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
@@ -50,9 +51,9 @@ public class CreateWrapper {
 		if(!Utils.isFileExists(path)) {
 			try {
 				WriteOutputFile.writeObjectInFile(path, createtab.toString());
-				TableScanIterator iter = new TableScanIterator(tbal);
-				BPlusTreeBuilder bPlusTreeBuilder = new BPlusTreeBuilder(iter);
-				bPlusTreeBuilder.build("LINEITEM.ORDERKEY");
+				FileReaderIterator iter = new FileReaderIterator(tbal);
+				BPlusTreeBuilder bPlusTreeBuilder = new BPlusTreeBuilder(iter, tbal, createtab.getColumnDefinitions());
+				bPlusTreeBuilder.build("ORDERKEY");
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

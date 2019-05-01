@@ -20,9 +20,9 @@ import net.sf.jsqlparser.schema.Table;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 import queryexec.CreateWrapper;
+import utils.Config;
 
 public class TableScanIterator implements DefaultIterator {
-	private Boolean DEBUG = true;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
@@ -39,19 +39,13 @@ public class TableScanIterator implements DefaultIterator {
 		this.createWrapper = new CreateWrapper();
 		this.createWrapper.createHandler(tab);
 		this.tab = tab;
-		if(DEBUG) {
-//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";
-			this.csvFile = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
-		} else {
-			this.csvFile = "data/" + tableName + ".csv";		
+		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";;	
+		try {
+			br = new BufferedReader(new FileReader(csvFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Error 1 " + tableName);
 		}
-			try {
-				br = new BufferedReader(new FileReader(csvFile));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				System.out.println("Error 1 " + tableName);
-			}
-
 		tuple = "";
 	}
 	
@@ -78,6 +72,7 @@ public class TableScanIterator implements DefaultIterator {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
 			map = new HashMap<String, PrimitiveValue>();
 			String[] row = tuple.split("\\|");
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
