@@ -29,13 +29,13 @@ public class IndexJoinIterator implements DefaultIterator {
 		this.join = join;
 		this.indexedColumn = indexedColumn;
 		this.nonIndexedColumn = nonIndexedColumn;
+		HashMap<String, BPlusTreeBuilder> bTreeMap = SchemaStructure.bTreeMap;
+		Table table = this.indexedColumn.getTable();
+		this.btree = bTreeMap.get(table.getName());
 		List<ColumnDefinition> cdefs = new ArrayList<ColumnDefinition>();
 		for(ColumnDefs cdef: SchemaStructure.schema.get(indexedColumn.getTable().getName())) {
 			cdefs.add(cdef.cdef);
 		}
-		FileReaderIterator iter = new FileReaderIterator(indexedColumn.getTable());
-		this.btree = new BPlusTreeBuilder(iter, indexedColumn.getTable(), cdefs);
-		this.btree.build(indexedColumn.getColumnName());
 	}
 
 	@Override
