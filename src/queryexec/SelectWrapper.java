@@ -226,12 +226,12 @@ public class SelectWrapper {
 					if(leftEx instanceof Column) {
 						Column left = (Column) leftEx;
 						if(isIndexed(left.getTable(),left.getColumnName())) {
-							result = new IndexJoinIterator(rightIterator,leftIterator, join);
+							result = new IndexJoinIterator(rightIterator, leftIterator, join, left, (Column)rightEx);
 						}
 					}else if(rightEx instanceof Column) {
 						Column right = (Column) rightEx;
 						if(isIndexed(right.getTable(),right.getColumnName())) {
-							result = new IndexJoinIterator(leftIterator,rightIterator, join);
+							result = new IndexJoinIterator(leftIterator,rightIterator, join, right, (Column)leftEx);
 						}
 					}
 				}else {
