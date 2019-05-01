@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import iterators.DefaultIterator;
 import iterators.HavingIterator;
+import iterators.IndexJoinIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.LimitIterator;
@@ -21,8 +22,10 @@ import iterators.newGroupByExternal;
 import iterators.orderExternalIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.create.table.Index;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
@@ -216,7 +219,24 @@ public class SelectWrapper {
 			Join join = new Join();
 			join.setOnExpression(exp);
 			if (Config.isInMemory) {
-				result = new HashJoinIterator(leftIterator, rightIterator, join);
+				if(exp instanceof EqualsTo) {
+					EqualsTo eqexp = (EqualsTo) exp;
+					Expression leftEx = eqexp.getLeftExpression();
+					Expression rightEx = eqexp.getRightExpression();
+					if(leftEx instanceof Column) {
+						Column left = (Column) leftEx;
+						if(isIndexed(left.getTable(),left.getColumnName())) {
+							result = new IndexJoinIterator(rightIterator,leftIterator, join);
+						}
+					}else if(rightEx instanceof Column) {
+						Column right = (Column) rightEx;
+						if(isIndexed(right.getTable(),right.getColumnName())) {
+							result = new IndexJoinIterator(leftIterator,rightIterator, join);
+						}
+					}
+				}else {
+					result = new HashJoinIterator(leftIterator, rightIterator, join);
+				}
 			} else {
 				try {
 					result = new SortMergeIterator(leftIterator, rightIterator, join, this.selectItems);
@@ -228,5 +248,18 @@ public class SelectWrapper {
 			result = new JoinIterator(leftIterator, rightIterator, joinDefault);
 		}
 		return result;
+	}
+
+	private boolean isIndexed(Table table, String columnName) {
+		// TODO Auto-generated method stub
+		List<Index> indexes = SchemaStructure.indexMap.get(table.getName());
+		for(Index index : indexes) {
+			List<String> colnames =  index.getColumnsNames();
+			for(String name : colnames) {
+				if(name.equals(columnName))
+					return true;
+			}
+		}
+		return false;
 	}
 }

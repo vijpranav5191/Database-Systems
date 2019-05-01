@@ -18,7 +18,7 @@ public class IndexJoinIterator implements DefaultIterator {
 		// TODO Auto-generated constructor stub
 		this.leftIterator = leftIterator;
 		this.join = join;
-		btree = new BPlusTreeBuilder(rightIterator);
+		this.btree = new BPlusTreeBuilder(rightIterator);
 	}
 	@Override
 	public boolean hasNext() {
@@ -50,8 +50,6 @@ public class IndexJoinIterator implements DefaultIterator {
 		else {
 			return null;
 		}
-
-
 		// TODO Auto-generated method stub
 		return null;
 	}

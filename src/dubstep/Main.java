@@ -36,7 +36,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 class Main {
 
 	public static void main(String args[]) throws Exception {
-		Config.isInMemory = false;
+		Config.isInMemory = true;
 		File f = new File(Config.fileName); 
 		f.mkdirs();
 		Utils.createDirectory(Config.folderName);
