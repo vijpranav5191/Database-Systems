@@ -93,7 +93,7 @@ public class SelectWrapper {
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb);
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
-						List<String> leftColumns = result.getColumns();
+						List<String> leftColumns = iter2.getColumns();
 						List<String> rightColumns = iter2.getColumns();
 
 						result = pushDownJoinPredicate(leftColumns, rightColumns, result, iter2, join);
@@ -232,6 +232,8 @@ public class SelectWrapper {
 						Column right = (Column) rightEx;
 						if(isIndexed(right.getTable(),right.getColumnName())) {
 							result = new IndexJoinIterator(leftIterator,rightIterator, join, right, (Column)leftEx);
+						}else {
+							result = new HashJoinIterator(leftIterator, rightIterator, join);
 						}
 					}
 				}else {
