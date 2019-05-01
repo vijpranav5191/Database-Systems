@@ -33,9 +33,9 @@ public class BPlusTree {
 	private String prevPath;
 	File filename;
 	BufferedWriter writer;
-	
 	int branchingFactor;
 	String indexStr;
+	
 	public BPlusTree(String indexStr){
 		this.branchingFactor = DEFAULT_BRANCHING_FACTOR;
 		this.root = new LeafNode();

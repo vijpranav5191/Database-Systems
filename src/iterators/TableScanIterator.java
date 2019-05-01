@@ -10,7 +10,6 @@ import java.util.HashMap;
 //import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
@@ -47,8 +46,23 @@ public class TableScanIterator implements DefaultIterator {
 			System.out.println("Error 1 " + tableName);
 		}
 		tuple = "";
+
 	}
-	
+	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName)
+	{
+		this.columns = new ArrayList<String>();
+		this.tableName = tab.getName();
+		this.tab = tab;
+		this.isOrderBy = isOrderBy;
+		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";
+		try {
+			br = new BufferedReader(new FileReader(csvFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Error 1 " + tableName);
+		}
+		tuple = "";
+	}
 	@Override
 	public boolean hasNext() {
 		try {

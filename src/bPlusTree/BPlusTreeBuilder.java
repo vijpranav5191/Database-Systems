@@ -21,7 +21,7 @@ import utils.Utils;
 public class BPlusTreeBuilder {
 	
 	RAIterator iterator;
-	BPlusTree bPlusTree;
+	public BPlusTree bPlusTree;
 	String indexStr;
 	Table table;
 	List<ColumnDefinition> cdefs;
@@ -51,7 +51,7 @@ public class BPlusTreeBuilder {
 					startOffset += seekOffset;				
 					seekOffset = 0;
 				}
-				seekOffset += next.length(); 
+				seekOffset += (next.length() + 1); 
 				this.bPlusTree.insert(longValue, startOffset);
 				insertedCount += 1;
 			}
@@ -77,9 +77,7 @@ public class BPlusTreeBuilder {
 	}
 
 	
-	public DefaultIterator search(Map<String, PrimitiveValue> tuple) throws IOException {
-		String indexColumn = table.getName() + "." + indexStr;
-		PrimitiveValue searchValue = tuple.get(indexColumn);
+	public DefaultIterator search(PrimitiveValue searchValue, String indexColumn) throws IOException {
 		int position = bPlusTree.search(searchValue);
 		BufferedReader br = Utils.getInputStreamBySeek(Config.databasePath + table.getName() + ".csv", position);
 		TableSeekIterator tableSeekItr = new TableSeekIterator(br, this.table, searchValue, indexColumn);
@@ -91,5 +89,4 @@ public class BPlusTreeBuilder {
 			bPlusTree.close();
 		}
 	}
-	
 }

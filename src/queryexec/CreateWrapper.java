@@ -1,12 +1,11 @@
 package queryexec;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +21,7 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.create.table.Index;
 import objects.ColumnDefs;
+import objects.IndexDef;
 import objects.SchemaStructure;
 import utils.Config;
 import utils.Utils;
@@ -36,24 +36,20 @@ public class CreateWrapper {
 			CCJSqlParser parser = new CCJSqlParser(inputStream);
 			if(queryStr != null) {
 				Statement query = parser.Statement();
-				this.createHandler(query);
+				this.createHandler(query, queryStr);
 			}
 		} catch (ClassNotFoundException | IOException | ParseException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void createHandler(Statement query) {
+	public void createHandler(Statement query, String querystr) {
 		CreateTable createtab = (CreateTable) query;
 		Table tbal = createtab.getTable();
-		createtab.setIndexes(null);
 		String path = Config.createFileDir + tbal.getName();
 		if(!Utils.isFileExists(path)) {
 			try {
-				WriteOutputFile.writeObjectInFile(path, createtab.toString());
-				FileReaderIterator iter = new FileReaderIterator(tbal);
-				BPlusTreeBuilder bPlusTreeBuilder = new BPlusTreeBuilder(iter, tbal, createtab.getColumnDefinitions());
-				bPlusTreeBuilder.build("ORDERKEY");
+				WriteOutputFile.writeObjectInFile(path, querystr);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -62,7 +58,7 @@ public class CreateWrapper {
 		} else {
 			List<ColumnDefinition> cdef = createtab.getColumnDefinitions();
 			List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
-			
+			List<Index> indexes = createtab.getIndexes();
 			for (ColumnDefinition cd : cdef) {
 				ColumnDefs c = new ColumnDefs();
 				c.cdef = cd;
@@ -71,6 +67,7 @@ public class CreateWrapper {
 			}
 			SchemaStructure.schema.put(tbal.getName(), cdfList);
 			SchemaStructure.tableMap.put(tbal.getName(), tbal);
+			SchemaStructure.indexMap.put(tbal.getName(), indexes);
 		}
 	}
 }

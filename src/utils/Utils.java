@@ -163,10 +163,18 @@ public class Utils {
 		return tuple;
 	}
 	
+	private static RandomAccessFile raf_1 = null;
+	
 	public static BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
-		RandomAccessFile raf = new RandomAccessFile(path, "rw");
-		raf.seek(seekPosition);
-		InputStream is = Channels.newInputStream(raf.getChannel());
+		try {
+			if(raf_1 == null) {
+				raf_1 = new RandomAccessFile(path, "rw");
+			}
+			raf_1.seek(seekPosition);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		InputStream is = Channels.newInputStream(raf_1.getChannel());
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		return br;
 	}
