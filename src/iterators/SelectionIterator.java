@@ -18,6 +18,8 @@ public class SelectionIterator implements DefaultIterator {
 		this.nextResult = getNextIter();
 	}
 	
+	
+	
 	public DefaultIterator getIterator() {
 		return iterator;
 	}

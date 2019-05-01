@@ -3,8 +3,10 @@ package bPlusTree;
 import java.util.Map;
 
 import iterators.DefaultIterator;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.Join;
 
 public class BPlusTreeBuilder {
@@ -28,6 +30,13 @@ public class BPlusTreeBuilder {
 	}
 
 	public DefaultIterator search(Map<String, PrimitiveValue> lefttuple, Join join) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
+
+	public static DefaultIterator searchByRange(DefaultIterator iterator2, Table table, Expression exp) {
 		// TODO Auto-generated method stub
 		return null;
 	}
