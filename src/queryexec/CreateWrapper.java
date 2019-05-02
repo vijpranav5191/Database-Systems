@@ -24,6 +24,7 @@ import objects.ColumnDefs;
 import objects.IndexDef;
 import objects.SchemaStructure;
 import utils.Config;
+import utils.Constants;
 import utils.Utils;
 
 public class CreateWrapper {
@@ -68,6 +69,17 @@ public class CreateWrapper {
 			SchemaStructure.schema.put(tbal.getName(), cdfList);
 			SchemaStructure.tableMap.put(tbal.getName(), tbal);
 			SchemaStructure.indexMap.put(tbal.getName(), indexes);
+			for(Index index: indexes) {
+				if(index.getType().equals(Constants.PRIMARY_KEY)) {
+					for(String primaryKey: index.getColumnsNames()) {
+						FileReaderIterator iter = new FileReaderIterator(tbal);
+						BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef);
+						btree.build(primaryKey);
+						SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+						break;
+					}
+				}
+			}
 		}
 	}
 }

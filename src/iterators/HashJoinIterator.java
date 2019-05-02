@@ -22,6 +22,7 @@ public class HashJoinIterator implements DefaultIterator {
 	DefaultIterator rightIterator;
 	
 	Map<String, PrimitiveValue> rightTuple;
+	String currentHashKey;
 	String rightExpression = null;
 	
 	Join join;
@@ -124,6 +125,7 @@ public class HashJoinIterator implements DefaultIterator {
 			String hashKey;
 			try {
 				hashKey = Utils.hashString(value.toString());
+				this.currentHashKey = hashKey;
 				this.indexMapList = 0;
 				this.mapList = this.passMap.getOrDefault(hashKey, new ArrayList<Map<String, PrimitiveValue>>());
 			} catch (Exception e) {
@@ -136,7 +138,6 @@ public class HashJoinIterator implements DefaultIterator {
 
 	@Override
 	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }

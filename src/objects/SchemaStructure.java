@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import bPlusTree.BPlusTreeBuilder;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
@@ -14,4 +15,5 @@ public class SchemaStructure {
 	public static HashMap<String, Table> columnTableMap = new HashMap<>();
 	public static List<Expression> whrexpressions = new ArrayList<Expression>();
 	public static HashMap<String, List<Index>> indexMap = new HashMap<>();
+	public static HashMap<String, BPlusTreeBuilder> bTreeMap = new HashMap<>();
 }
