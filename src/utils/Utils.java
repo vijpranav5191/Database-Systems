@@ -1,7 +1,17 @@
 package utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -78,7 +88,8 @@ public class Utils {
 	}
 
 	public static Expression conquerExpression(List<Expression> elist) {
-		if (elist.size() == 2) {
+		if (elist.size() == 2) 
+		{
 			AndExpression and = new AndExpression();
 			and.setLeftExpression(elist.get(0));
 			and.setRightExpression(elist.get(1));
@@ -86,7 +97,8 @@ public class Utils {
 		}
 		Expression result = elist.get(0);
 
-		for (int i = 1; i < elist.size(); i++) {
+		for (int i = 1; i < elist.size(); i++) 
+		{
 			AndExpression and = new AndExpression();
 			and.setLeftExpression(result);
 			and.setRightExpression(elist.get(i));
@@ -135,5 +147,37 @@ public class Utils {
 	public static void createDirectory(String folderName) {
 		File f = new File(folderName);
 		f.mkdirs();
+	}
+	
+	private static RandomAccessFile raf = null;
+	
+	public static String readTuple(String path, int index) {
+		String tuple = null;
+		try {
+			if(raf == null) {
+				raf = new RandomAccessFile(path, "rw");
+			}
+			raf.seek(index);
+			tuple =  raf.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return tuple;
+	}
+	
+	private static RandomAccessFile raf_1 = null;
+	
+	public static BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
+		try {
+			if(raf_1 == null) {
+				raf_1 = new RandomAccessFile(path, "rw");
+			}
+			raf_1.seek(seekPosition);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		InputStream is = Channels.newInputStream(raf_1.getChannel());
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		return br;
 	}
 }

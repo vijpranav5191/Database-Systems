@@ -2,7 +2,6 @@ package iterators;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,23 +10,18 @@ import java.util.HashMap;
 //import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.ParseException;
-
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
-import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.Statement;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 import queryexec.CreateWrapper;
+import utils.Config;
 
 public class TableScanIterator implements DefaultIterator {
-	private Boolean DEBUG = true;
 	private String csvFile;
 	private String tableName;
 	private BufferedReader br;
@@ -44,39 +38,24 @@ public class TableScanIterator implements DefaultIterator {
 		this.createWrapper = new CreateWrapper();
 		this.createWrapper.createHandler(tab);
 		this.tab = tab;
-		if(DEBUG) {
 
-//		this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".csv";			
-//			this.csvFile = "C:\\Users\\Amit\\Desktop\\Sanity_Check_Examples\\data\\50Data\\" + tableName.toLowerCase() + ".csv";
-			this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".dat";				
-//			this.csvFile = "/Users/pranavvij/Desktop/data/checkpoint2/" + tableName.toLowerCase() + ".csv";
-		} else {
-			this.csvFile = "data/" + tableName + ".csv";		
+		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";;	
+		try {
+			br = new BufferedReader(new FileReader(csvFile));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Error 1 " + tableName);
 		}
-			try {
-				br = new BufferedReader(new FileReader(csvFile));
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				System.out.println("Error 1 " + tableName);
-			}
-
 		tuple = "";
 
 	}
-	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName )
+	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName)
 	{
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.tab = tab;
 		this.isOrderBy = isOrderBy;
-		if(DEBUG) {
-			if(isOrderBy)
-				this.csvFile = String.valueOf(fileName);		
-		} else {
-			if(isOrderBy == true)
-				this.csvFile = String.valueOf(fileName);
-			
-		}
+		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 		} catch (FileNotFoundException e) {
@@ -108,6 +87,7 @@ public class TableScanIterator implements DefaultIterator {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
 			map = new HashMap<String, PrimitiveValue>();
 			String[] row = tuple.split("\\|");
 			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);

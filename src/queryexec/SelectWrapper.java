@@ -1,9 +1,15 @@
 package queryexec;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+
+import bPlusTree.BPlusTreeBuilder;
 import iterators.DefaultIterator;
 import iterators.HavingIterator;
+import iterators.IndexJoinIterator;
+import iterators.IndexSelectionIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.LimitIterator;
@@ -21,8 +27,14 @@ import iterators.newGroupByExternal;
 import iterators.orderExternalIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.create.table.Index;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
@@ -98,12 +110,41 @@ public class SelectWrapper {
 				}
 			}
 
-			if (this.whereExp != null) {
+			if (this.whereExp != null) 
+			{
+				
 				List<Expression> tempExp = SchemaStructure.whrexpressions;
-				if (tempExp != null && tempExp.size() > 0) {
-					Expression exp = Utils.conquerExpression(tempExp);
-					result = new SelectionIterator(result, exp);
+				HashMap< String , List<Index>> indexMap = SchemaStructure.indexMap;
+				
+				if (tempExp != null && tempExp.size() > 0) 
+				{
+					
+					for(Expression itrExp : tempExp)
+					{
+						if( itrExp instanceof GreaterThan   )
+						{
+							GreaterThan expGreaterThan = (GreaterThan) itrExp;
+							Column leftExp = (Column)expGreaterThan.getLeftExpression();
+							Column rightExp = (Column)expGreaterThan.getRightExpression();
+							String leftColumnName = null;
+							Table leftTableName = null;
+							if( leftExp instanceof Column)
+							{
+								leftColumnName =   leftExp.getColumnName(); 
+								leftTableName =  leftExp.getTable(); 
+							}
+							if(leftColumnName != null ) 
+								function( result ,  indexMap , leftColumnName , leftTableName  );			
+							
+						}
+						
+						
+					}
+					
+//					Expression exp = Utils.conquerExpression(tempExp);
+//					result = new SelectionIterator(result, exp);
 				}
+				
 			}
 
 			if (this.groupBy != null) {
@@ -163,6 +204,20 @@ public class SelectWrapper {
 		}
 	}
 
+	private void function(DefaultIterator iterator , HashMap<String, List<Index>> indexMap, String columnName, Table tableName) {
+		// TODO Auto-generated method stub
+		List<Index> indexes =  indexMap.get( tableName.toString());
+		
+		if( indexes.contains(columnName))
+		{
+			iterator = new IndexSelectionIterator(iterator , tableName , columnName);
+		}
+		else
+		{
+			iterator = new IndexSelectionIterator(iterator , tableName , columnName);
+		}
+	}
+
 	private boolean isContainingColumn(String xKey, List<ColumnDefs> list) {
 		for (ColumnDefs cdef : list) {
 			if (cdef.cdef.getColumnName().equals(xKey)) {
@@ -217,7 +272,24 @@ public class SelectWrapper {
 			join.setOnExpression(exp);
 
 			if (Config.isInMemory) {
-				result = new HashJoinIterator(leftIterator, rightIterator, join);
+				if(exp instanceof EqualsTo) {
+					EqualsTo eqexp = (EqualsTo) exp;
+					Expression leftEx = eqexp.getLeftExpression();
+					Expression rightEx = eqexp.getRightExpression();
+					if(leftEx instanceof Column) {
+						Column left = (Column) leftEx;
+						if(isIndexed(left.getTable(),left.getColumnName())) {
+							result = new IndexJoinIterator(rightIterator, leftIterator, join, left, (Column)rightEx);
+						}
+					}else if(rightEx instanceof Column) {
+						Column right = (Column) rightEx;
+						if(isIndexed(right.getTable(),right.getColumnName())) {
+							result = new IndexJoinIterator(leftIterator,rightIterator, join, right, (Column)leftEx);
+						}
+					}
+				}else {
+					result = new HashJoinIterator(leftIterator, rightIterator, join);
+				}
 			} else {
 				try {
 					result = new SortMergeIterator(leftIterator, rightIterator, join, this.selectItems);
@@ -229,5 +301,18 @@ public class SelectWrapper {
 			result = new JoinIterator(leftIterator, rightIterator, joinDefault);
 		}
 		return result;
+	}
+
+	private boolean isIndexed(Table table, String columnName) {
+		// TODO Auto-generated method stub
+		List<Index> indexes = SchemaStructure.indexMap.get(table.getName());
+		for(Index index : indexes) {
+			List<String> colnames =  index.getColumnsNames();
+			for(String name : colnames) {
+				if(name.equals(columnName))
+					return true;
+			}
+		}
+		return false;
 	}
 }

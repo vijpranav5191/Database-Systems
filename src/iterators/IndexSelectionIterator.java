@@ -1,6 +1,8 @@
 package iterators;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,6 +24,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.Index;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
@@ -30,165 +33,14 @@ public class IndexSelectionIterator implements DefaultIterator{
 	
 	DefaultIterator iterator;
 	DefaultIterator iteratorTemp;
+	List<ColumnDefinition> cdefs;
 	@SuppressWarnings("unlikely-arg-type")
-	public IndexSelectionIterator(DefaultIterator iterator ,Table table , Expression exp) {
-		// TODO Auto-generated constructor stub
-		this.iteratorTemp = iterator;
-		HashMap< String , List<Index>> indexMap = SchemaStructure.indexMap;
-		if( exp instanceof GreaterThan   )
-		{
-			GreaterThan expGreaterThan = (GreaterThan) exp;
-			Column leftExp = (Column)expGreaterThan.getLeftExpression();
-			Column rightExp = (Column)expGreaterThan.getRightExpression();
-			String leftColumnName = null;
-			Table leftTableName = null;
-			if( leftExp instanceof Column)
-			{
-				leftColumnName =   leftExp.getColumnName(); 
-				leftTableName =  leftExp.getTable(); 
-			}
-			String rightColumnName = "";
-			Table rightTableName = null;
+	public IndexSelectionIterator( DefaultIterator iterator, Table table , String columnName) {
 			
-			if( rightExp instanceof Column)
-			{
-				rightColumnName =  rightExp.getColumnName(); 
-				rightTableName =  rightExp.getTable();
-			}
-			
-			
-			
-			
-			if(leftColumnName != null ) 
-				function( indexMap , leftColumnName , leftTableName ,  exp );
-			if(rightColumnName != null ) 
-				function( indexMap , rightColumnName , rightTableName ,  exp );				
-			
-		}
-		
-		else if( exp instanceof GreaterThanEquals )
-		{
-			GreaterThanEquals expGreaterThan = (GreaterThanEquals) exp;
-			Column leftExp = (Column) expGreaterThan.getLeftExpression();
-			Column rightExp = (Column)expGreaterThan.getRightExpression();
-			String leftColumnName = null;
-			Table leftTableName = null;
-			if( leftExp instanceof Column)
-			{
-				leftColumnName =   leftExp.getColumnName(); 
-				leftTableName =  leftExp.getTable(); 
-			}
-			String rightColumnName = "";
-			Table rightTableName = null;
-			
-			if( rightExp instanceof Column)
-			{
-				rightColumnName =  rightExp.getColumnName(); 
-				rightTableName =  rightExp.getTable();
-			}
-		
-			if(leftColumnName != null ) 
-				function( indexMap , leftColumnName , leftTableName ,  exp );
-			if(rightColumnName != null ) 
-				function( indexMap , rightColumnName , rightTableName ,  exp );	
-		}
-		
-		else if( exp instanceof MinorThan   )
-		{
-			MinorThan expMinorThan = (MinorThan) exp;
-			Column leftExp = (Column) expMinorThan.getLeftExpression();
-			Column rightExp = (Column) expMinorThan.getRightExpression();
-			String leftColumnName = null;
-			Table leftTableName = null;
-			if( leftExp instanceof Column)
-			{
-				leftColumnName =   leftExp.getColumnName(); 
-				leftTableName =  leftExp.getTable(); 
-			}
-			String rightColumnName = "";
-			Table rightTableName = null;
-			
-			if( rightExp instanceof Column)
-			{
-				rightColumnName =  rightExp.getColumnName(); 
-				rightTableName =  rightExp.getTable();
-			}
-			
-			if(leftColumnName != null ) 
-				function( indexMap , leftColumnName , leftTableName ,  exp );
-			if(rightColumnName != null ) 
-				function( indexMap , rightColumnName , rightTableName ,  exp );				
-			
-		}
-		
-		else if( exp instanceof MinorThanEquals )
-		{
-			MinorThanEquals expMinorThan = (MinorThanEquals) exp;
-			Column leftExp = (Column) expMinorThan.getLeftExpression();
-			Column rightExp = (Column)expMinorThan.getRightExpression();
-			String leftColumnName = null;
-			Table leftTableName = null;
-			if( leftExp instanceof Column)
-			{
-				leftColumnName =   leftExp.getColumnName(); 
-				leftTableName =  leftExp.getTable(); 
-			}
-			String rightColumnName = "";
-			Table rightTableName = null;
-			
-			if( rightExp instanceof Column)
-			{
-				rightColumnName =  rightExp.getColumnName(); 
-				rightTableName =  rightExp.getTable();
-			}
-		
-			if(leftColumnName != null ) 
-				function( indexMap , leftColumnName , leftTableName ,  exp );
-			if(rightColumnName != null ) 
-				function( indexMap , rightColumnName , rightTableName ,  exp );	
-		}
-		
-		else if( exp instanceof EqualsTo )
-		{
-			EqualsTo expEquals = (EqualsTo) exp;
-			Column leftExp = (Column) expEquals.getLeftExpression();
-			Column rightExp = (Column)expEquals.getRightExpression();
-			String leftColumnName = null;
-			Table leftTableName = null;
-			if( leftExp instanceof Column)
-			{
-				leftColumnName =   leftExp.getColumnName(); 
-				leftTableName =  leftExp.getTable(); 
-			}
-			String rightColumnName = "";
-			Table rightTableName = null;
-			
-			if( rightExp instanceof Column)
-			{
-				rightColumnName =  rightExp.getColumnName(); 
-				rightTableName =  rightExp.getTable();
-			}
-		
-			if(leftColumnName != null ) 
-				function( indexMap , leftColumnName , leftTableName ,  exp );
-			if(rightColumnName != null ) 
-				function( indexMap , rightColumnName , rightTableName ,  exp );	
-		}	
 		
 	}
 	
-	private void function(HashMap<String, List<Index>> indexMap, String columnName, Table tableName , Expression exp) {
-		// TODO Auto-generated method stub
-		List<Index> indexes =  indexMap.get( tableName.toString());
-		if( indexes.contains(columnName))
-		{
-			this.iterator = BPlusTreeBuilder.searchByRange(iterator , tableName , exp );
-		}
-		else
-		{
-			this.iterator = new  SelectionIterator(iterator , exp);
-		}
-	}
+	
 	@Override
 	public boolean hasNext() {
 		// TODO Auto-generated method stub

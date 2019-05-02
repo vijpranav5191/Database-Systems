@@ -1,25 +1,10 @@
 package dubstep;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import com.sun.xml.internal.ws.message.ByteArrayAttachment;
-
 import interfaces.UnionWrapper;
 import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -27,8 +12,6 @@ import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
 import queryexec.SelectWrapper;
-import sun.misc.IOUtils;
-import sun.nio.ch.IOUtil;
 import utils.Config;
 import utils.Utils;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -36,12 +19,10 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 class Main {
 
 	public static void main(String args[]) throws Exception {
-		Config.isInMemory = false;
-		File f = new File(Config.fileName); 
-		f.mkdirs();
+		Config.isInMemory = true;
 		Utils.createDirectory(Config.folderName);
 		Utils.createDirectory(Config.createFileDir);		
-		
+		Utils.createDirectory(Config.bPlusTreeDir);
 
 		for (String arg : args) {
 			if (arg.equals("--in-mem")) {
