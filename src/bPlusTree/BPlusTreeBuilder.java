@@ -78,7 +78,7 @@ public class BPlusTreeBuilder {
 		return -1;
 	}
 
-	
+
 	public DefaultIterator search(PrimitiveValue searchValue, String indexColumn) throws IOException {
 		if(searchValue == null) {
 			bPlusTree.search(searchValue);	

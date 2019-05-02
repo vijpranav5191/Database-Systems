@@ -35,6 +35,12 @@ public class IndexJoinIterator implements DefaultIterator {
 		this.indexedColumn = indexedColumn;
 		this.nonIndexedColumn = nonIndexedColumn;
 		this.leftTuple=null;
+		this.columns = new ArrayList<String>();
+		this.join = join;
+		if(this.columns.size() == 0) {
+			this.columns.addAll(leftIterator.getColumns());
+			this.columns.addAll(rightIterator.getColumns());
+		}
 		List<ColumnDefinition> cdefs = new ArrayList<ColumnDefinition>();
 		for(ColumnDefs cdef: SchemaStructure.schema.get(indexedColumn.getTable().getName())) {
 			cdefs.add(cdef.cdef);
