@@ -93,7 +93,7 @@ public class SelectWrapper {
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb);
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
-						List<String> leftColumns = iter2.getColumns();
+						List<String> leftColumns = result.getColumns();
 						List<String> rightColumns = iter2.getColumns();
 
 						result = pushDownJoinPredicate(leftColumns, rightColumns, result, iter2, join);
@@ -175,18 +175,6 @@ public class SelectWrapper {
 		return false;
 	}
 
-	public DefaultIterator optimize(DefaultIterator root) {
-
-		if (root instanceof SelectionIterator) {
-			SelectionIterator selIter = (SelectionIterator) root;
-			if (selIter.getChildIter() instanceof JoinIterator) {
-				DefaultIterator joiniter = (JoinIterator) selIter.getChildIter();
-				Expression selExp = selIter.getWhereExp();
-			}
-		}
-		return null;
-	}
-
 	public List<Expression> splitAndClauses(Expression e) {
 		List<Expression> ret = new ArrayList<>();
 		if (e instanceof AndExpression) {
@@ -223,18 +211,19 @@ public class SelectWrapper {
 					EqualsTo eqexp = (EqualsTo) exp;
 					Expression leftEx = eqexp.getLeftExpression();
 					Expression rightEx = eqexp.getRightExpression();
+					Column left=null,right=null;
 					if(leftEx instanceof Column) {
-						Column left = (Column) leftEx;
-						if(isIndexed(left.getTable(),left.getColumnName())) {
-							result = new IndexJoinIterator(rightIterator, leftIterator, join, left, (Column)rightEx);
-						}
-					}else if(rightEx instanceof Column) {
-						Column right = (Column) rightEx;
-						if(isIndexed(right.getTable(),right.getColumnName())) {
-							result = new IndexJoinIterator(leftIterator,rightIterator, join, right, (Column)leftEx);
-						}else {
-							result = new HashJoinIterator(leftIterator, rightIterator, join);
-						}
+						 left = (Column) leftEx;
+					}
+					if(rightEx instanceof Column) {
+						right = (Column) rightEx;
+					}	
+					if(isIndexed(left.getTable(),left.getColumnName())) {
+						result = new IndexJoinIterator(rightIterator, leftIterator, join, left, (Column)rightEx);
+					}else if(isIndexed(right.getTable(),right.getColumnName())) {
+						result = new IndexJoinIterator(leftIterator,rightIterator, join, right, (Column)leftEx);
+					}else {
+						result = new HashJoinIterator(leftIterator, rightIterator, join);
 					}
 				}else {
 					result = new HashJoinIterator(leftIterator, rightIterator, join);

@@ -26,7 +26,12 @@ public class IndexJoinIterator implements DefaultIterator {
 	public IndexJoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join,
 			Column indexedColumn, Column nonIndexedColumn) {
 		this.leftIterator = leftIterator;
+		this.columns = new ArrayList<String>();
 		this.join = join;
+		if(this.columns.size() == 0) {
+			this.columns.addAll(leftIterator.getColumns());
+			this.columns.addAll(rightIterator.getColumns());
+		}
 		this.indexedColumn = indexedColumn;
 		this.nonIndexedColumn = nonIndexedColumn;
 		this.leftTuple=null;
@@ -59,7 +64,7 @@ public class IndexJoinIterator implements DefaultIterator {
 				try {
 					String nonIndexedColumn =  this.nonIndexedColumn.getTable().getName() + "." + this.nonIndexedColumn.getColumnName();
 					String indexedColumn =  this.indexedColumn.getTable().getName() + "." + this.indexedColumn.getColumnName();
-					this.rightIterator = this.btree.search(leftTuple.get(nonIndexedColumn), indexedColumn);
+					this.rightIterator = this.btree.search(this.leftTuple.get(nonIndexedColumn), indexedColumn);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -89,8 +94,6 @@ public class IndexJoinIterator implements DefaultIterator {
 
 	@Override
 	public List<String> getColumns() {
-		// TODO Auto-generated method stub
-
 		return this.columns;
 	}
 
