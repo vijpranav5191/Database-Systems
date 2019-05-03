@@ -36,7 +36,7 @@ public class TableScanIterator implements DefaultIterator {
 		this.tableName = tab.getName();
 		this.tab = tab;
 
-		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";;	
+		this.csvFile = Config.databasePath + tableName + ".csv";;	
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 		} catch (FileNotFoundException e) {
@@ -52,7 +52,7 @@ public class TableScanIterator implements DefaultIterator {
 		this.tableName = tab.getName();
 		this.tab = tab;
 		this.isOrderBy = isOrderBy;
-		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";
+		this.csvFile = Config.databasePath + tableName + ".csv";
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
 		} catch (FileNotFoundException e) {
