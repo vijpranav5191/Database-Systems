@@ -2,6 +2,7 @@ package dubstep;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.StringReader;
 import interfaces.UnionWrapper;
 import net.sf.jsqlparser.parser.CCJSqlParser;
@@ -19,11 +20,17 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 class Main {
 
 	public static void main(String args[]) throws Exception {
-		Config.isInMemory = true;
+		Config.isInMemory = false;
 		Utils.createDirectory(Config.folderName);
 		Utils.createDirectory(Config.createFileDir);		
 		Utils.createDirectory(Config.bPlusTreeDir);
-
+		
+		File createDir = new File(Config.createFileDir);
+		CreateWrapper createWrapper = new CreateWrapper();
+		for(File file: createDir.listFiles()) {
+			createWrapper.createHandler(file.getName());
+		}
+		
 		for (String arg : args) {
 			if (arg.equals("--in-mem")) {
 				Config.isInMemory = true;

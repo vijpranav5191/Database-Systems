@@ -16,80 +16,85 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 
 public class IndexJoinIterator implements DefaultIterator {
-	private DefaultIterator leftIterator;
-	private DefaultIterator rightIterator;
+	private DefaultIterator nonIndexedIterator;
+	private DefaultIterator indexedIterator;
+	private DefaultIterator searchIndexIterator;
+	
 	private Join join;
 	private BPlusTreeBuilder btree;
 	private List<String> columns;
 	Column indexedColumn, nonIndexedColumn;
-	private Map<String, PrimitiveValue> leftTuple;
-	public IndexJoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join,
-			Column indexedColumn, Column nonIndexedColumn) {
-		this.leftIterator = leftIterator;
+	String indexedColumnStr, nonIndexedColumnStr;
+	private Map<String, PrimitiveValue> nonIndexedTuple;
+	Map<String, PrimitiveValue> nextResult;
+	
+	
+	public IndexJoinIterator(DefaultIterator nonIndexedIterator, DefaultIterator indexedIterator, 
+			Join join, Column nonIndexedColumn, Column indexedColumn) {
+		this.indexedIterator = indexedIterator;
+		this.nonIndexedIterator = nonIndexedIterator;
 		this.columns = new ArrayList<String>();
 		this.join = join;
 		if(this.columns.size() == 0) {
-			this.columns.addAll(leftIterator.getColumns());
-			this.columns.addAll(rightIterator.getColumns());
+			this.columns.addAll(nonIndexedIterator.getColumns());
+			this.columns.addAll(indexedIterator.getColumns());
 		}
 		this.indexedColumn = indexedColumn;
 		this.nonIndexedColumn = nonIndexedColumn;
-		this.leftTuple=null;
-		this.columns = new ArrayList<String>();
-		this.join = join;
-		if(this.columns.size() == 0) {
-			this.columns.addAll(leftIterator.getColumns());
-			this.columns.addAll(rightIterator.getColumns());
-		}
-		List<ColumnDefinition> cdefs = new ArrayList<ColumnDefinition>();
-		for(ColumnDefs cdef: SchemaStructure.schema.get(indexedColumn.getTable().getName())) {
-			cdefs.add(cdef.cdef);
-		}
 		this.btree = SchemaStructure.bTreeMap.get(indexedColumn.getTable().getName());
+		this.nonIndexedColumnStr =  this.nonIndexedColumn.getTable().getName() + "." + this.nonIndexedColumn.getColumnName();
+		this.indexedColumnStr =  this.indexedColumn.getTable().getName() + "." + this.indexedColumn.getColumnName();	
+		this.nextResult = getNextIter();
 	}
+
 
 	@Override
 	public boolean hasNext() {
-		// TODO Auto-generated method stub
-		return this.leftIterator.hasNext();
+		if(this.nextResult != null) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {		
-		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();		
-	
-		if(this.leftIterator.hasNext()) {
-			if(this.rightIterator == null || !this.rightIterator.hasNext()) {
-				this.leftTuple = leftIterator.next();
-				try {
-					String nonIndexedColumn =  this.nonIndexedColumn.getTable().getName() + "." + this.nonIndexedColumn.getColumnName();
-					String indexedColumn =  this.indexedColumn.getTable().getName() + "." + this.indexedColumn.getColumnName();
-					this.rightIterator = this.btree.search(this.leftTuple.get(nonIndexedColumn), indexedColumn);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}else {
-			return null;
-		}
-		Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
-		if(rightTuple==null) {
-			return null;
-		}
-		for(String key: rightTuple.keySet()) {
-			temp.put(key, rightTuple.get(key));
-		}
-		for(String key: this.leftTuple.keySet()) {
-			temp.put(key, this.leftTuple.get(key));
-		}	
-
+	public Map<String, PrimitiveValue> next() {
+		Map<String, PrimitiveValue> temp = this.nextResult;
+		this.nextResult = getNextIter();
 		return temp;
 	}
 
+
+	public Map<String, PrimitiveValue> getNextIter(){
+		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();		
+		if(this.searchIndexIterator == null || !this.searchIndexIterator.hasNext()) {
+			this.nonIndexedTuple = this.nonIndexedIterator.next();
+			if(this.nonIndexedTuple != null) {
+				try {
+					this.searchIndexIterator = this.btree.search(this.nonIndexedTuple.get(this.nonIndexedColumnStr), this.indexedColumnStr);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				return null;
+			}
+		}
+		Map<String, PrimitiveValue> searchedTuple = this.searchIndexIterator.next();
+		if(searchedTuple != null) {
+			for(String key: searchedTuple.keySet()) {
+				temp.put(key, searchedTuple.get(key));
+			}
+			for(String key: this.nonIndexedTuple.keySet()) {
+				temp.put(key, this.nonIndexedTuple.get(key));
+			}
+			return temp;
+		}
+		return null;
+	}
+	
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-		this.leftIterator.reset();
+		this.nonIndexedIterator.reset();
+		this.indexedIterator.reset();
 	}
 
 	@Override
@@ -99,8 +104,6 @@ public class IndexJoinIterator implements DefaultIterator {
 
 	@Override
 	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

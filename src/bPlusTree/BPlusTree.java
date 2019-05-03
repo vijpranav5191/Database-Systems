@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.schema.Table;
 import utils.Config;
 
 
@@ -66,11 +68,13 @@ public class BPlusTree {
 		//toDraw();
 	}
 	
-	public void toDraw() {
-		Queue<List<Node>> queue = new LinkedList<List<Node>>();
+	public void toDraw(Table table) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(Config.bPlusTreeDir + table.getName() + "_" + this.indexStr));
+	    Queue<List<Node>> queue = new LinkedList<List<Node>>();
 		queue.add(Arrays.asList(root));
 		while (!queue.isEmpty()) {
 			Queue<List<Node>> nextQueue = new LinkedList<List<Node>>();
+			String line = "";
 			while (!queue.isEmpty()) {
 				List<Node> nodes = queue.remove();
 				Iterator<Node> it = nodes.iterator();
@@ -78,27 +82,33 @@ public class BPlusTree {
 					Node node = it.next();
 					if(node instanceof BPlusTree.InternalNode) {
 						for(PrimitiveValue x: node.keys) {
-							System.out.print(x.toString() + " , ");
+							line += x.toString() + ",";
 						}
 					} else {
 						LeafNode node1  = (BPlusTree.LeafNode) node;
 						for(PrimitiveValue x: node1.keys) {
-							System.out.print(x.toString() + " , ");
+							line+= x.toString() + ",";
 						}	
 					}
+					line = line.substring(0, line.length() - 1);
 					if (node instanceof BPlusTree.InternalNode) {
 						InternalNode internalNode = (InternalNode) node;
 						nextQueue.add(internalNode.children);
 					}
-					System.out.print("---->");
+					line += "|";
 				}
 			}
+			writer.write(line.substring(0, line.length() - 1));
+			writer.newLine();
 			queue = nextQueue;
-			System.out.println("\n");
 		}
-		System.out.println("==========================================");
-	
+	    writer.close();
 	}
+	
+	public void reDraw() {
+		
+	}
+	
 	
 	abstract class Node {
 		List<PrimitiveValue> keys;
@@ -176,7 +186,7 @@ public class BPlusTree {
 		@Override
 		int getValue(PrimitiveValue key) {
 			int loc = binarySearch(keys, key);
-			return loc >= 0 ? values.get(loc) : null;
+			return loc >= 0 ? values.get(loc) : -1;
 		}
 	}
 	
@@ -268,9 +278,6 @@ public class BPlusTree {
 			}
 			
 		};
-		if(key == null) {
-			Collections.binarySearch(kList, key, comp);	
-		}
 		int loc = Collections.binarySearch(kList, key, comp);
 		return loc;
 	}

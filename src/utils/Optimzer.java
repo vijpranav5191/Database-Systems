@@ -70,9 +70,10 @@ public class Optimzer {
 			for(Expression exp: expressions) {
 				if(exp instanceof EqualsTo) {
 					EqualsTo equalTo = (EqualsTo) exp;
-					String[] left = equalTo.getLeftExpression().toString().split("\\.");
-					String[] right = equalTo.getRightExpression().toString().split("\\.");
-					
+					//String[] left = equalTo.getLeftExpression().toString().split("\\.");
+					//String[] right = equalTo.getRightExpression().toString().split("\\.");
+					String left = equalTo.getLeftExpression().toString();
+					String right = equalTo.getRightExpression().toString();	
 					if(isContainingExpression(left, leftcdefs) && isContainingExpression(right, rightcdefs)) {
 						result = exp;
 						break;
@@ -91,18 +92,24 @@ public class Optimzer {
 	}
 	
 	
-	private static Boolean isContainingExpression(String[] exp, List<String> cdefs) {
-		for(String value: exp) {
-			for(String cdef: cdefs) {
-				String[] split = cdef.split("\\.");
-				for(String s: split) {
-					if(value.equals(s)) {
-						return true;
-					}
-				}
+	private static Boolean isContainingExpression(String column, List<String> cdefs) {
+//		for(String value: exp) {
+//			for(String cdef: cdefs) {
+//				String[] split = cdef.split("\\.");
+//				for(String s: split) {
+//					if(value.equals(s)) {
+//						return true;
+//					}
+//				}
+//			}
+//		}
+//		return false;
+		
+		for(String cdef: cdefs) {
+			if(cdef.equals(column)) {
+				return true;
 			}
 		}
-		
 		return false;
 	}
 
