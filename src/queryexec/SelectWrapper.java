@@ -1,10 +1,16 @@
 package queryexec;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+
+import bPlusTree.BPlusTreeBuilder;
 import iterators.DefaultIterator;
 import iterators.HavingIterator;
 import iterators.IndexJoinIterator;
+import iterators.IndexScanIterator;
+import iterators.IndexSelectionIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.LimitIterator;
@@ -14,7 +20,7 @@ import iterators.ResultIterator;
 import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
-import iterators.TwoPassHashJoin;
+
 import iterators.groupByExternal;
 import iterators.newExternal;
 import iterators.newGroupBy;
@@ -23,6 +29,10 @@ import iterators.orderExternalIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
@@ -46,7 +56,7 @@ public class SelectWrapper {
 	private List<Column> groupBy;
 	private List<Join> joins;
 	private List<OrderByElement> orderBy;
-
+    private HashMap<String, List<Index>> indexMap;
 	private Limit limit;
 	private Expression having;
 
@@ -64,7 +74,7 @@ public class SelectWrapper {
 		this.limit = this.plainselect.getLimit();
 		this.having = this.plainselect.getHaving();
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
-
+		indexMap = SchemaStructure.indexMap;
 		// Expression exp =
 		// Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable),
 		// SchemaStructure.schema.get(leftTable),
@@ -80,7 +90,7 @@ public class SelectWrapper {
 		if (fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
-			iter = pushDownSelectPredicate(table, iter);
+			iter = pushDownSelectPredicate2(table, iter);
 		}
 
 		DefaultIterator result = iter;
@@ -90,18 +100,23 @@ public class SelectWrapper {
 			if ((this.joins = this.plainselect.getJoins()) != null) {
 				for (Join join : joins) {
 					FromItem item = join.getRightItem();
-					if (item instanceof Table) {
+					if (item instanceof Table) 
+					{
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb);
-						iter2 = pushDownSelectPredicate(rightTb, iter2);
+						iter2 = pushDownSelectPredicate2(rightTb, iter2);
 						result = pushDownJoinPredicate(result, iter2, join);
 					}
 				}
 			}
 
-			if (this.whereExp != null) {
+			if (this.whereExp != null) 
+			{
 				List<Expression> tempExp = SchemaStructure.whrexpressions;
-				if (tempExp != null && tempExp.size() > 0) {
+				
+				
+				if (tempExp != null && tempExp.size() > 0) 
+				{
 					Expression exp = Utils.conquerExpression(tempExp);
 					result = new SelectionIterator(result, exp);
 				}
@@ -164,6 +179,69 @@ public class SelectWrapper {
 		}
 	}
 
+	private DefaultIterator pushDownSelectPredicate2(Table table, DefaultIterator iter) {
+		// TODO Auto-generated method stub
+		List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table,SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
+		
+		List<Index> lst = SchemaStructure.indexMap.get(table.toString());
+		List<Index> secondaryIndex = new ArrayList<Index>();
+		List<Index> nonSecondaryIndex = new ArrayList<Index>();
+		for(Index l : lst )
+		{
+			if(l.getType().equals("INDEX"))
+				secondaryIndex.add(l);
+			else
+				nonSecondaryIndex.add(l);
+		}
+		List<Expression> inQSecondaryIndex = new ArrayList<Expression>();
+		List<Expression> inQnonSecondaryIndex = new ArrayList<Expression>();
+		for(Expression exp : tempExp)
+		{
+			if(secondaryIndex.contains(exp.toString().split("\\.")[1]))
+			{
+				inQSecondaryIndex.add(exp);
+			}
+			else
+			{
+				inQnonSecondaryIndex.add(exp);
+			}
+		}
+		
+		if (inQSecondaryIndex != null && inQSecondaryIndex.size() > 0) 
+		{	Expression exp  = null;
+			if(inQnonSecondaryIndex.size() > 1)
+				exp = Utils.conquerExpression(inQSecondaryIndex); // what if only one?
+			else
+				exp = inQSecondaryIndex.get(0);
+			iter = new IndexScanIterator(iter, exp);
+		}
+		if (inQnonSecondaryIndex != null && inQnonSecondaryIndex.size() > 0) 
+		{
+			Expression exp = Utils.conquerExpression(inQnonSecondaryIndex);
+			iter = new SelectionIterator(iter, exp);
+		}
+		
+//		if (tempExp != null && tempExp.size() > 0) {
+//			Expression exp = Utils.conquerExpression(tempExp);
+//			iter = new SelectionIterator(iter, exp);
+//		}
+		return iter;
+	}
+
+//	private void function(DefaultIterator iterator , HashMap<String, List<Index>> indexMap, String columnName, Table tableName) {
+//		// TODO Auto-generated method stub
+//		List<Index> indexes =  indexMap.get( tableName.toString());
+//		
+//		if( indexes.contains(columnName))
+//		{
+//			iterator = new IndexSelectionIterator(iterator , tableName , columnName);
+//		}
+//		else
+//		{
+//			iterator = new IndexSelectionIterator(iterator , tableName , columnName);
+//		}
+//	}
+
 	private boolean isContainingColumn(String xKey, List<ColumnDefs> list) {
 		for (ColumnDefs cdef : list) {
 			if (cdef.cdef.getColumnName().equals(xKey)) {
@@ -171,18 +249,6 @@ public class SelectWrapper {
 			}
 		}
 		return false;
-	}
-
-	public DefaultIterator optimize(DefaultIterator root) {
-
-		if (root instanceof SelectionIterator) {
-			SelectionIterator selIter = (SelectionIterator) root;
-			if (selIter.getChildIter() instanceof JoinIterator) {
-				DefaultIterator joiniter = (JoinIterator) selIter.getChildIter();
-				Expression selExp = selIter.getWhereExp();
-			}
-		}
-		return null;
 	}
 
 	public List<Expression> splitAndClauses(Expression e) {
@@ -200,6 +266,8 @@ public class SelectWrapper {
 	public DefaultIterator pushDownSelectPredicate(Table table, DefaultIterator iter) {
 		List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table,
 				SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
+		
+		
 		if (tempExp != null && tempExp.size() > 0) {
 			Expression exp = Utils.conquerExpression(tempExp);
 			iter = new SelectionIterator(iter, exp);

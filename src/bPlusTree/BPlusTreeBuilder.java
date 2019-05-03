@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 import iterators.DefaultIterator;
+
 import iterators.RAIterator;
 import iterators.TableSeekIterator;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.schema.Table;
@@ -87,7 +89,7 @@ public class BPlusTreeBuilder implements Serializable{
 		return -1;
 	}
 
-	
+
 	public DefaultIterator search(PrimitiveValue searchValue, String indexColumn) throws IOException {
 		if(searchValue == null) {
 			bPlusTree.search(searchValue);	
@@ -104,6 +106,7 @@ public class BPlusTreeBuilder implements Serializable{
 		}
 	}
 
+<<<<<<< HEAD
 	public BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
 		try {
 			if(raf_1 == null) {
@@ -120,5 +123,12 @@ public class BPlusTreeBuilder implements Serializable{
 	
 	public String toDraw() {
 		return this.bPlusTree.toDraw();
+=======
+	
+
+	public static DefaultIterator searchByRange(DefaultIterator iterator2, Table table, Expression exp) {
+		// TODO Auto-generated method stub
+		return null;
+>>>>>>> 36b6bad8905dab1ec4839425918c489fbc8132c2
 	}
 }

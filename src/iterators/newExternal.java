@@ -15,15 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-
-import javax.sound.midi.Soundbank;
-
-import net.sf.jsqlparser.expression.DateValue;
-import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.PrimitiveValue.InvalidPrimitive;
-import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.SelectItem;
@@ -440,6 +433,7 @@ public class newExternal implements DefaultIterator{
 		String writeA = "";
 		for (String object : mapColumn)
 		{
+			
 	         writeA += (toWrite.get(object) + "|").toString() ;
 	    }
 		writeA = writeA.substring(0,writeA.length()-1);

@@ -35,6 +35,7 @@ public class TableScanIterator implements DefaultIterator {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.tab = tab;
+
 		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";;	
 		try {
 			br = new BufferedReader(new FileReader(csvFile));

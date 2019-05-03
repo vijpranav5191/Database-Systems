@@ -91,7 +91,8 @@ public class Utils {
 	}
 
 	public static Expression conquerExpression(List<Expression> elist) {
-		if (elist.size() == 2) {
+		if (elist.size() == 2) 
+		{
 			AndExpression and = new AndExpression();
 			and.setLeftExpression(elist.get(0));
 			and.setRightExpression(elist.get(1));
@@ -99,7 +100,8 @@ public class Utils {
 		}
 		Expression result = elist.get(0);
 
-		for (int i = 1; i < elist.size(); i++) {
+		for (int i = 1; i < elist.size(); i++) 
+		{
 			AndExpression and = new AndExpression();
 			and.setLeftExpression(result);
 			and.setRightExpression(elist.get(i));
