@@ -278,9 +278,6 @@ public class BPlusTree {
 			}
 			
 		};
-		if(key == null) {
-			Collections.binarySearch(kList, key, comp);	
-		}
 		int loc = Collections.binarySearch(kList, key, comp);
 		return loc;
 	}

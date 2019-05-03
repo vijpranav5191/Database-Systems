@@ -57,7 +57,6 @@ public class TableSeekIterator implements DefaultIterator{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//System.out.print("tuple" + tuple);
 		Map<String, PrimitiveValue> map = new HashMap<String, PrimitiveValue>();
 		String[] row;
 		if(tuple != null) {
