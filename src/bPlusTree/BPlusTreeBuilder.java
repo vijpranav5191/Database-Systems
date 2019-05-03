@@ -25,12 +25,8 @@ import objects.SchemaStructure;
 import utils.Config;
 import utils.Utils;
 
-public class BPlusTreeBuilder implements Serializable{
+public class BPlusTreeBuilder{
 	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private RandomAccessFile raf_1 = null;
 	
 	RAIterator iterator;
@@ -74,7 +70,6 @@ public class BPlusTreeBuilder implements Serializable{
 				e.printStackTrace();
 			}
 		}
-		System.out.println("BPlus Tree Done  " + this.table.getName() + "     " + insertedCount);
 		return this.bPlusTree;
 	}
 	
@@ -106,7 +101,6 @@ public class BPlusTreeBuilder implements Serializable{
 		}
 	}
 
-<<<<<<< HEAD
 	public BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
 		try {
 			if(raf_1 == null) {
@@ -121,14 +115,7 @@ public class BPlusTreeBuilder implements Serializable{
 		return br;
 	}
 	
-	public String toDraw() {
-		return this.bPlusTree.toDraw();
-=======
-	
-
-	public static DefaultIterator searchByRange(DefaultIterator iterator2, Table table, Expression exp) {
-		// TODO Auto-generated method stub
-		return null;
->>>>>>> 36b6bad8905dab1ec4839425918c489fbc8132c2
+	public void toDraw() throws IOException {
+		this.bPlusTree.toDraw(this.table);
 	}
 }

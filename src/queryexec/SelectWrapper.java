@@ -90,7 +90,7 @@ public class SelectWrapper {
 		if (fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
-			iter = pushDownSelectPredicate2(table, iter);
+			iter = pushDownSelectPredicate(table, iter);
 		}
 
 		DefaultIterator result = iter;
@@ -104,7 +104,7 @@ public class SelectWrapper {
 					{
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb);
-						iter2 = pushDownSelectPredicate2(rightTb, iter2);
+						iter2 = pushDownSelectPredicate(rightTb, iter2);
 						result = pushDownJoinPredicate(result, iter2, join);
 					}
 				}
@@ -331,7 +331,6 @@ public class SelectWrapper {
 				EqualsTo equalTo = (EqualsTo) joinDefault.getOnExpression();
 				Join join = joinDefault;
 				
-				
 				if (Config.isInMemory) {	
 					Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
 					Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
@@ -349,7 +348,7 @@ public class SelectWrapper {
 							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
 								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
 						} else {
-							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+							result = new IndexJoinIterator(leftIterator, rightIterator, join, 
 									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
 						}
 					} else if(HoldingRightColumn != null) {
@@ -357,7 +356,7 @@ public class SelectWrapper {
 							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
 								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
 						} else {
-							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+							result = new IndexJoinIterator(leftIterator, rightIterator, join, 
 									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
 						}
 					} else {

@@ -24,10 +24,11 @@ import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.schema.Table;
 import utils.Config;
 
 
-public class BPlusTree implements Serializable{
+public class BPlusTree {
 	private Node root;
 	private final int DEFAULT_BRANCHING_FACTOR = 128;
 	
@@ -67,12 +68,13 @@ public class BPlusTree implements Serializable{
 		//toDraw();
 	}
 	
-	public String toDraw() {
-		String btreeString = ""; 
-		Queue<List<Node>> queue = new LinkedList<List<Node>>();
+	public void toDraw(Table table) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(Config.bPlusTreeDir + table.getName() + "_" + this.indexStr));
+	    Queue<List<Node>> queue = new LinkedList<List<Node>>();
 		queue.add(Arrays.asList(root));
 		while (!queue.isEmpty()) {
 			Queue<List<Node>> nextQueue = new LinkedList<List<Node>>();
+			String line = "";
 			while (!queue.isEmpty()) {
 				List<Node> nodes = queue.remove();
 				Iterator<Node> it = nodes.iterator();
@@ -80,28 +82,27 @@ public class BPlusTree implements Serializable{
 					Node node = it.next();
 					if(node instanceof BPlusTree.InternalNode) {
 						for(PrimitiveValue x: node.keys) {
-							btreeString+= x.toString() + ",";
+							line += x.toString() + ",";
 						}
 					} else {
 						LeafNode node1  = (BPlusTree.LeafNode) node;
 						for(PrimitiveValue x: node1.keys) {
-							btreeString+= x.toString() + ",";
+							line+= x.toString() + ",";
 						}	
 					}
-					btreeString = btreeString.substring(0, btreeString.length() - 1);
+					line = line.substring(0, line.length() - 1);
 					if (node instanceof BPlusTree.InternalNode) {
 						InternalNode internalNode = (InternalNode) node;
 						nextQueue.add(internalNode.children);
 					}
-					btreeString+= "|";
+					line += "|";
 				}
 			}
+			writer.write(line.substring(0, line.length() - 1));
+			writer.newLine();
 			queue = nextQueue;
-			String bfsStr = btreeString;
-			btreeString = bfsStr.substring(0, bfsStr.length() - 1) + "\n";
 		}
-		System.out.println("==========================================");
-		return btreeString;
+	    writer.close();
 	}
 	
 	public void reDraw() {
@@ -129,7 +130,7 @@ public class BPlusTree implements Serializable{
 	}
 	
 	
-	class LeafNode extends Node implements Serializable{
+	class LeafNode extends Node{
 		
 		LeafNode next;
 		ArrayList<Integer> values;
@@ -190,7 +191,7 @@ public class BPlusTree implements Serializable{
 	}
 	
 	
-	class InternalNode extends Node implements Serializable{
+	class InternalNode extends Node{
 		List<Node> children;
 
 		InternalNode() {
