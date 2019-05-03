@@ -186,7 +186,7 @@ public class BPlusTree {
 		@Override
 		int getValue(PrimitiveValue key) {
 			int loc = binarySearch(keys, key);
-			return loc >= 0 ? values.get(loc) : null;
+			return loc >= 0 ? values.get(loc) : -1;
 		}
 	}
 	
