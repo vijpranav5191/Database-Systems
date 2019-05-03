@@ -143,13 +143,12 @@ public class BPlusTree {
 		@Override
 		Node insertValue(PrimitiveValue key, int value) {
 			int loc = binarySearch(keys, key);
-			int size = this.keyNumber();
 			int valueIndex = loc >= 0 ? loc : -loc - 1;
-//			try {
-//				//writeMapToFile(Config.bPlusTreeDir + key, value);
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
+			try {
+				writeMapToFile(Config.bPlusTreeDir + indexStr, value);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			keys.add(valueIndex, key);
 			values.add(valueIndex, value);
 			if(isOverflow()) {
@@ -282,11 +281,11 @@ public class BPlusTree {
 		return loc;
 	}
 	String bulkInsert = "";
-	public void writeMapToFile(String path, Map<String, PrimitiveValue> map) throws IOException {
+	public void writeMapToFile(String path, int map) throws IOException {
 		if(prevPath != null && prevPath.equals(path) && writer != null) {
 			//writer.write(map.toString());
 			//writer.newLine();
-			this.bulkInsert += (map.toString() + "\n");
+			this.bulkInsert += (map + "\n");
 		} else {
 			prevPath = path;
 			if(writer != null) {
@@ -298,7 +297,7 @@ public class BPlusTree {
 			}
 			filename = new File(path);
 		    writer = new BufferedWriter(new FileWriter(filename));   
-		    this.bulkInsert += (map.toString() + "\n");
+		    this.bulkInsert += (map + "\n");
 		}
 	}
 	

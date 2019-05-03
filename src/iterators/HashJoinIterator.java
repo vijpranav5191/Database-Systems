@@ -78,6 +78,10 @@ public class HashJoinIterator implements DefaultIterator {
 		if(this.nextResult != null) {
 			return true;
 		}
+		this.passMap = null;
+		if(mapList != null && mapList.size() > 0) {
+			this.mapList = null;
+		}
 		return false;
 	}
 

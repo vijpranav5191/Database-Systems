@@ -53,18 +53,18 @@ public class CreateWrapper {
 		//!Utils.isFileExists(path)
 //		if(true) {
 			try {
-				for(Index index: indexes) {
-					if(index.getType().equals(Constants.PRIMARY_KEY)) {
-						for(String primaryKey: index.getColumnsNames()) {
-							FileReaderIterator iter = new FileReaderIterator(tbal);
-							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef);
-							btree.build(primaryKey);
-							//btree.toDraw();
-							SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-							break;
-						}
-					}
-				}
+//				for(Index index: indexes) {
+//					if(index.getType().equals(Constants.PRIMARY_KEY)) {
+//						for(String primaryKey: index.getColumnsNames()) {
+//							FileReaderIterator iter = new FileReaderIterator(tbal);
+//							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef);
+//							btree.build(primaryKey);
+//							//btree.toDraw();
+//							//SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+//							break;
+//						}
+//					}
+//				}
 				WriteOutputFile.writeObjectInFile(path, querystr);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();

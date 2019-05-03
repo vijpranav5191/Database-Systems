@@ -20,7 +20,7 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 class Main {
 
 	public static void main(String args[]) throws Exception {
-		Config.isInMemory = false;
+		Config.isInMemory = true;
 		Utils.createDirectory(Config.folderName);
 		Utils.createDirectory(Config.createFileDir);		
 		Utils.createDirectory(Config.bPlusTreeDir);
