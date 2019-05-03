@@ -74,6 +74,7 @@ public class SelectWrapper {
 		this.having = this.plainselect.getHaving();
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
 		indexMap = SchemaStructure.indexMap;
+		
 		// Expression exp =
 		// Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable),
 		// SchemaStructure.schema.get(leftTable),
@@ -209,12 +210,17 @@ private DefaultIterator pushDownSelectPredicate2(Table table, DefaultIterator it
 		}
 		
 		if (inQSecondaryIndex != null && inQSecondaryIndex.size() > 0) 
-		{	Expression exp  = null;
-			if(inQnonSecondaryIndex.size() > 1)
-				exp = Utils.conquerExpression(inQSecondaryIndex); // what if only one?
-			else
-				exp = inQSecondaryIndex.get(0);
-			iter = new IndexScanIterator(iter, exp);
+		{	
+//			Expression exp  = null;
+//			if(inQnonSecondaryIndex.size() > 1)
+//				exp = Utils.conquerExpression(inQSecondaryIndex); // what if only one?
+//			else
+//				exp = inQSecondaryIndex.get(0);
+			for( Expression exp : inQSecondaryIndex )
+			{
+				iter = new IndexScanIterator(iter, exp);
+			}
+
 		}
 		if (inQnonSecondaryIndex != null && inQnonSecondaryIndex.size() > 0) 
 		{
