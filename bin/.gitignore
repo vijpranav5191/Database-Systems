@@ -1,7 +1,9 @@
-/dubstep/
-/iterators/
+/.DS_Store
+/FileUtils/
 /bPlusTree/
-
-/utils/
+/dubstep/
 /interfaces/
+/iterators/
+/objects/
 /queryexec/
+/utils/

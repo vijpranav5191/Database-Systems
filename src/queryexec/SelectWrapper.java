@@ -35,6 +35,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 import utils.Config;
+import utils.Constants;
 import utils.Optimzer;
 import utils.Utils;
 
@@ -93,10 +94,7 @@ public class SelectWrapper {
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb);
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
-						List<String> leftColumns = result.getColumns();
-						List<String> rightColumns = iter2.getColumns();
-
-						result = pushDownJoinPredicate(leftColumns, rightColumns, result, iter2, join);
+						result = pushDownJoinPredicate(result, iter2, join);
 					}
 				}
 			}
@@ -209,36 +207,48 @@ public class SelectWrapper {
 		return iter;
 	}
 
-	public DefaultIterator pushDownJoinPredicate(List<String> leftColumns, List<String> rightColumns,
-			DefaultIterator leftIterator, DefaultIterator rightIterator, Join joinDefault) {
+	public DefaultIterator pushDownJoinPredicate(DefaultIterator leftIterator, DefaultIterator rightIterator, Join joinDefault) {
 
+		List<String> leftColumns = leftIterator.getColumns();
+		List<String> rightColumns = rightIterator.getColumns();
+		
 		DefaultIterator result = null;
 		Expression exp = Optimzer.getExpressionForJoinPredicate(leftColumns, rightColumns,
 				SchemaStructure.whrexpressions);
 		if (exp != null) {
 			Join join = new Join();
 			join.setOnExpression(exp);
-			if (Config.isInMemory) {
-				if(exp instanceof EqualsTo) {
-					EqualsTo eqexp = (EqualsTo) exp;
-					Expression leftEx = eqexp.getLeftExpression();
-					Expression rightEx = eqexp.getRightExpression();
-					if(leftEx instanceof Column) {
-						Column left = (Column) leftEx;
-						if(isIndexed(left.getTable(),left.getColumnName())) {
-							result = new IndexJoinIterator(rightIterator, leftIterator, join, left, (Column)rightEx);
-						} else {
-							result = new HashJoinIterator(leftIterator, rightIterator, join);
-						}
-					} else if(rightEx instanceof Column) {
-						Column right = (Column) rightEx;
-						if(isIndexed(right.getTable(),right.getColumnName())) {
-							result = new IndexJoinIterator(leftIterator,rightIterator, join, right, (Column)leftEx);
-						}else {
-							result = new HashJoinIterator(leftIterator, rightIterator, join);
-						}
+			EqualsTo equalTo = (EqualsTo) exp;
+			
+			if (Config.isInMemory) {	
+				Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
+				Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
+				
+				if(HoldingLeftColumn != null && HoldingRightColumn != null) {
+					if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {
+						result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+								HoldingRightColumn, HoldingLeftColumn);
+					} else{
+						result = new IndexJoinIterator(leftIterator, rightIterator, join, 
+								HoldingLeftColumn, HoldingRightColumn);	
 					}
-				}else {
+				} else if(HoldingLeftColumn != null) {
+					if(HoldingLeftColumn.toString().equals(equalTo.getLeftExpression().toString())) {
+						result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+							(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+					} else {
+						result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+								(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+					}
+				} else if(HoldingRightColumn != null) {
+					if(HoldingRightColumn.toString().equals(equalTo.getLeftExpression().toString())) {
+						result = new IndexJoinIterator(leftIterator, rightIterator, join, 
+							(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+					} else {
+						result = new IndexJoinIterator(leftIterator, rightIterator, join, 
+								(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+					}
+				} else {
 					result = new HashJoinIterator(leftIterator, rightIterator, join);
 				}
 			} else {
@@ -249,21 +259,88 @@ public class SelectWrapper {
 				}
 			}
 		} else {
-			result = new JoinIterator(leftIterator, rightIterator, joinDefault);
+			if(joinDefault.getOnExpression() instanceof EqualsTo) {
+				EqualsTo equalTo = (EqualsTo) joinDefault.getOnExpression();
+				Join join = joinDefault;
+				
+				
+				if (Config.isInMemory) {	
+					Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
+					Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
+					
+					if(HoldingLeftColumn != null && HoldingRightColumn != null) {
+						if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {
+							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+									HoldingRightColumn, HoldingLeftColumn);
+						} else{
+							result = new IndexJoinIterator(leftIterator, rightIterator, join, 
+									HoldingLeftColumn, HoldingRightColumn);	
+						}
+					} else if(HoldingLeftColumn != null) {
+						if(HoldingLeftColumn.toString().equals(equalTo.getLeftExpression().toString())) {
+							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+						} else {
+							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+						}
+					} else if(HoldingRightColumn != null) {
+						if(HoldingRightColumn.toString().equals(equalTo.getLeftExpression().toString())) {
+							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+						} else {
+							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
+									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+						}
+					} else {
+						result = new HashJoinIterator(leftIterator, rightIterator, join);
+					}
+				} else {
+					try {
+						result = new SortMergeIterator(leftIterator, rightIterator, join, this.selectItems);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			} else {
+				result = new JoinIterator(leftIterator, rightIterator, joinDefault);
+			}
 		}
 		return result;
 	}
-
-	private boolean isIndexed(Table table, String columnName) {
-		// TODO Auto-generated method stub
-		List<Index> indexes = SchemaStructure.indexMap.get(table.getName());
-		for(Index index : indexes) {
-			List<String> colnames =  index.getColumnsNames();
-			for(String name : colnames) {
-				if(name.equals(columnName))
-					return true;
+	
+	private Column isTableHoldingIndexedWhichIndex(DefaultIterator iterator, EqualsTo equalTo) {
+		TableScanIterator tableIterator = null;
+		if(iterator instanceof TableScanIterator ) {
+			tableIterator = (TableScanIterator) iterator;
+			String[] left = equalTo.getLeftExpression().toString().split("\\.");
+			String[] right = equalTo.getRightExpression().toString().split("\\.");
+			
+			if(Utils.isPrimaryKey(left[1], SchemaStructure.indexMap.get(tableIterator.tab.getName()))) {
+				if(left[0].equals(tableIterator.tab.getName())) {
+					return (Column)equalTo.getLeftExpression();
+				} else {
+					return (Column)equalTo.getRightExpression();
+				}
+			}
+			if(Utils.isPrimaryKey(right[1], SchemaStructure.indexMap.get(tableIterator.tab.getName()))) {
+				if(right[0].equals(tableIterator.tab.getName())) {
+					return (Column)equalTo.getLeftExpression();
+				} else {
+					return (Column)equalTo.getRightExpression();
+				}
 			}
 		}
-		return false;
+		return null;
 	}
 }
+
+
+
+
+
+
+
+
+
+

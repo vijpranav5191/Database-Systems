@@ -59,7 +59,12 @@ public class TableSeekIterator implements DefaultIterator{
 		}
 		//System.out.print("tuple" + tuple);
 		Map<String, PrimitiveValue> map = new HashMap<String, PrimitiveValue>();
-		String[] row = tuple.split("\\|");
+		String[] row;
+		if(tuple != null) {
+			row = tuple.split("\\|");
+		} else {
+			return null;
+		}
 		List<ColumnDefs> cdefs = SchemaStructure.schema.get(this.table.getName());
 		for(int j = 0;j < row.length; j++) {
 			ColumnDefs cdef = cdefs.get(j);

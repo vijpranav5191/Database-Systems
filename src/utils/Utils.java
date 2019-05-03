@@ -22,7 +22,10 @@ import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.create.table.Index;
+import net.sf.jsqlparser.statement.select.Join;
 import objects.ColumnDefs;
+import objects.SchemaStructure;
 
 public class Utils {
 
@@ -163,19 +166,37 @@ public class Utils {
 		return tuple;
 	}
 	
-	private static RandomAccessFile raf_1 = null;
-	
-	public static BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
-		try {
-			if(raf_1 == null) {
-				raf_1 = new RandomAccessFile(path, "rw");
+	public static boolean isPrimaryKey(String key, List<Index> indexes) {
+		for(Index index: indexes) {
+			if(index.getType().equals(Constants.PRIMARY_KEY)) {
+				for(String primaryKey: index.getColumnsNames()) {
+					if(key.equals(primaryKey)) {
+						return true;
+					}
+				}
 			}
-			raf_1.seek(seekPosition);
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
-		InputStream is = Channels.newInputStream(raf_1.getChannel());
-		BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		return br;
+		return false;
+	}
+	
+	public static void createPrecedenceList() {// sorted by size
+		String[] tables = {"LINEITEM", "ORDERS", "PARTSUPP", "CUSTOMER","PART", "SUPPLIER", "NATION", "REGION",};
+		Integer[] sizeOfTable = {725, 164, 113, 23, 23, 3, 2, 1};
+		for(int i = 0;i < tables.length;i++) {
+			SchemaStructure.precedenceMap.put(tables[i], sizeOfTable[i]);
+		}
+	}
+	
+	public static boolean isHoldingPrecedence(Table left, Table right) {
+		if(SchemaStructure.precedenceMap.get(right.getName()) < SchemaStructure.precedenceMap.get(left.getName())) {
+			return true;
+		}
+		return false;
 	}
 }
+
+
+
+
+
+

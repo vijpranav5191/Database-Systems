@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import net.sf.jsqlparser.expression.PrimitiveValue;
 import utils.Config;
 
 
-public class BPlusTree {
+public class BPlusTree implements Serializable{
 	private Node root;
 	private final int DEFAULT_BRANCHING_FACTOR = 128;
 	
@@ -66,7 +67,8 @@ public class BPlusTree {
 		//toDraw();
 	}
 	
-	public void toDraw() {
+	public String toDraw() {
+		String btreeString = ""; 
 		Queue<List<Node>> queue = new LinkedList<List<Node>>();
 		queue.add(Arrays.asList(root));
 		while (!queue.isEmpty()) {
@@ -78,27 +80,34 @@ public class BPlusTree {
 					Node node = it.next();
 					if(node instanceof BPlusTree.InternalNode) {
 						for(PrimitiveValue x: node.keys) {
-							System.out.print(x.toString() + " , ");
+							btreeString+= x.toString() + ",";
 						}
 					} else {
 						LeafNode node1  = (BPlusTree.LeafNode) node;
 						for(PrimitiveValue x: node1.keys) {
-							System.out.print(x.toString() + " , ");
+							btreeString+= x.toString() + ",";
 						}	
 					}
+					btreeString = btreeString.substring(0, btreeString.length() - 1);
 					if (node instanceof BPlusTree.InternalNode) {
 						InternalNode internalNode = (InternalNode) node;
 						nextQueue.add(internalNode.children);
 					}
-					System.out.print("---->");
+					btreeString+= "|";
 				}
 			}
 			queue = nextQueue;
-			System.out.println("\n");
+			String bfsStr = btreeString;
+			btreeString = bfsStr.substring(0, bfsStr.length() - 1) + "\n";
 		}
 		System.out.println("==========================================");
-	
+		return btreeString;
 	}
+	
+	public void reDraw() {
+		
+	}
+	
 	
 	abstract class Node {
 		List<PrimitiveValue> keys;
@@ -120,7 +129,7 @@ public class BPlusTree {
 	}
 	
 	
-	class LeafNode extends Node{
+	class LeafNode extends Node implements Serializable{
 		
 		LeafNode next;
 		ArrayList<Integer> values;
@@ -181,7 +190,7 @@ public class BPlusTree {
 	}
 	
 	
-	class InternalNode extends Node{
+	class InternalNode extends Node implements Serializable{
 		List<Node> children;
 
 		InternalNode() {

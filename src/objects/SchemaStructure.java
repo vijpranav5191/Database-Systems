@@ -16,4 +16,5 @@ public class SchemaStructure {
 	public static List<Expression> whrexpressions = new ArrayList<Expression>();
 	public static HashMap<String, List<Index>> indexMap = new HashMap<>();
 	public static HashMap<String, BPlusTreeBuilder> bTreeMap = new HashMap<>();
+	public static HashMap<String, Integer> precedenceMap = new HashMap<>();
 }

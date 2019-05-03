@@ -26,17 +26,14 @@ public class TableScanIterator implements DefaultIterator {
 	private String tableName;
 	private BufferedReader br;
 	private String tuple;
-	private Table tab;
+	public Table tab;
 	private Map<String, PrimitiveValue> map;
 	private List<String> columns;
 	private Boolean isOrderBy;
-	CreateWrapper createWrapper;
 	
 	public TableScanIterator(Table tab ) {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
-		this.createWrapper = new CreateWrapper();
-		this.createWrapper.createHandler(tab);
 		this.tab = tab;
 		this.csvFile = Config.databasePath + tableName.toLowerCase() + ".csv";;	
 		try {

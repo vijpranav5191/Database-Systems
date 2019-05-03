@@ -2,6 +2,11 @@ package bPlusTree;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.io.Serializable;
+import java.nio.channels.Channels;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +23,13 @@ import objects.SchemaStructure;
 import utils.Config;
 import utils.Utils;
 
-public class BPlusTreeBuilder {
+public class BPlusTreeBuilder implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private RandomAccessFile raf_1 = null;
 	
 	RAIterator iterator;
 	public BPlusTree bPlusTree;
@@ -61,7 +72,7 @@ public class BPlusTreeBuilder {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("BPlus Tree Done" + insertedCount);
+		System.out.println("BPlus Tree Done  " + this.table.getName() + "     " + insertedCount);
 		return this.bPlusTree;
 	}
 	
@@ -82,7 +93,7 @@ public class BPlusTreeBuilder {
 			bPlusTree.search(searchValue);	
 		}
 		int position = bPlusTree.search(searchValue);
-		BufferedReader br = Utils.getInputStreamBySeek(Config.databasePath + table.getName() + ".csv", position);
+		BufferedReader br = getInputStreamBySeek(Config.databasePath + table.getName() + ".csv", position);
 		TableSeekIterator tableSeekItr = new TableSeekIterator(br, this.table, searchValue, indexColumn);
 		return tableSeekItr;
 	}
@@ -91,5 +102,23 @@ public class BPlusTreeBuilder {
 		if(bPlusTree != null) {
 			bPlusTree.close();
 		}
+	}
+
+	public BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
+		try {
+			if(raf_1 == null) {
+				raf_1 = new RandomAccessFile(path, "rw");
+			}
+			raf_1.seek(seekPosition);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		InputStream is = Channels.newInputStream(raf_1.getChannel());
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		return br;
+	}
+	
+	public String toDraw() {
+		return this.bPlusTree.toDraw();
 	}
 }
