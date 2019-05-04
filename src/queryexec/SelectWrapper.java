@@ -1,9 +1,13 @@
 package queryexec;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import bPlusTree.BPlusTreeBuilder;
 import iterators.DefaultIterator;
@@ -26,6 +30,7 @@ import iterators.newExternal;
 import iterators.newGroupBy;
 import iterators.newGroupByExternal;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
@@ -40,6 +45,7 @@ import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
@@ -58,6 +64,7 @@ public class SelectWrapper {
     private HashMap<String, List<Index>> indexMap;
 	private Limit limit;
 	private Expression having;
+	private Map<String, List<String>> queryColumns;
 
 	public SelectWrapper(PlainSelect plainselect) {
 		this.plainselect = plainselect;
@@ -74,6 +81,7 @@ public class SelectWrapper {
 		this.having = this.plainselect.getHaving();
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
 		indexMap = SchemaStructure.indexMap;
+		this.queryColumns = extractQueryCols(this.selectItems,this.whereExp,this.joins,this.groupBy,this.orderBy);
 		
 		// Expression exp =
 		// Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable),
@@ -246,6 +254,82 @@ public class SelectWrapper {
 //			iterator = new IndexSelectionIterator(iterator , tableName , columnName);
 //		}
 //	}
+	private Map<String, List<String>> extractQueryCols(List<SelectItem> selectItems2, Expression whereExp2, List<Join> joins2,
+			List<Column> groupBy2, List<OrderByElement> orderBy2) {
+		Map<String, List<String>> queryColumns = new HashMap<>();
+		Set<String> collist = new HashSet();
+		// TODO Auto-generated method stub
+		if(joins2!=null) {
+			for(Join j : joins2) {
+				Expression e = j.getOnExpression();
+				collist.addAll(Utils.splitExpCols(e));
+			}
+		}
+
+		if(selectItems2!=null) {
+			for (SelectItem sel : selectItems2) {
+				SelectExpressionItem selex = (SelectExpressionItem) sel;
+				if(selex.getExpression() instanceof Column) {
+					collist.add(sel.toString());
+				}else if(selex.getExpression() instanceof Function){
+					if(selex.getAlias()!=null) {
+						List<String> temp = new ArrayList<>();
+
+						if(queryColumns.containsKey("ALIAS")) {
+							queryColumns.get("ALIAS").add(selex.getAlias());
+						}else {
+							temp.add(selex.getAlias());
+							queryColumns.put("ALIAS", temp);
+						}
+					}
+					Function e = (Function) selex.getExpression();
+					if(e.getParameters()!=null) {
+						List<Expression> elist = e.getParameters().getExpressions();
+						for (Expression temp : elist) {
+							collist.addAll(Utils.splitExpCols2(temp));
+						}
+					}else {
+						String n = e.getName()+"(*)."+selex.getAlias();
+						if(queryColumns.containsKey("ALIAS")) {
+							queryColumns.get("ALIAS").add(n);	
+						}else {
+							queryColumns.put("ALIAS", new ArrayList<>(Arrays.asList(n)));
+						}
+					}
+				}
+			}
+		}
+		if(whereExp2!=null) {
+			Set<Expression> wherelist = Utils.splitAllClauses(whereExp2);
+			for(Expression exp : wherelist) {
+				collist.addAll(Utils.splitExpCols(exp));
+			}
+		}
+		if(groupBy2!=null) {
+			for(Column col : groupBy2) {
+				collist.add(col.getWholeColumnName());	
+			}
+		}
+//		if(orderBy2!=null) {
+//			for(OrderByElement ord: orderBy2) {
+//				Expression e = ord.getExpression();
+//				collist.addAll(Utils.splitExpCols(e));
+//			}
+//		}
+		List<String> list = new ArrayList<>();
+		for(String x : collist) {
+			String[] splitcol = x.split("\\.");
+			if(queryColumns.containsKey(splitcol[0])) {
+				queryColumns.get(splitcol[0]).add(splitcol[0]+"."+splitcol[1]);
+			}else{
+				List<String> temp = new ArrayList<String>();
+				temp.add(splitcol[0]+"."+splitcol[1]);
+				queryColumns.put(splitcol[0], temp);
+			}
+		}
+		collist = null;
+		return queryColumns;
+	}
 
 	private boolean isContainingColumn(String xKey, List<ColumnDefs> list) {
 		for (ColumnDefs cdef : list) {

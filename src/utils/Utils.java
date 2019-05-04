@@ -2,30 +2,32 @@ package utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
+import net.sf.jsqlparser.expression.BinaryExpression;
+import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
-import net.sf.jsqlparser.statement.select.Join;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 
@@ -69,6 +71,48 @@ public class Utils {
 				ret.addAll(splitAndClauses(a.getRightExpression()));
 			} else {
 				ret.add(e);
+			}
+		}
+		return ret;
+	}
+	public static List<Expression> splitOrClauses(Expression e) {
+		List<Expression> ret = new ArrayList<Expression>();
+		if (e != null) {
+			if (e instanceof OrExpression) {
+				OrExpression a = (OrExpression) e;
+				ret.addAll(splitOrClauses(a.getLeftExpression()));
+				ret.addAll(splitOrClauses(a.getRightExpression()));
+			} else {
+				ret.add(e);
+			}
+		}
+		return ret;
+	}
+	public static List<Expression> result = new ArrayList<>();
+	public static void splitOrClauses2(Expression e) {
+		
+		if( !(e instanceof OrExpression ) )
+		{
+			result.add(e);
+			return;
+		}
+		OrExpression orExp = (OrExpression) e;
+		result.add(orExp.getRightExpression());
+		splitOrClauses2(orExp.getLeftExpression());	
+	}
+	public static Set<Expression> splitAllClauses(Expression e) {
+		Set<Expression> ret = new HashSet<Expression>();
+//		ret.addAll(splitAndClauses(e));
+		for(Expression a : splitAndClauses(e)) {
+			if(a instanceof OrExpression) 
+			{
+				ret.remove(a);
+				splitOrClauses2(a);
+				ret.addAll(result);
+				result.clear();
+			}
+			else {
+				ret.add(a);
 			}
 		}
 		return ret;
@@ -196,6 +240,87 @@ public class Utils {
 			return true;
 		}
 		return false;
+	}
+	private static RandomAccessFile raf_1 = null;
+	public static BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
+		try {
+			if(raf_1 == null) {
+				raf_1 = new RandomAccessFile(path, "rw");
+			}
+			raf_1.seek(seekPosition);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		InputStream is = Channels.newInputStream(raf_1.getChannel());
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
+		return br;
+	}
+
+	public static Collection<? extends String> splitExpCols(Expression exp) {
+		// TODO Auto-generated method stub
+		List<String> temp = new ArrayList<>();
+		if(exp instanceof BinaryExpression) {
+			temp.addAll(splitExpCols(((BinaryExpression) exp).getLeftExpression()));
+			temp.addAll(splitExpCols(((BinaryExpression) exp).getRightExpression()));
+		}else if(exp instanceof Column) {
+			exp = ((Column)exp);
+			temp.add(((Column) exp).getWholeColumnName());
+		}
+		return temp;
+	}
+//	public static List<String> result2 = new ArrayList<>();
+//	public static void splitBinaryFunc(Expression e) {
+//		
+//		if( !(e instanceof BinaryExpression ) )
+//		{
+//			if(e instanceof Column)
+//			{
+//				result2.add(((Column) e).getWholeColumnName());
+//				return;
+//			}
+//		}
+//		BinaryExpression binExp = (BinaryExpression) e;
+//		if(binExp.getRightExpression() instanceof Column)
+//		{
+//			Column x = (Column) binExp.getRightExpression();
+//			result2.add(x.getWholeColumnName());
+//		}
+//		splitBinaryFunc(binExp.getLeftExpression());	
+//	}
+	
+	public static HashSet<String> splitExpCols2(Expression exp) {
+		// TODO Auto-generated method stub
+		HashSet<String> result1 = new HashSet<>();
+		
+		if(exp instanceof BinaryExpression)
+		{
+			BinaryExpression binExp = (BinaryExpression) exp;
+			
+			Expression leftB =  binExp.getLeftExpression();
+			Expression rightB = binExp.getRightExpression();
+		
+			if(leftB instanceof Column)
+				result1.add(((Column) leftB).getWholeColumnName());
+			else if (leftB instanceof BinaryExpression)
+				result1.addAll(splitExpCols2(leftB));
+			
+			if(rightB instanceof Column)
+				result1.add(((Column) rightB).getWholeColumnName());
+			else if (rightB instanceof BinaryExpression) 
+				result1.addAll(splitExpCols2(rightB));
+		}
+		else if (exp instanceof CaseExpression) {
+			CaseExpression ce = (CaseExpression) exp;
+			List<WhenClause> whenClauses = ce.getWhenClauses();
+			for(WhenClause e: whenClauses) {
+				Expression whenExp = e.getWhenExpression();
+				Set<Expression> splitlist = Utils.splitAllClauses(whenExp);
+				for(Expression a : splitlist) {
+					result1.addAll(Utils.splitExpCols2(a));
+				}
+			}
+		}
+		return result1;
 	}
 }
 
