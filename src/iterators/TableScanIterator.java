@@ -20,6 +20,7 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 import queryexec.CreateWrapper;
 import utils.Config;
+import utils.Utils;
 
 public class TableScanIterator implements DefaultIterator {
 	private String csvFile;
@@ -27,15 +28,25 @@ public class TableScanIterator implements DefaultIterator {
 	private BufferedReader br;
 	private String tuple;
 	public Table tab;
-	private Map<String, PrimitiveValue> map;
+	private List<PrimitiveValue> map;
 	private List<String> columns;
 	private Boolean isOrderBy;
+	List<ColumnDefs> cdefs;
+	Map<String, Integer> columnMap;
 	
 	public TableScanIterator(Table tab ) {
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.tab = tab;
-
+		this.cdefs = SchemaStructure.schema.get(tableName);
+		for(int j = 0;j < this.cdefs.size(); j++) {
+			if(this.tab.getAlias() != null){
+				this.columns.add(this.tab.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
+			} else {
+				this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
+			}
+		}
+		
 		this.csvFile = Config.databasePath + tableName + ".csv";;	
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -44,13 +55,15 @@ public class TableScanIterator implements DefaultIterator {
 			System.out.println("Error 1 " + tableName);
 		}
 		tuple = "";
-
+		this.columnMap = createColumnMapper(this.cdefs);
 	}
+	
 	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName)
 	{
 		this.columns = new ArrayList<String>();
 		this.tableName = tab.getName();
 		this.tab = tab;
+		this.cdefs = SchemaStructure.schema.get(tableName);
 		this.isOrderBy = isOrderBy;
 		this.csvFile = Config.databasePath + tableName + ".csv";
 		try {
@@ -60,6 +73,7 @@ public class TableScanIterator implements DefaultIterator {
 			System.out.println("Error 1 " + tableName);
 		}
 		tuple = "";
+		
 	}
 	@Override
 	public boolean hasNext() {
@@ -77,7 +91,7 @@ public class TableScanIterator implements DefaultIterator {
 	}
 	
 	@Override
-	public Map<String, PrimitiveValue> next() {
+	public List<PrimitiveValue> next() {
 		if(this.hasNext()) {
 			try {
 				tuple = br.readLine();
@@ -85,11 +99,11 @@ public class TableScanIterator implements DefaultIterator {
 				e.printStackTrace();
 			}
 			
-			map = new HashMap<String, PrimitiveValue>();
+			map = new ArrayList<PrimitiveValue>();
+			
 			String[] row = tuple.split("\\|");
-			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
 			for(int j = 0;j < row.length; j++) {
-				ColumnDefs cdef = cdefs.get(j);
+				ColumnDefs cdef = this.cdefs.get(j);
 				String value = row[j];
 				PrimitiveValue pm;
 				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
@@ -115,11 +129,7 @@ public class TableScanIterator implements DefaultIterator {
 						pm = new StringValue(value);
 						break;
 				}
-				if(this.tab.getAlias() != null) {
-					this.map.put( this.tab.getAlias() + "." + cdef.cdef.getColumnName(), pm);	
-				} else {
-					this.map.put( this.tableName + "." + cdef.cdef.getColumnName(), pm);
-				}
+				map.add(pm);
 			}
 			return map;
 		}
@@ -141,22 +151,16 @@ public class TableScanIterator implements DefaultIterator {
 
 	@Override
 	public List<String> getColumns() {
-		if(this.columns.size() == 0) {
-			List<ColumnDefs> cdefs = SchemaStructure.schema.get(tableName);
-			for(int j = 0;j < cdefs.size(); j++) {
-				if(this.tab.getAlias() != null){
-					this.columns.add(this.tab.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
-				}else {
-					this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
-				}
-			}
-		}
 		return this.columns;
 	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	public Map<String, Integer> createColumnMapper(List<ColumnDefs> cdefs) {
+		Map<String, Integer> mapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(ColumnDefs cdef: cdefs) {
+			this.columnMap.put(tableName + "." + cdef.cdef.getColumnName(), index);
+			index+=1;
+		}
+		return mapper;
 	}
 }

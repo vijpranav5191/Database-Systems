@@ -25,15 +25,18 @@ public class SortMergeIterator implements DefaultIterator{
 	String rightExpression;
 	EqualsTo equalTo;
 	GreaterThan gtt;
-	Map<String, PrimitiveValue> nextResult;
+	
+	List<PrimitiveValue> nextResult;
 	List<SelectItem> selectItem;
-	Map<String, PrimitiveValue> rightNextTuple;
-	Map<String, PrimitiveValue> leftNextTuple;
 	
-	ArrayList<Map<String, PrimitiveValue>> rightBufferList;
-	ArrayList<Map<String, PrimitiveValue>> leftBufferList;
+	List<PrimitiveValue> rightNextTuple;
+	List<PrimitiveValue> leftNextTuple;
 	
+	ArrayList<List<PrimitiveValue>> rightBufferList;
+	ArrayList<List<PrimitiveValue>> leftBufferList;
 	
+
+	Map<String, Integer> columnMapper;
 	int indexLeft = 0;
 	int indexRight = 0;
 	
@@ -43,6 +46,7 @@ public class SortMergeIterator implements DefaultIterator{
 		this.columns = new ArrayList<String>();
 		this.equalTo = new EqualsTo(); 
 		this.gtt = new GreaterThan();
+		
 		if(this.join.getOnExpression() instanceof EqualsTo) {
 			EqualsTo exp = (EqualsTo) this.join.getOnExpression();
 			this.leftExpression = exp.getLeftExpression().toString(); // need to check this approach
@@ -90,11 +94,24 @@ public class SortMergeIterator implements DefaultIterator{
 		this.gtt.setLeftExpression(colLeft);
 		this.gtt.setRightExpression(colRight);
 		
+		this.columns.addAll(this.leftIterator.getColumns());
+		this.columns.addAll(this.rightIterator.getColumns());
+		createMapperColumn();
+		
 		this.rightNextTuple = this.rightIterator.next();
 		this.leftNextTuple = this.leftIterator.next();
 		this.setBuffers();
 		
 		this.nextResult = this.getNextIter();
+	}
+	
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.columns) {
+			this.columnMapper.put(col, index);
+			index += 1;
+		}
 	}
 	
 	private boolean isContainingColumns(String leftExpression, List<String> columns) {
@@ -122,8 +139,8 @@ public class SortMergeIterator implements DefaultIterator{
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = this.nextResult;
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> temp = this.nextResult;
 		try {
 			this.nextResult = getNextIter();
 		} catch (Exception e) {
@@ -133,10 +150,10 @@ public class SortMergeIterator implements DefaultIterator{
 		return temp;
 	}
 
-	public Map<String, PrimitiveValue> getNextIter() throws Exception{
-		Map<String, PrimitiveValue> leftTuple = null;
-		Map<String, PrimitiveValue> rightTuple = null;
-		Map<String, PrimitiveValue> result = null;
+	public List<PrimitiveValue> getNextIter() throws Exception {
+		List<PrimitiveValue> leftTuple = null;
+		List<PrimitiveValue> rightTuple = null;
+		List<PrimitiveValue> result = null;
 		
 		if(this.indexLeft < this.leftBufferList.size()) {
 			leftTuple = this.leftBufferList.get(this.indexLeft);
@@ -159,14 +176,15 @@ public class SortMergeIterator implements DefaultIterator{
 	}
 	
 	public void setBuffers() throws Exception {
-		Map<String, PrimitiveValue> leftTuple = this.leftNextTuple;
-		Map<String, PrimitiveValue> rightTuple = this.rightNextTuple;
-		Map<String, PrimitiveValue> result = pushTogetherMap(leftTuple, rightTuple);
+		List<PrimitiveValue> leftTuple = this.leftNextTuple;
+		List<PrimitiveValue> rightTuple = this.rightNextTuple;
+		List<PrimitiveValue> result = pushTogetherMap(leftTuple, rightTuple);
+		
 		if(leftTuple != null && rightTuple != null) {
-			if(result !=null && EvaluateUtils.evaluate(result, this.equalTo)) {
+			if(result !=null && EvaluateUtils.evaluate(result, this.equalTo, this.columnMapper)) {
 				this.setRightBufferIterator();
 				this.setLeftBufferIterator();
-			} else if(result!=null && EvaluateUtils.evaluate(result, this.gtt)) { // left is greater
+			} else if(result!=null && EvaluateUtils.evaluate(result, this.gtt, this.columnMapper)) { // left is greater
 				this.setRightBufferIterator();
 				this.setBuffers();
 			} else {// right is greater
@@ -181,14 +199,15 @@ public class SortMergeIterator implements DefaultIterator{
 	
 	// this.rightTuple is preComputed
 	public void setRightBufferIterator() {
-		this.rightBufferList = new ArrayList<Map<String, PrimitiveValue>>();
+		this.rightBufferList = new ArrayList<List<PrimitiveValue>>();
 		if(this.rightNextTuple == null) {
 			return;
 		}
 		this.rightBufferList.add(this.rightNextTuple);
-		Map<String, PrimitiveValue> next = this.rightIterator.next();
+		List<PrimitiveValue> next = this.rightIterator.next();
 		
-		while(next != null && this.rightNextTuple.get(this.rightExpression).equals(next.get(this.rightExpression))) {
+		while(next != null && this.rightNextTuple.get(this.columnMapper.get(this.rightExpression))
+				.equals(next.get(this.columnMapper.get(this.rightExpression)))) {
 			this.rightNextTuple = next;
 			next = this.rightIterator.next();
 			this.rightBufferList.add(this.rightNextTuple);
@@ -199,14 +218,15 @@ public class SortMergeIterator implements DefaultIterator{
 	
 	// this.rightTuple is preComputed
 	public void setLeftBufferIterator() {
-		this.leftBufferList = new ArrayList<Map<String, PrimitiveValue>>();
+		this.leftBufferList = new ArrayList<List<PrimitiveValue>>();
 		if(this.leftNextTuple == null) {
 			return;
 		}
 		this.leftBufferList.add(this.leftNextTuple);
-		Map<String, PrimitiveValue> next = this.leftIterator.next();
+		List<PrimitiveValue> next = this.leftIterator.next();
 		
-		while(next != null && this.leftNextTuple.get(this.leftExpression).equals(next.get(this.leftExpression))) {
+		while(next != null && this.leftNextTuple.get(this.columnMapper.get(this.leftExpression))
+				.equals(next.get(this.columnMapper.get(this.leftExpression)))) {
 			this.leftNextTuple = next;
 			next = this.leftIterator.next();
 			this.leftBufferList.add(this.leftNextTuple);
@@ -221,33 +241,18 @@ public class SortMergeIterator implements DefaultIterator{
 		this.rightIterator.reset();
 	}
 	
-	public Map<String, PrimitiveValue> pushTogetherMap(Map<String, PrimitiveValue> leftTuple, Map<String, PrimitiveValue> rightTuple){
+	public List<PrimitiveValue> pushTogetherMap(List<PrimitiveValue> leftTuple, List<PrimitiveValue> rightTuple){
 		if(leftTuple == null || rightTuple == null) {
 			return null;
 		}
-		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();
-		
-		for(String key: rightTuple.keySet()) {
-			temp.put(key, rightTuple.get(key));
-		}
-		for(String key: leftTuple.keySet()) {
-			temp.put(key, leftTuple.get(key));
-		}
+		List<PrimitiveValue> temp = new ArrayList<PrimitiveValue>();
+		temp.addAll(leftTuple);
+		temp.addAll(rightTuple);
 		return temp;
 	}
 	
 	@Override
 	public List<String> getColumns() {
-		if(this.columns.size() == 0) {
-			this.columns.addAll(this.leftIterator.getColumns());
-			this.columns.addAll(this.rightIterator.getColumns());
-		}
 		return this.columns;
-	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return this.leftIterator;
 	}
 }

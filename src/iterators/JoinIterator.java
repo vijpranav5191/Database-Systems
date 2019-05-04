@@ -13,21 +13,36 @@ import utils.EvaluateUtils;
 public class JoinIterator implements DefaultIterator{
 	DefaultIterator leftIterator;
 	DefaultIterator rightIterator;
-	Map<String, PrimitiveValue> leftTuple;
-	Map<String, PrimitiveValue> nextResult;
+	
+	List<PrimitiveValue> leftTuple;
+	List<PrimitiveValue> nextResult;
+	
 	Join join;
 	List<String> columns;
+	Map<String, Integer> columnMapper;
 	
 	public JoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join) {
+		this.columns = new ArrayList<String>();
 		this.leftIterator = leftIterator;
 		this.rightIterator = rightIterator;
 		this.join = join;
+		this.columns.addAll(this.leftIterator.getColumns());
+		this.columns.addAll(this.rightIterator.getColumns());
+		createMapperColumn();
+		
 		this.leftTuple = leftIterator.next();
 		this.nextResult = this.getNextWhereIter();
-		this.columns = new ArrayList<String>();
+		
 	}
 	
-	
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.columns) {
+			this.columnMapper.put(col, index);
+			index += 1;
+		}
+	}
 	
 	@Override
 	public boolean hasNext() {
@@ -38,8 +53,8 @@ public class JoinIterator implements DefaultIterator{
 	}
 	
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = this.nextResult;
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> temp = this.nextResult;
 		this.nextResult = getNextWhereIter();
 		return temp;
 	}
@@ -51,8 +66,8 @@ public class JoinIterator implements DefaultIterator{
 		this.leftTuple = leftIterator.next();
 	}
 	
-	public Map<String, PrimitiveValue> getNextIter(){
-		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();
+	public List<PrimitiveValue> getNextIter(){
+		List<PrimitiveValue> temp = new ArrayList<>();
 		
 		if(!this.rightIterator.hasNext()) {
 			this.leftTuple = this.leftIterator.next();
@@ -62,28 +77,23 @@ public class JoinIterator implements DefaultIterator{
 				return null;
 			}
 		}
-		Map<String, PrimitiveValue> rightTuple = this.rightIterator.next();
+		List<PrimitiveValue> rightTuple = this.rightIterator.next();
 		if(this.leftTuple == null || rightTuple == null) {
 			return null;
 		}
-
-		for(String key: rightTuple.keySet()) {
-			temp.put(key, rightTuple.get(key));
-		}
-		for(String key: this.leftTuple.keySet()) {
-			temp.put(key, this.leftTuple.get(key));
-		}
+		temp.addAll(leftTuple);
+		temp.addAll(rightTuple);
 		return temp;
 	}
 
 	
-	public Map<String, PrimitiveValue> getNextWhereIter(){
-		Map<String, PrimitiveValue> temp = this.getNextIter();
+	public List<PrimitiveValue> getNextWhereIter(){
+		List<PrimitiveValue> temp = this.getNextIter();
 		if(this.join != null) {
 			Expression exp = this.join.getOnExpression();
 			if(exp != null) {
 				try {
-					while(temp != null && !EvaluateUtils.evaluate(temp, exp)) {
+					while(temp != null && !EvaluateUtils.evaluate(temp, exp, this.columnMapper)) {
 						temp = this.getNextIter();
 					}
 				} catch (Exception e) {
@@ -97,16 +107,6 @@ public class JoinIterator implements DefaultIterator{
 	
 	@Override
 	public List<String> getColumns() {
-		if(this.columns.size() == 0) {
-			this.columns.addAll(this.leftIterator.getColumns());
-			this.columns.addAll(this.rightIterator.getColumns());
-		}
 		return this.columns;
-	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

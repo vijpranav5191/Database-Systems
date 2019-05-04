@@ -30,49 +30,63 @@ public class OrderByIterator implements DefaultIterator{
 	int innerPointer = 0;
 	
 	List<String> coulmnsForExternal;
-	Map<String, PrimitiveValue> nextResult;
+	List<PrimitiveValue> nextResult;
+	List<String> columns;
 	
-	public ArrayList<ArrayList<Map<String, PrimitiveValue>>> sortedList; 
-	public ArrayList<Map<String, PrimitiveValue>> currentList;
+	Map<String, Integer> columnMapper;
+	public ArrayList<ArrayList<List<PrimitiveValue>>> sortedList; 
+	public ArrayList<List<PrimitiveValue>> currentList;
 	
 	
 
 	public OrderByIterator(List<OrderByElement> orderbyelements, DefaultIterator iterator){
 		this.orderbyelements = orderbyelements;
 		this.iterator = iterator;
-		this.sortedList = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
-		this.currentList = new ArrayList<Map<String, PrimitiveValue>>();
-		ArrayList<Map<String, PrimitiveValue>> list = new ArrayList<Map<String, PrimitiveValue>>();
+		this.columns = this.iterator.getColumns();
+		this.sortedList = new ArrayList<ArrayList<List<PrimitiveValue>>>();
+		this.currentList = new ArrayList<List<PrimitiveValue>>();
+		createMapperColumn();
+		
+		
+		ArrayList<List<PrimitiveValue>> list = new ArrayList<>();
 		while(this.iterator.hasNext()) {
 			list.add(this.iterator.next());
 		}
 		this.sortedList.add(list);
 		orderDataByElement();
-
 		this.nextResult = this.getNextIter();
 	}
 	
 	public OrderByIterator(List<OrderByElement> orderbyelements, List<Map<String, PrimitiveValue>> iterator, List<String> coulmnsForExternal){
 		this.orderbyelements = orderbyelements;
 		this.coulmnsForExternal = coulmnsForExternal;
-		this.sortedList = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
-		this.currentList = new ArrayList<Map<String, PrimitiveValue>>();
-		ArrayList<Map<String, PrimitiveValue>> list = new ArrayList<Map<String, PrimitiveValue>>();
-		for(Map<String, PrimitiveValue> obj: iterator) {
-			list.add(obj);
+		this.columns = this.iterator.getColumns();
+		this.sortedList = new ArrayList<ArrayList<List<PrimitiveValue>>>();
+		this.currentList = new ArrayList<List<PrimitiveValue>>();
+		
+		ArrayList<List<PrimitiveValue>> list = new ArrayList<>();
+		while(this.iterator.hasNext()) {
+			list.add(this.iterator.next());
 		}
 		this.sortedList.add(list);
 		orderDataByElement();
 		this.nextResult = this.getNextIter();
 	}
 	
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.columns) {
+			this.columnMapper.put(col, index);
+			index+=1;
+		}
+	}
 	private void orderDataByElement() {
 		for(OrderByElement orderByElement: this.orderbyelements) {
-			for(ArrayList<Map<String, PrimitiveValue>> x :this.sortedList) {
+			for(ArrayList<List<PrimitiveValue>> x :this.sortedList) {
 				if(orderByElement.isAsc()) {
 					Column col= (Column) orderByElement.getExpression();
 					if(col.getTable() != null) {
-
 						this.sortByCol(x, SortASC, col.toString());	
 					} else {
 						this.sortByCol(x, SortASC, col.getColumnName());		
@@ -90,7 +104,7 @@ public class OrderByIterator implements DefaultIterator{
 		}
 	}
 
-	private ArrayList<ArrayList<Map<String, PrimitiveValue>>> disIntegrateList(OrderByElement orderByElement) {
+	private ArrayList<ArrayList<List<PrimitiveValue>>> disIntegrateList(OrderByElement orderByElement) {
 		String byKey = null;
 		Column col= (Column) orderByElement.getExpression();
 		if(col.getTable() != null) {
@@ -98,18 +112,18 @@ public class OrderByIterator implements DefaultIterator{
 		} else {
 			byKey = col.getColumnName();		
 		}
-		ArrayList<ArrayList<Map<String, PrimitiveValue>>> temp = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
+		ArrayList<ArrayList<List<PrimitiveValue>>> temp = new ArrayList<ArrayList<List<PrimitiveValue>>>();
 		
-		for(ArrayList<Map<String, PrimitiveValue>> list: this.sortedList) {
-			Map<String, PrimitiveValue> curr = null;
-			ArrayList<Map<String, PrimitiveValue>>  disIntegratedList = new ArrayList<Map<String, PrimitiveValue>>();
-			for(Map<String, PrimitiveValue> element: list) {
-				if(curr == null || !curr.get(byKey).equals(element.get(byKey))) {
+		for(ArrayList<List<PrimitiveValue>> list: this.sortedList) {
+			List<PrimitiveValue> curr = null;
+			ArrayList<List<PrimitiveValue>>  disIntegratedList = new ArrayList<List<PrimitiveValue>>();
+			for(List<PrimitiveValue> element: list) {
+				if(curr == null || !curr.get(this.columnMapper.get(byKey)).equals(element.get(this.columnMapper.get(byKey)))) {
 					curr = element;
 					if(disIntegratedList.size() > 0) {
 						temp.add(disIntegratedList);
 					}
-					disIntegratedList = new ArrayList<Map<String, PrimitiveValue>>(); 
+					disIntegratedList = new ArrayList<List<PrimitiveValue>>(); 
 					disIntegratedList.add(curr);
 				} else {
 					disIntegratedList.add(element);
@@ -132,15 +146,15 @@ public class OrderByIterator implements DefaultIterator{
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = this.nextResult;
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> temp = this.nextResult;
 		this.nextResult = getNextIter();
 		return temp;
 	}
 
 
-	private Map<String, PrimitiveValue> getNextIter() {
-		Map<String, PrimitiveValue> temp = null;
+	private List<PrimitiveValue> getNextIter() {
+		List<PrimitiveValue> temp = null;
 		if(this.innerPointer < this.currentList.size()) {
 			temp = this.currentList.get(this.innerPointer);
 			this.innerPointer++;
@@ -157,8 +171,8 @@ public class OrderByIterator implements DefaultIterator{
 
 	@Override
 	public void reset() {
-		int outerPointer = 0; 
-		int innerPointer = 0;
+		this.outerPointer = 0; 
+		this.innerPointer = 0;
 	}
 
 	@Override
@@ -170,14 +184,18 @@ public class OrderByIterator implements DefaultIterator{
 	}
 
 	
-	public ArrayList<Map<String, PrimitiveValue>> sortByCol(ArrayList<Map<String, PrimitiveValue>> maps, int sortDirection, String columnName){
-		Comparator<Map<String, PrimitiveValue>> comp = new Comparator<Map<String, PrimitiveValue>>(){
-			public int compare(Map<String, PrimitiveValue> a, Map<String, PrimitiveValue> b){
+	public ArrayList<List<PrimitiveValue>> sortByCol(ArrayList<List<PrimitiveValue>> maps, int sortDirection, String columnName){
+		Comparator<List<PrimitiveValue>> comp = new Comparator<List<PrimitiveValue>>(){
+			public int compare(List<PrimitiveValue> a, List<PrimitiveValue> b){
 				//reverse result if DESC (sortDirection = -1)
-				PrimitiveValue aValue = a.get(columnName);
-				PrimitiveValue bValue = b.get(columnName);
-				int value = 0;
+				PrimitiveValue aValue = a.get(columnMapper.get(columnName));
+				PrimitiveValue bValue = b.get(columnMapper.get(columnName));
+				List<PrimitiveValue> scope = new ArrayList<PrimitiveValue>();
+				Map<String, Integer> mapper = new HashMap<>();
+				scope.add(aValue);
+				scope.add(bValue);
 				
+				int value = 0;
 				Table table = new Table();
 				table.setName("R");
 				
@@ -189,14 +207,12 @@ public class OrderByIterator implements DefaultIterator{
 				bCol.setColumnName("B");
 				bCol.setTable(table);
 				
-				
 				GreaterThan gtt = new GreaterThan();
 				gtt.setLeftExpression(aCol);
 				gtt.setRightExpression(bCol);
 				
-				Map<String, PrimitiveValue> scope = new HashMap<String, PrimitiveValue>();
-				scope.put(table.getName() + ".A", aValue);
-				scope.put(table.getName() + ".B", bValue);
+				mapper.put(aCol.toString(), 0);
+				mapper.put(bCol.toString(), 1);
 				
 				try {
 					if(aValue instanceof StringValue) {
@@ -222,14 +238,13 @@ public class OrderByIterator implements DefaultIterator{
 					}
 					else {
 
-						if(EvaluateUtils.evaluate(scope, gtt)) {
+						if(EvaluateUtils.evaluate(scope, gtt, mapper)) {
 							value = 10;
 						} else {
 							value = -10;
 						}
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				return sortDirection * value;
@@ -238,11 +253,5 @@ public class OrderByIterator implements DefaultIterator{
 		
 		Collections.sort(maps, comp);
 		return maps;
-	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

@@ -21,29 +21,43 @@ public class HashJoinIterator implements DefaultIterator {
 	DefaultIterator leftIterator;
 	DefaultIterator rightIterator;
 	
-	Map<String, PrimitiveValue> rightTuple;
 	String currentHashKey;
-	String rightExpression = null;
+	int indexMapList = 0;
 	
+	String rightExpression = null;
 	Join join;
 	List<String> columns;
+	Map<String, Integer> columnMapper;
+
 	
-	HashMap<String, ArrayList<Map<String, PrimitiveValue>>> passMap; // In Memory left map
-	
-	ArrayList<Map<String, PrimitiveValue>> mapList;
-	int indexMapList = 0;
-	Map<String, PrimitiveValue> nextResult;
+	ArrayList<List<PrimitiveValue>> mapList;
+	HashMap<String, ArrayList<List<PrimitiveValue>>> passMap; // In Memory left map
+	List<PrimitiveValue> rightTuple;
+	List<PrimitiveValue> nextResult;
 		
 	public HashJoinIterator(DefaultIterator leftIterator, DefaultIterator rightIterator, Join join){
 		this.leftIterator = leftIterator;
 		this.rightIterator = rightIterator;
 		this.join = join;
 		this.columns = new ArrayList<String>();
-		this.passMap = new HashMap<String, ArrayList<Map<String, PrimitiveValue>>>();
+		this.columns.addAll(this.leftIterator.getColumns());
+		this.columns.addAll(this.rightIterator.getColumns());
+		createMapperColumn();
+		this.passMap = new HashMap<String, ArrayList<List<PrimitiveValue>>>();
 		createOnePassHash();
+		
 		this.nextResult = getNextIter();
 	}
 
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.columns) {
+			this.columnMapper.put(col, index);
+			index+=1;
+		}
+	}
+	
 	private void createOnePassHash() {
 		if(this.join.getOnExpression() instanceof EqualsTo) {
 			EqualsTo exp = (EqualsTo) this.join.getOnExpression();
@@ -51,19 +65,20 @@ public class HashJoinIterator implements DefaultIterator {
 			String rightExpression = exp.getRightExpression().toString();
 			
 			while(this.leftIterator.hasNext()) {
-				Map<String, PrimitiveValue> map = this.leftIterator.next();
+				List<PrimitiveValue> map = this.leftIterator.next();
+				
 				String key = null; 
-				if(map.containsKey(leftExpression)) {
+				if(this.columnMapper.containsKey(leftExpression)) {
 					 key = leftExpression;
 					 this.rightExpression = rightExpression;
-				} else if(map.containsKey(rightExpression)) {
+				} else if(this.columnMapper.containsKey(rightExpression)) {
 					 key = rightExpression;
 					 this.rightExpression = leftExpression;
 				}
 				try {
-					PrimitiveValue value = map.get(key);
+					PrimitiveValue value = map.get(this.columnMapper.get(key));
 					String hashKey = Utils.hashString(value.toString());
-					ArrayList<Map<String, PrimitiveValue>> list = this.passMap.getOrDefault(hashKey, new ArrayList<Map<String, PrimitiveValue>>());
+					ArrayList<List<PrimitiveValue>> list = this.passMap.getOrDefault(hashKey, new ArrayList<List<PrimitiveValue>>());
 					list.add(map);
 					this.passMap.put(hashKey, list);
 				} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
@@ -86,8 +101,8 @@ public class HashJoinIterator implements DefaultIterator {
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = this.nextResult;
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> temp = this.nextResult;
 		this.nextResult = getNextIter();
 		return temp;
 	}
@@ -101,47 +116,34 @@ public class HashJoinIterator implements DefaultIterator {
 
 	@Override
 	public List<String> getColumns() {
-		if(this.columns.size() == 0) {
-			this.columns.addAll(this.leftIterator.getColumns());
-			this.columns.addAll(this.rightIterator.getColumns());
-		}
 		return this.columns;
 	}
 	
-	public Map<String, PrimitiveValue> getNextIter(){
-		Map<String, PrimitiveValue> temp = new HashMap<String, PrimitiveValue>();
+	public List<PrimitiveValue> getNextIter(){
+		List<PrimitiveValue> temp = new ArrayList<PrimitiveValue>();
 		
 		if(this.mapList!= null && this.mapList.size() > 0 && this.indexMapList < this.mapList.size()) {
-			Map<String, PrimitiveValue> leftTuple = this.mapList.get(this.indexMapList);
+			List<PrimitiveValue> leftTuple = this.mapList.get(this.indexMapList);
 			this.indexMapList++;
-			for(String key: this.rightTuple.keySet()) {
-				temp.put(key, this.rightTuple.get(key));
-			}
-			for(String key: leftTuple.keySet()) {
-				temp.put(key, leftTuple.get(key));
-			}
+			temp.addAll(leftTuple);
+			temp.addAll(rightTuple);
 		} else {
 			if(!this.rightIterator.hasNext()) {
 				return null;
 			}
 			this.rightTuple = this.rightIterator.next();	
-			PrimitiveValue value = this.rightTuple.get(this.rightExpression);
+			PrimitiveValue value = this.rightTuple.get(this.columnMapper.get(this.rightExpression));
 			String hashKey;
 			try {
 				hashKey = Utils.hashString(value.toString());
 				this.currentHashKey = hashKey;
 				this.indexMapList = 0;
-				this.mapList = this.passMap.getOrDefault(hashKey, new ArrayList<Map<String, PrimitiveValue>>());
+				this.mapList = this.passMap.getOrDefault(hashKey, new ArrayList<List<PrimitiveValue>>());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			temp = getNextIter();
 		}
 		return temp;
-	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		return null;
 	}
 }

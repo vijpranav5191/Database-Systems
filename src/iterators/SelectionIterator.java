@@ -1,5 +1,6 @@
 package iterators;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,38 +11,29 @@ import utils.EvaluateUtils;
 public class SelectionIterator implements DefaultIterator {
 	DefaultIterator iterator;
 	private Expression whereExp;
-	Map<String, PrimitiveValue> nextResult;
+	List<PrimitiveValue> nextResult;
+	List<String> columns;
+	Map<String, Integer> columnMapper;
 	
 	public SelectionIterator(DefaultIterator iterator, Expression whereExp){
 		this.iterator = iterator;
+		this.columns = this.iterator.getColumns();
 		this.whereExp = whereExp;
+		createMapperColumn();
 		this.nextResult = getNextIter();
 	}
 	
-	
-	
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.columns) {
+			this.columnMapper.put(col, index);
+			index+=1;
+		}
+	}
+
 	public DefaultIterator getIterator() {
 		return iterator;
-	}
-
-	public void setIterator(DefaultIterator iterator) {
-		this.iterator = iterator;
-	}
-
-	public Expression getWhereExp() {
-		return whereExp;
-	}
-
-	public void setWhereExp(Expression whereExp) {
-		this.whereExp = whereExp;
-	}
-
-	public Map<String, PrimitiveValue> getNextResult() {
-		return nextResult;
-	}
-
-	public void setNextResult(Map<String, PrimitiveValue> nextResult) {
-		this.nextResult = nextResult;
 	}
 
 	@Override
@@ -53,8 +45,8 @@ public class SelectionIterator implements DefaultIterator {
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = this.nextResult;
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> temp = this.nextResult;
 		this.nextResult = getNextIter();
 		return temp;
 	}
@@ -67,22 +59,18 @@ public class SelectionIterator implements DefaultIterator {
 
 	@Override
 	public List<String> getColumns() {
-		// TODO Auto-generated method stub
-			return this.iterator.getColumns();
+		return this.columns;
 	}
 
-	public Map<String, PrimitiveValue> getNextIter() {
-		Map<String, PrimitiveValue> pos = this.iterator.next();
+	public List<PrimitiveValue> getNextIter() {
+		List<PrimitiveValue> pos = this.iterator.next();
 		try {
-			while(pos != null && !EvaluateUtils.evaluate(pos, this.whereExp)) {
+			while(pos != null && !EvaluateUtils.evaluate(pos, this.whereExp, this.columnMapper)) {
 				pos = this.iterator.next();
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
 		return pos;
-	}
-	public DefaultIterator getChildIter() {
-		return this.iterator;
 	}
 }

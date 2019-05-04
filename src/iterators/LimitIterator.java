@@ -1,5 +1,6 @@
 package iterators;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,12 +11,24 @@ public class LimitIterator implements DefaultIterator{
 	DefaultIterator iterator;
 	Limit limit;
 	int index = 0;
+	List<String> columns;
+	Map<String, Integer> columnMapper;
 	
 	public LimitIterator(DefaultIterator iterator, Limit limit) {
 		this.iterator = iterator;
 		this.limit = limit;
+		this.columns = this.iterator.getColumns();
+		createMapperColumn();
 	}
 
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.columns) {
+			this.columnMapper.put(col, index);
+			index+=1;
+		}
+	}
 	
 	@Override
 	public boolean hasNext() {
@@ -26,8 +39,8 @@ public class LimitIterator implements DefaultIterator{
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = null;
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> temp = null;
 		if(index < this.limit.getRowCount()) {
 			temp =  this.iterator.next();
 			this.index++;
@@ -43,14 +56,6 @@ public class LimitIterator implements DefaultIterator{
 
 	@Override
 	public List<String> getColumns() {
-		return this.iterator.getColumns();
+		return this.columns;
 	}
-
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return this.iterator;
-	}
-
 }
