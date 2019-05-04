@@ -27,8 +27,7 @@ public class IndexSelectionIterator implements DefaultIterator{
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		// TODO Auto-generated method stub
+	public List<PrimitiveValue> next() {
 		return this.iterator.next();
 	}
 
@@ -45,11 +44,4 @@ public class IndexSelectionIterator implements DefaultIterator{
 		
 		return this.iterator.getColumns();
 	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

@@ -19,7 +19,7 @@ public class IndexScanIterator implements DefaultIterator{
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
+	public List<PrimitiveValue> next() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -35,11 +35,4 @@ public class IndexScanIterator implements DefaultIterator{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

@@ -46,6 +46,7 @@ public class TableScanIterator implements DefaultIterator {
 				this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
 			}
 		}
+		this.columnMap = createColumnMapper(this.cdefs);
 		
 		this.csvFile = Config.databasePath + tableName + ".csv";;	
 		try {
@@ -55,7 +56,6 @@ public class TableScanIterator implements DefaultIterator {
 			System.out.println("Error 1 " + tableName);
 		}
 		tuple = "";
-		this.columnMap = createColumnMapper(this.cdefs);
 	}
 	
 	public TableScanIterator(Table tab, Boolean isOrderBy, File fileName)
@@ -65,6 +65,14 @@ public class TableScanIterator implements DefaultIterator {
 		this.tab = tab;
 		this.cdefs = SchemaStructure.schema.get(tableName);
 		this.isOrderBy = isOrderBy;
+		for(int j = 0;j < this.cdefs.size(); j++) {
+			if(this.tab.getAlias() != null){
+				this.columns.add(this.tab.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
+			} else {
+				this.columns.add(tableName + "." + cdefs.get(j).cdef.getColumnName());
+			}
+		}
+		this.columnMap = createColumnMapper(this.cdefs);
 		this.csvFile = Config.databasePath + tableName + ".csv";
 		try {
 			br = new BufferedReader(new FileReader(csvFile));
@@ -73,7 +81,6 @@ public class TableScanIterator implements DefaultIterator {
 			System.out.println("Error 1 " + tableName);
 		}
 		tuple = "";
-		
 	}
 	@Override
 	public boolean hasNext() {

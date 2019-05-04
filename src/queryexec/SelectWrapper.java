@@ -25,7 +25,6 @@ import iterators.groupByExternal;
 import iterators.newExternal;
 import iterators.newGroupBy;
 import iterators.newGroupByExternal;
-import iterators.orderExternalIterator;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;

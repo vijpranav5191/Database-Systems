@@ -16,20 +16,31 @@ import net.sf.jsqlparser.schema.Table;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 
-public class TableSeekIterator implements DefaultIterator{
+public class TableSeekIterator implements DefaultIterator {
 
 	private List<String> columns;
 	Table table;
 	private String tuple;
-	private Map<String, PrimitiveValue> nextResult;
+	private List<PrimitiveValue> nextResult;
 	BufferedReader br;
 	String indexColumn;
 	PrimitiveValue searchValue;
+	List<ColumnDefs> cdefs;
+	Map<String, Integer> columnMap;
 	
 	public TableSeekIterator(BufferedReader br, Table table, PrimitiveValue searchValue, String indexColumn){
 		this.columns = new ArrayList<String>();
 		this.br = br;
 		this.table = table;
+		this.cdefs = SchemaStructure.schema.get(table.getName());
+		for(int j = 0;j < this.cdefs.size(); j++) {
+			if(this.table.getAlias() != null){
+				this.columns.add(this.table.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
+			} else {
+				this.columns.add(table.getName() + "." + cdefs.get(j).cdef.getColumnName());
+			}
+		}
+		this.columnMap = createColumnMapper(this.cdefs);
 		this.searchValue = searchValue;
 		this.indexColumn = indexColumn;
 		this.nextResult = getNextIter();
@@ -37,36 +48,35 @@ public class TableSeekIterator implements DefaultIterator{
 	
 	@Override
 	public boolean hasNext() {
-		if(this.nextResult != null && this.nextResult.get(indexColumn).equals(searchValue)) {
+		if(this.nextResult != null && this.nextResult.get(this.columnMap.get(indexColumn)).equals(searchValue)) {
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> temp = this.nextResult;
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> temp = this.nextResult;
 		this.nextResult = getNextIter();
 		return temp;
 	}
 
 
-	public Map<String, PrimitiveValue> getNextIter(){
+	public List<PrimitiveValue> getNextIter(){
 		try {
 			tuple = br.readLine();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Map<String, PrimitiveValue> map = new HashMap<String, PrimitiveValue>();
+		List<PrimitiveValue> map = new ArrayList<PrimitiveValue>();
 		String[] row;
 		if(tuple != null) {
 			row = tuple.split("\\|");
 		} else {
 			return null;
 		}
-		List<ColumnDefs> cdefs = SchemaStructure.schema.get(this.table.getName());
 		for(int j = 0;j < row.length; j++) {
-			ColumnDefs cdef = cdefs.get(j);
+			ColumnDefs cdef = this.cdefs.get(j);
 			String value = row[j];
 			PrimitiveValue pm;
 			switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
@@ -92,11 +102,7 @@ public class TableSeekIterator implements DefaultIterator{
 					pm = new StringValue(value);
 					break;
 			}
-			if(this.table.getAlias() != null) {
-				map.put( this.table.getAlias() + "." + cdef.cdef.getColumnName(), pm);	
-			} else {
-				map.put( this.table.getName() + "." + cdef.cdef.getColumnName(), pm);
-			}
+			map.add(pm);
 		}
 		return map;
 	}
@@ -106,24 +112,18 @@ public class TableSeekIterator implements DefaultIterator{
 		new Exception("Please dont Reset!!!!!");
 	}
 
+	public Map<String, Integer> createColumnMapper(List<ColumnDefs> cdefs) {
+		Map<String, Integer> mapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(ColumnDefs cdef: cdefs) {
+			this.columnMap.put(this.table.getName() + "." + cdef.cdef.getColumnName(), index);
+			index+=1;
+		}
+		return mapper;
+	}
+	
 	@Override
 	public List<String> getColumns() {
-		if(this.columns.size() == 0) {
-			List<ColumnDefs> cdefs = SchemaStructure.schema.get(this.table.getName());
-			for(int j = 0;j < cdefs.size(); j++) {
-				if(this.table.getAlias() != null){
-					this.columns.add(this.table.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
-				}else {
-					this.columns.add(this.table.getName() + "." + cdefs.get(j).cdef.getColumnName());
-				}
-			}
-		}
 		return this.columns;
 	}
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
