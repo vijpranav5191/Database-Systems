@@ -51,34 +51,34 @@ public class CreateWrapper {
 		List<Index> indexes = createtab.getIndexes();
 		List<ColumnDefinition> cdef = createtab.getColumnDefinitions();
 		//!Utils.isFileExists(path)
-		if(true) {
-			try {
-				for(Index index: indexes) {
-					if(index.getType().equals(Constants.PRIMARY_KEY)) {
-						for(String primaryKey: index.getColumnsNames()) {
-							FileReaderIterator iter = new FileReaderIterator(tbal);
-							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef);
-							btree.build(primaryKey);
-							//btree.toDraw();
-							SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-							break;
-						}
-					}
-				}
-				WriteOutputFile.writeObjectInFile(path, querystr);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} else {
-			try {
-				BPlusTreeBuilder btree = (BPlusTreeBuilder) WriteOutputFile.readObjectInFile(Config.bPlusTreeDir + tbal.getName());
-				SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
-			}
-		}
+//		if(true) {
+//			try {
+//				for(Index index: indexes) {
+//					if(index.getType().equals(Constants.PRIMARY_KEY)) {
+//						for(String primaryKey: index.getColumnsNames()) {
+//							FileReaderIterator iter = new FileReaderIterator(tbal);
+//							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef);
+//							btree.build(primaryKey);
+//							//btree.toDraw();
+//							SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+//							break;
+//						}
+//					}
+//				}
+//				WriteOutputFile.writeObjectInFile(path, querystr);
+//			} catch (FileNotFoundException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		} else {
+//			try {
+//				BPlusTreeBuilder btree = (BPlusTreeBuilder) WriteOutputFile.readObjectInFile(Config.bPlusTreeDir + tbal.getName());
+//				SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+//			} catch (ClassNotFoundException | IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
 		List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
 		for (ColumnDefinition cd : cdef) {
 			ColumnDefs c = new ColumnDefs();

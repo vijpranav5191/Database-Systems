@@ -261,8 +261,10 @@ public class SelectWrapper {
 			EqualsTo equalTo = (EqualsTo) exp;
 			
 			if (Config.isInMemory) {	
-				Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
-				Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
+				//Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
+				//Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
+				Column HoldingRightColumn = null;
+				Column HoldingLeftColumn = null;
 				
 				if(HoldingLeftColumn != null && HoldingRightColumn != null) {
 					if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {
@@ -305,9 +307,11 @@ public class SelectWrapper {
 				Join join = joinDefault;
 				
 				if (Config.isInMemory) {	
-					Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
-					Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
-					
+					//Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
+					//Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
+					Column HoldingRightColumn = null;
+					Column HoldingLeftColumn = null;
+						
 					if(HoldingLeftColumn != null && HoldingRightColumn != null) {
 						if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {
 							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
