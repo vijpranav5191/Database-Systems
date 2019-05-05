@@ -50,6 +50,8 @@ public class BPlusTree {
 		this.indexStr = indexStr;
 	}
 	
+	
+	
 	public int search(PrimitiveValue key) {
 		return root.getValue(key);
 	}
@@ -133,7 +135,7 @@ public class BPlusTree {
 	public class LeafNode extends Node{
 		
 		LeafNode next;
-		public ArrayList<Integer> values;
+		public List<Integer> values;
 		
 		LeafNode() {
 			keys = new ArrayList<PrimitiveValue>();
@@ -308,5 +310,10 @@ public class BPlusTree {
 			}
 			writer.close();
 		}
+	}
+
+	public void createFromDisk(List<PrimitiveValue> keys, List<Integer> values) {
+		this.root.keys = keys;
+		((LeafNode)this.root).values = values;
 	}
 }
