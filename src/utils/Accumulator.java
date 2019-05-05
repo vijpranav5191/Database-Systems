@@ -45,11 +45,9 @@ public class Accumulator {
 	public void aggregate(List<PrimitiveValue> map) throws Exception {
 		if(this.dataType == null) {
 			this.dataType = new HashMap<String, String>();
-			int index = 0;
 			for(String col: this.columnMap.keySet()) {
 				String type = map.get(this.columnMap.get(col)).getType().toString().toLowerCase();
 				this.dataType.put(col, type);
-				index += 1;
 			}
 		}
 		String hash = "";
@@ -59,37 +57,58 @@ public class Accumulator {
 		}
 		hash = hash.substring(0, hash.length() - 1);
 		PrimitiveValue pv = null;
-		double x = 0;
 		switch(this.aggregator.toUpperCase()) {
 			case "SUM":
+				double sum_x = 0;
 				for(Expression exp: this.expression.getExpressions()) {
 					pv = EvaluateUtils.evaluateExpression(map, exp, this.columnMap);
-					x += pv.toDouble() + this.accum.getOrDefault(hash, new DoubleValue(0)).toDouble();
+					if(pv instanceof LongValue) {
+						sum_x += pv.toLong() + this.accum.getOrDefault(hash, new LongValue(0)).toLong();
+						this.accum.put(hash, new LongValue((long) sum_x));
+					} else if(pv instanceof DoubleValue) {
+						sum_x += pv.toDouble() + this.accum.getOrDefault(hash, new DoubleValue(0)).toDouble();
+						this.accum.put(hash, new DoubleValue(sum_x));
+					}
 				}
+				
 				break;
 			case "AVG":
+				double avg_x = 0;
 				for(Expression exp: this.expression.getExpressions()) {
 					pv = EvaluateUtils.evaluateExpression(map, exp, this.columnMap);
-					x += (pv.toDouble() + (this.accum.getOrDefault(hash, new DoubleValue(0)).toDouble() * (this.avgCount - 1))) / this.avgCount;
+					avg_x += (pv.toDouble() + (this.accum.getOrDefault(hash, new DoubleValue(0)).toDouble() * (this.avgCount - 1))) / this.avgCount;
 				}
+				this.accum.put(hash, new DoubleValue(avg_x));
 				break;
 			case "MIN":
 				for(Expression exp: this.expression.getExpressions()) {
 					pv = EvaluateUtils.evaluateExpression(map, exp, this.columnMap);
-					x = Math.min(this.accum.getOrDefault(hash, new DoubleValue(999999999)).toDouble(), pv.toDouble());
+					if(pv instanceof LongValue) {
+						long min_x = Math.min(this.accum.getOrDefault(hash, new LongValue(999999999)).toLong(), pv.toLong());		
+						this.accum.put(hash, new LongValue(min_x));
+					} else if(pv instanceof DoubleValue){
+						double min_x = Math.min(this.accum.getOrDefault(hash, new DoubleValue(999999999)).toDouble(), pv.toDouble());		
+						this.accum.put(hash, new DoubleValue(min_x));
+					}
 				}
 				break;
 			case "MAX":
 				for(Expression exp: this.expression.getExpressions()) {
 					pv = EvaluateUtils.evaluateExpression(map, exp, this.columnMap);
-					x = Math.max(this.accum.getOrDefault(hash, new DoubleValue(999999999)).toDouble(), pv.toDouble());
+					if(pv instanceof LongValue) {
+						long max_x = Math.max(this.accum.getOrDefault(hash, new LongValue(-999999999)).toLong(), pv.toLong());		
+						this.accum.put(hash, new LongValue(max_x));
+					} else if(pv instanceof DoubleValue){
+						double max_x = Math.max(this.accum.getOrDefault(hash, new DoubleValue(-999999999)).toDouble(), pv.toDouble());		
+						this.accum.put(hash, new DoubleValue(max_x));
+					}
 				}
 				break;
 			case "COUNT":
-				x =  this.accum.getOrDefault(hash, new DoubleValue(0)).toDouble() + 1;
+				long count = this.accum.getOrDefault(hash, new LongValue(0)).toLong() + 1;
+				this.accum.put(hash, new LongValue(count));
 				break;	
 		}
-		this.accum.put(hash, new DoubleValue(x));
 	}
 	
 	public void commit() {
