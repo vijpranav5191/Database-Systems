@@ -29,9 +29,9 @@ public class Optimzer {
 //	}
 	
 	
-	public static List<Expression> getExpressionForSelectionPredicate(Table table, List<ColumnDefs> cdefs, List<Expression> expressions)
-	{
+	public static List<Expression> getExpressionForSelectionPredicate(Table table, List<ColumnDefs> cdefs, List<Expression> expressions){
 			List<Expression> lst = new ArrayList<Expression>();
+
 			for(Expression expression : expressions)
 			{
 				if(expression instanceof EqualsTo && ((EqualsTo) expression).getRightExpression() instanceof Column)
@@ -40,6 +40,7 @@ public class Optimzer {
 
 				lst.add(expression);
 				
+
 			}
 			if(lst != null && lst.size() > 0) {
 				for(Expression exp : lst) {

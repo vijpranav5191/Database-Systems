@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import iterators.DefaultIterator;
+import iterators.GroupByIterator;
 import iterators.IndexJoinIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
@@ -20,7 +21,6 @@ import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
 
-import iterators.newGroupBy;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -114,7 +114,7 @@ public class SelectWrapper {
 					}
 				}
 				if (Config.isInMemory) {
-					result = new newGroupBy(result, this.groupBy, (Table) fromItem, this.selectItems);
+					result = new GroupByIterator(result, this.groupBy, (Table) fromItem, this.selectItems);
 				} 
 			}
 

@@ -13,6 +13,7 @@ import FileUtils.WriteOutputFile;
 import bPlusTree.BPlusTreeBuilder;
 import iterators.FileReaderIterator;
 import iterators.TableScanIterator;
+import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
@@ -50,40 +51,40 @@ public class CreateWrapper {
 		String path = Config.createFileDir + tbal.getName();
 		List<Index> indexes = createtab.getIndexes();
 		List<ColumnDefinition> cdef = createtab.getColumnDefinitions();
-		//!Utils.isFileExists(path)
-//		if(true) {
-//			try {
-//				for(Index index: indexes) {
-//					if(index.getType().equals(Constants.PRIMARY_KEY)) {
-//						for(String primaryKey: index.getColumnsNames()) {
-//							FileReaderIterator iter = new FileReaderIterator(tbal);
-//							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef);
-//							btree.build(primaryKey);
-//							//btree.toDraw();
-//							SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-//							break;
-//						}
-//					}
-//				}
-				try {
-					WriteOutputFile.writeObjectInFile(path, querystr);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+
+		if(!Utils.isFileExists(path)) {
+			try {
+				for(Index index: indexes) {
+					if(index.getType().equals(Constants.PRIMARY_KEY)) {
+						for(String primaryKey: index.getColumnsNames()) {
+							FileReaderIterator iter = new FileReaderIterator(tbal);
+							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef, primaryKey);
+							btree.build();
+							btree.writeMapToFile();
+							SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+							break;
+						}
+					}
 				}
-//			} catch (FileNotFoundException e) {
-//				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		} else {
-//			try {
-//				BPlusTreeBuilder btree = (BPlusTreeBuilder) WriteOutputFile.readObjectInFile(Config.bPlusTreeDir + tbal.getName());
-//				SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-//			} catch (ClassNotFoundException | IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
+				WriteOutputFile.writeObjectInFile(path, querystr);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			for(Index index: indexes) {
+				if(index.getType().equals(Constants.PRIMARY_KEY)) {
+					for(String primaryKey: index.getColumnsNames()) {
+						BPlusTreeBuilder btree = new BPlusTreeBuilder(tbal, cdef, primaryKey);
+						//btree.readMapFromFile();
+						//SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+						break;
+					}
+				}
+			}
+			
+		}
 		List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
 		for (ColumnDefinition cd : cdef) {
 			ColumnDefs c = new ColumnDefs();

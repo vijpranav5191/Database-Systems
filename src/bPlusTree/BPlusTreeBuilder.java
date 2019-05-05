@@ -1,15 +1,22 @@
 package bPlusTree;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.nio.channels.Channels;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import bPlusTree.BPlusTree.LeafNode;
 import iterators.DefaultIterator;
 
 import iterators.RAIterator;
@@ -35,15 +42,23 @@ public class BPlusTreeBuilder{
 	Table table;
 	List<ColumnDefinition> cdefs;
 	
-	public BPlusTreeBuilder(RAIterator iterator, Table table, List<ColumnDefinition> cdefs){
+	public BPlusTreeBuilder(RAIterator iterator, Table table, List<ColumnDefinition> cdefs, String indexStr){
 		this.iterator = iterator;
 		this.table = table;
 		this.cdefs = cdefs;
+		this.indexStr = indexStr;
 	}
 	
-	public BPlusTree build(String indexStr) {
-		this.bPlusTree = new BPlusTree(Config.BRANCHING_FACTOR, indexStr);
+	
+	public BPlusTreeBuilder(Table table, List<ColumnDefinition> cdefs, String indexStr){
+		this.table = table;
+		this.cdefs = cdefs;
 		this.indexStr = indexStr;
+	}
+	
+	
+	public BPlusTree build() {
+		this.bPlusTree = new BPlusTree(Config.BRANCHING_FACTOR, indexStr);
 		int position = getPositionOfColumn(this.indexStr);
 		
 		String startPoint = "";
@@ -115,5 +130,31 @@ public class BPlusTreeBuilder{
 	
 	public void toDraw() throws IOException {
 		this.bPlusTree.toDraw(this.table);
+	}
+	
+	public void writeMapToFile() throws IOException {
+		List<Integer> values = ((LeafNode)this.bPlusTree.root).values;
+		List<PrimitiveValue> keys = this.bPlusTree.root.keys;
+		File filename = new File(Config.bPlusTreeDir + this.table + "__" + this.indexStr);
+		BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
+		for(int i=0;i < values.size();i++) {
+			writer.write(keys.get(i) + "," + values.get(i));
+			writer.newLine();
+		}
+		writer.close();
+	}
+	
+	public void readMapFromFile() {
+		File filename = new File(Config.bPlusTreeDir + this.table + "__" + this.indexStr);
+		String line;
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(Config.bPlusTreeDir + this.table + "__" + this.indexStr));
+			while ((line = br.readLine()) != null) {
+				String[] l = line.split("\\,");
+			    System.out.println(l[0] + "   " + l[1]);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
