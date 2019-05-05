@@ -65,7 +65,12 @@ public class CreateWrapper {
 //						}
 //					}
 //				}
-//				WriteOutputFile.writeObjectInFile(path, querystr);
+				try {
+					WriteOutputFile.writeObjectInFile(path, querystr);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 //			} catch (FileNotFoundException e) {
 //				e.printStackTrace();
 //			} catch (IOException e) {
