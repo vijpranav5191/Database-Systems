@@ -8,6 +8,7 @@ import java.util.Map;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.PrimitiveValue.InvalidPrimitive;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -127,7 +128,11 @@ public class GroupByIterator implements DefaultIterator{
 				map.addAll(accum.getNextList());
 				isAddded = false;
 			}
-			map.add(accum.next());
+			try {
+				map.add(accum.next());
+			} catch (InvalidPrimitive e) {
+				e.printStackTrace();
+			}
 		}
 		return map;
 	}

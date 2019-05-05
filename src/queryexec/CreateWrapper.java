@@ -51,15 +51,15 @@ public class CreateWrapper {
 		String path = Config.createFileDir + tbal.getName();
 		List<Index> indexes = createtab.getIndexes();
 		List<ColumnDefinition> cdef = createtab.getColumnDefinitions();
-		//!Utils.isFileExists(path)
-		if(true) {
+
+		if(!Utils.isFileExists(path)) {
 			try {
 				for(Index index: indexes) {
 					if(index.getType().equals(Constants.PRIMARY_KEY)) {
 						for(String primaryKey: index.getColumnsNames()) {
 							FileReaderIterator iter = new FileReaderIterator(tbal);
-							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef);
-							btree.build(primaryKey);
+							BPlusTreeBuilder btree = new BPlusTreeBuilder(iter, tbal, cdef, primaryKey);
+							btree.build();
 							btree.writeMapToFile();
 							SchemaStructure.bTreeMap.put(tbal.getName(), btree);
 							break;
@@ -73,12 +73,17 @@ public class CreateWrapper {
 				e.printStackTrace();
 			}
 		} else {
-			try {
-				BPlusTreeBuilder btree = (BPlusTreeBuilder) WriteOutputFile.readObjectInFile(Config.bPlusTreeDir + tbal.getName());
-				SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-			} catch (ClassNotFoundException | IOException e) {
-				e.printStackTrace();
+			for(Index index: indexes) {
+				if(index.getType().equals(Constants.PRIMARY_KEY)) {
+					for(String primaryKey: index.getColumnsNames()) {
+						BPlusTreeBuilder btree = new BPlusTreeBuilder(tbal, cdef, primaryKey);
+						//btree.readMapFromFile();
+						//SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+						break;
+					}
+				}
 			}
+			
 		}
 		List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
 		for (ColumnDefinition cd : cdef) {

@@ -26,17 +26,18 @@ public class Accumulator {
 	String aggregator;
 	Map<String, Integer> columnMap;
 	List<Column> groupBy;
-	int avgCount = 0;
 	int pointer = 0;
 	Iterator<String> keySet;
 	String currentHash = null;
 	List<PrimitiveValue> map;
 	Map<String, String> dataType;
+	Map<String, Integer> runningCount;
 	
 	public Accumulator(ExpressionList expressionList, List<Column> groupBy, 
 			String aggregator, Map<String, Integer> columnMap) {
 		this.aggregator = aggregator;
 		this.expression = expressionList;
+		this.runningCount = new HashMap<String, Integer>();
 		this.columnMap = columnMap;
 		this.groupBy = groupBy;
 		this.accum = new LinkedHashMap<String, PrimitiveValue>();
@@ -51,11 +52,12 @@ public class Accumulator {
 			}
 		}
 		String hash = "";
-		this.avgCount += 1;
+		
 		for(Column col: this.groupBy) {
 			hash += (map.get(this.columnMap.get(col.getTable().getName() + "." + col.getColumnName())) + "|");
 		}
 		hash = hash.substring(0, hash.length() - 1);
+		this.runningCount.put(hash, this.runningCount.getOrDefault(hash, 0) + 1);
 		PrimitiveValue pv = null;
 		switch(this.aggregator.toUpperCase()) {
 			case "SUM":
@@ -73,12 +75,12 @@ public class Accumulator {
 				
 				break;
 			case "AVG":
-				double avg_x = 0;
+				double avg_x_sum = 0;
 				for(Expression exp: this.expression.getExpressions()) {
 					pv = EvaluateUtils.evaluateExpression(map, exp, this.columnMap);
-					avg_x += (pv.toDouble() + (this.accum.getOrDefault(hash, new DoubleValue(0)).toDouble() * (this.avgCount - 1))) / this.avgCount;
+					avg_x_sum += pv.toDouble() + this.accum.getOrDefault(hash, new DoubleValue(0)).toDouble();
 				}
-				this.accum.put(hash, new DoubleValue(avg_x));
+				this.accum.put(hash, new DoubleValue(avg_x_sum));
 				break;
 			case "MIN":
 				for(Expression exp: this.expression.getExpressions()) {
@@ -162,7 +164,10 @@ public class Accumulator {
 		return this.map;
 	}
 	// always call nextHash Before this
-	public PrimitiveValue next() {
+	public PrimitiveValue next() throws InvalidPrimitive {
+		if(this.aggregator.toUpperCase().equals("AVG")) {
+			return new DoubleValue(this.accum.get(this.currentHash).toDouble() / this.runningCount.get(this.currentHash)); 
+		}
 		return this.accum.get(this.currentHash);
 	}
 }
