@@ -63,6 +63,7 @@ public class OrderByIterator implements DefaultIterator{
 		this.columns = this.iterator.getColumns();
 		this.sortedList = new ArrayList<ArrayList<List<PrimitiveValue>>>();
 		this.currentList = new ArrayList<List<PrimitiveValue>>();
+		createMapperColumn();
 		
 		ArrayList<List<PrimitiveValue>> list = new ArrayList<>();
 		while(this.iterator.hasNext()) {

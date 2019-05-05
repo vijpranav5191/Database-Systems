@@ -27,21 +27,15 @@ public class Optimzer {
 //	}
 	
 	
-	public static List<Expression> getExpressionForSelectionPredicate(Table table, List<ColumnDefs> cdefs, List<Expression> expressions)
-	{
+	public static List<Expression> getExpressionForSelectionPredicate(Table table, List<ColumnDefs> cdefs, List<Expression> expressions){
 			List<Expression> lst = new ArrayList<Expression>();
-			for(Expression expression : expressions)
-			{
+			for(Expression expression : expressions){
 				if(expression instanceof EqualsTo && expression.toString().split(" ")[2].split("\\.").length == 2)
 					continue;
-//				System.out.println(" expresson " + expression);
 				String part = expression.toString().split(" ")[0];
-				if(part.split("\\.").length == 2)
-				{
-					for(ColumnDefs cd : cdefs)	
-					{
-						if(part.equals(table.getName() + "." + cd.cdef.getColumnName()))
-						{ 
+				if(part.split("\\.").length == 2){
+					for(ColumnDefs cd : cdefs){
+						if(part.equals(table.getName() + "." + cd.cdef.getColumnName())){ 
 							lst.add(expression);
 						}
 					}

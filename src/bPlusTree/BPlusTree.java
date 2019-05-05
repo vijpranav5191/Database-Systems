@@ -29,7 +29,7 @@ import utils.Config;
 
 
 public class BPlusTree {
-	private Node root;
+	public Node root;
 	private final int DEFAULT_BRANCHING_FACTOR = 128;
 	
 	private String prevPath;
@@ -110,8 +110,8 @@ public class BPlusTree {
 	}
 	
 	
-	abstract class Node {
-		List<PrimitiveValue> keys;
+	public abstract class Node {
+		public List<PrimitiveValue> keys;
 		
 		int keyNumber() {
 			return keys.size();
@@ -130,10 +130,10 @@ public class BPlusTree {
 	}
 	
 	
-	class LeafNode extends Node{
+	public class LeafNode extends Node{
 		
 		LeafNode next;
-		ArrayList<Integer> values;
+		public ArrayList<Integer> values;
 		
 		LeafNode() {
 			keys = new ArrayList<PrimitiveValue>();
@@ -190,7 +190,7 @@ public class BPlusTree {
 	}
 	
 	
-	class InternalNode extends Node{
+	public class InternalNode extends Node{
 		List<Node> children;
 
 		InternalNode() {
