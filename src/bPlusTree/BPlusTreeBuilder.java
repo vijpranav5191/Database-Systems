@@ -1,15 +1,20 @@
 package bPlusTree;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.nio.channels.Channels;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import bPlusTree.BPlusTree.LeafNode;
 import iterators.DefaultIterator;
 
 import iterators.RAIterator;
@@ -115,5 +120,17 @@ public class BPlusTreeBuilder{
 	
 	public void toDraw() throws IOException {
 		this.bPlusTree.toDraw(this.table);
+	}
+	
+	public void writeMapToFile() throws IOException {
+		List<Integer> values = ((LeafNode)this.bPlusTree.root).values;
+		List<PrimitiveValue> keys = this.bPlusTree.root.keys;
+		File filename = new File(Config.bPlusTreeDir + this.table + "__" + this.indexStr);
+		BufferedWriter writer = new BufferedWriter(new FileWriter(filename));   
+		for(int i=0;i < values.size();i++) {
+			writer.write(keys.get(i) + "," + values.get(i));
+			writer.newLine();
+		}
+		writer.close();
 	}
 }
