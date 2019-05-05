@@ -37,9 +37,9 @@ public class UnionWrapper {
 		// TODO Auto-generated method stub
 		plainsel = union.getPlainSelects();
 		resultList = new HashSet<>();
-		for (PlainSelect plainSelect : plainsel) {
-			parseSelunion(plainSelect);
-		}
+//		for (PlainSelect plainSelect : plainsel) {
+//			//parseSelunion(plainSelect);
+//		}
 		printresl(resultList);
 	}
 	
@@ -52,45 +52,45 @@ public class UnionWrapper {
 		}
 	}
 
-	public HashSet<PlainSelect> parseSelunion(PlainSelect plainselect){
-		DefaultIterator iter = null;
-		
-		FromItem fromItem = plainselect.getFromItem();
-		selectItems = plainselect.getSelectItems();
-		whereExp = plainselect.getWhere();
-		if(fromItem instanceof Table) {
-			Table table = (Table) fromItem;
-			iter = new TableScanIterator(table);
-		}
-		DefaultIterator result = iter;
-		while(iter.hasNext()) {
-			if((joins=plainselect.getJoins())!=null){
-				for (Join join : joins) {
-					FromItem item = join.getRightItem();
-					if(item instanceof Table ) {
-						DefaultIterator iter2 = new TableScanIterator((Table) item);
-						result = new JoinIterator(result, iter2, join);
-					}
-					//System.out.println(result.next());
-				}
-			}
-			if (this.whereExp != null) {
-				result = new SelectionIterator(result, this.whereExp);
-			}
-//			if(this.selectItems != null ) {
-//				result = new ProjectionIterator(result, this.selectItems);
+//	public HashSet<PlainSelect> parseSelunion(PlainSelect plainselect){
+//		DefaultIterator iter = null;
+//		
+//		FromItem fromItem = plainselect.getFromItem();
+//		selectItems = plainselect.getSelectItems();
+//		whereExp = plainselect.getWhere();
+//		if(fromItem instanceof Table) {
+//			Table table = (Table) fromItem;
+//			iter = new TableScanIterator(table);
+//		}
+//		DefaultIterator result = iter;
+//		while(iter.hasNext()) {
+//			if((joins=plainselect.getJoins())!=null){
+//				for (Join join : joins) {
+//					FromItem item = join.getRightItem();
+//					if(item instanceof Table ) {
+//						DefaultIterator iter2 = new TableScanIterator((Table) item);
+//						result = new JoinIterator(result, iter2, join);
+//					}
+//					//System.out.println(result.next());
+//				}
 //			}
-//			ResultIterator res = new ResultIterator(result);
-//			while(res.hasNext()) {
-//				res.next();
-	//			}
-			while (result.hasNext()) {
-				if(result.next()!=null)
-					resultList.add(result.next());
-			}
-
-		}
-		return null;
-	}
+//			if (this.whereExp != null) {
+//				result = new SelectionIterator(result, this.whereExp);
+//			}
+////			if(this.selectItems != null ) {
+////				result = new ProjectionIterator(result, this.selectItems);
+////			}
+////			ResultIterator res = new ResultIterator(result);
+////			while(res.hasNext()) {
+////				res.next();
+//	//			}
+//			while (result.hasNext()) {
+//				if(result.next()!=null)
+//					resultList.add(result.next());
+//			}
+//
+//		}
+//		return null;
+//	}
 
 }

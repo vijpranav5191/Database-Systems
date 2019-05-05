@@ -31,61 +31,106 @@ public class newGroupBy implements DefaultIterator{
 	
 	DefaultIterator iterator;
 	private List<SelectItem> selectItems;
-	private Expression having;
-	private List<Set<Map<String,PrimitiveValue>>> arrayList;
-//	List<List<Map<String, PrimitiveValue>>> resultSet ;
+	private List<Set<List<PrimitiveValue>>> arrayList;
+	
 	List<OrderByElement> ordElem;
 	private int index;
-	private ArrayList<Map<String,PrimitiveValue>> lstObj;
-	private Set<Map<String, PrimitiveValue>> tempList;
-	private ArrayList<ArrayList<Map<String, PrimitiveValue>>> resultSet;
+	private ArrayList<List<PrimitiveValue>> lstObj;
+	private Set<List<PrimitiveValue>> tempList;
+	Map<String, Integer> columnMapper;
+	List<String> columns;
+	private ArrayList<ArrayList<List<PrimitiveValue>>> resultSet;
 
 	
 	public newGroupBy(DefaultIterator iterator, List<Column> groupBy, Table primaryTable, List<SelectItem> selectItems) throws Exception {
 		this.selectItems = selectItems;
-		// TODO Auto-generated constructor stub
 		this.iterator = iterator; 
-		this.lstObj = new ArrayList<>();
-		this.having = having;
-		
+		this.lstObj = new ArrayList<>();	
 		this.ordElem =  new ArrayList<OrderByElement>();
-		for(Column col : groupBy)
-		{
+		this.columns = new ArrayList<>();
+		
+		for(int index = 0; index < this.selectItems.size();index++) {
+			SelectItem selectItem = this.selectItems.get(index);
+
+			if(selectItem instanceof SelectExpressionItem) {
+				SelectExpressionItem selectExpression = (SelectExpressionItem) selectItem;
+				if(selectExpression.getExpression() instanceof Column) {
+					Column column = (Column) selectExpression.getExpression();
+					if(selectExpression.getAlias() != null) {
+						this.columns.add(selectExpression.getAlias());
+					} else {
+						if(column.getTable().getName() != null) {
+							this.columns.add(column.getTable().getName() + "." + column.getColumnName());
+						} else if(column.getTable().getAlias() != null) {
+							this.columns.add(column.getTable().getAlias() + "." + column.getColumnName());
+						} else {
+							this.columns.add(column.getColumnName());	
+						}
+					}
+				} else if((selectExpression.getExpression() instanceof Function)){
+					if(selectExpression.getAlias() == null){
+						Function func = (Function) selectExpression.getExpression();
+						String name = func.getName();
+						if(func.getParameters()!=null) {
+							List<Expression> expList = func.getParameters().getExpressions();
+							StringBuilder sb = new StringBuilder();
+							for(Expression exp : expList) {
+								sb.append(exp.toString());
+							}
+							this.columns.add(name+"("+sb.toString()+")");
+						}
+					} else {
+						//this.columns.add(((SelectExpressionItem) selectItem).getExpression().toString());
+						this.columns.add(selectExpression.getAlias());
+					}
+				}
+				else {
+					if(selectExpression.getAlias()==null) {
+						this.columns.add(selectItem.toString());
+					}else {
+						this.columns.add(selectExpression.getAlias());
+					}
+				}	
+			} else if(selectItem instanceof AllTableColumns){
+				AllTableColumns allTableColumns = (AllTableColumns) selectItem;
+				Table table = allTableColumns.getTable();
+				for(String column: this.iterator.getColumns()) {
+					if(column.split("\\.")[0].equals(table.getName())) {
+						this.columns.add(column);
+					}
+				}
+			} else if(selectItem instanceof AllColumns) {
+				this.columns = this.iterator.getColumns();
+			}	
+		}
+		createMapperColumn();
+		for(Column col : groupBy){
 			OrderByElement ord = new OrderByElement();
 			ord.setExpression(col);
 			ordElem.add( ord);	
 		}
-		
-//		OrderByIterator ordItr = new OrderByIterator(ordElem , iterator);
-		
-		while(this.iterator.hasNext())
-		{	
-			
+		while(this.iterator.hasNext()){	
 			lstObj.add( this.iterator.next() );
 		}
-		
-//		for(Map obj : lstObj)
-//		{
-//			System.out.println(obj); 
-//		}
-		arrayList = new ArrayList<Set<Map<String,PrimitiveValue>>>();
+		arrayList = new ArrayList<Set<List<PrimitiveValue>>>();
 		this.resultSet = new ArrayList<>();
 		this.resultSet.add(lstObj);
-//		this.resultSet = getArrayList( lstObj , ordElem );
 		orderDataByElement(ordElem);
-		
-		
-//		for(List<Map<String,PrimitiveValue>> l : arrayList)
-//		{
-//			System.out.println(l);
-//		}
 		this.index = 0;
 	}
 	
-	
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.iterator.getColumns()) {
+			this.columnMapper.put(col, index);
+			index+=1;
+		}
+	}
+
 	private void orderDataByElement(List<OrderByElement> ordElem) {
 		for(OrderByElement orderByElement: ordElem) {
-			for(ArrayList<Map<String, PrimitiveValue>> x : this.resultSet) {
+			for(ArrayList<List<PrimitiveValue>> x : this.resultSet) {
 				if(orderByElement.isAsc()) {
 					Column col= (Column) orderByElement.getExpression();
 					if(col.getTable() != null) {
@@ -99,7 +144,7 @@ public class newGroupBy implements DefaultIterator{
 		}
 	}
 
-	private ArrayList<ArrayList<Map<String, PrimitiveValue>>> disIntegrateList(OrderByElement orderByElement) {
+	private ArrayList<ArrayList<List<PrimitiveValue>>> disIntegrateList(OrderByElement orderByElement) {
 		String byKey = null;
 		Column col= (Column) orderByElement.getExpression();
 		if(col.getTable() != null) {
@@ -107,18 +152,18 @@ public class newGroupBy implements DefaultIterator{
 		} else {
 			byKey = col.getColumnName();		
 		}
-		ArrayList<ArrayList<Map<String, PrimitiveValue>>> temp = new ArrayList<ArrayList<Map<String, PrimitiveValue>>>();
+		ArrayList<ArrayList<List<PrimitiveValue>>> temp = new ArrayList<ArrayList<List<PrimitiveValue>>>();
 		
-		for(ArrayList<Map<String, PrimitiveValue>> list: this.resultSet) {
-			Map<String, PrimitiveValue> curr = null;
-			ArrayList<Map<String, PrimitiveValue>>  disIntegratedList = new ArrayList<Map<String, PrimitiveValue>>();
-			for(Map<String, PrimitiveValue> element: list) {
-				if(curr == null || !curr.get(byKey).equals(element.get(byKey))) {
+		for(ArrayList<List<PrimitiveValue>> list: this.resultSet) {
+			List<PrimitiveValue> curr = null;
+			ArrayList<List<PrimitiveValue>>  disIntegratedList = new ArrayList<List<PrimitiveValue>>();
+			for(List<PrimitiveValue> element: list) {
+				if(curr == null || !curr.get(this.columnMapper.get(byKey)).equals(element.get(this.columnMapper.get(byKey)))) {
 					curr = element;
 					if(disIntegratedList.size() > 0) {
 						temp.add(disIntegratedList);
 					}
-					disIntegratedList = new ArrayList<Map<String, PrimitiveValue>>(); 
+					disIntegratedList = new ArrayList<List<PrimitiveValue>>(); 
 					disIntegratedList.add(curr);
 				} else {
 					disIntegratedList.add(element);
@@ -131,14 +176,19 @@ public class newGroupBy implements DefaultIterator{
 		return temp;
 	}
 	
-	public ArrayList<Map<String, PrimitiveValue>> sortByCol(ArrayList<Map<String, PrimitiveValue>> maps, int sortDirection, String columnName){
-		Comparator<Map<String, PrimitiveValue>> comp = new Comparator<Map<String, PrimitiveValue>>(){
-			public int compare(Map<String, PrimitiveValue> a, Map<String, PrimitiveValue> b){
+	public ArrayList<List<PrimitiveValue>> sortByCol(ArrayList<List<PrimitiveValue>> maps, int sortDirection, String columnName){
+		Comparator<List<PrimitiveValue>> comp = new Comparator<List<PrimitiveValue>>(){
+			public int compare(List<PrimitiveValue> a, List<PrimitiveValue> b){
 				//reverse result if DESC (sortDirection = -1)
-				PrimitiveValue aValue = a.get(columnName);
-				PrimitiveValue bValue = b.get(columnName);
-				int value = 0;
+				PrimitiveValue aValue = a.get(columnMapper.get(columnName));
+				PrimitiveValue bValue = b.get(columnMapper.get(columnName));
 				
+				List<PrimitiveValue> scope = new ArrayList<PrimitiveValue>();
+				Map<String, Integer> mapper = new HashMap<>();
+				scope.add(aValue);
+				scope.add(bValue);
+				
+				int value = 0;
 				Table table = new Table();
 				table.setName("R");
 				
@@ -150,14 +200,12 @@ public class newGroupBy implements DefaultIterator{
 				bCol.setColumnName("B");
 				bCol.setTable(table);
 				
-				
 				GreaterThan gtt = new GreaterThan();
 				gtt.setLeftExpression(aCol);
 				gtt.setRightExpression(bCol);
 				
-				Map<String, PrimitiveValue> scope = new HashMap<String, PrimitiveValue>();
-				scope.put(table.getName() + ".A", aValue);
-				scope.put(table.getName() + ".B", bValue);
+				mapper.put(aCol.toString(), 0);
+				mapper.put(bCol.toString(), 1);
 				
 				try {
 					if(aValue instanceof StringValue) {
@@ -167,14 +215,13 @@ public class newGroupBy implements DefaultIterator{
 					} else if(aValue instanceof LongValue){
 						return (int) ((aValue.toLong() - bValue.toLong()) * sortDirection);	
 					}else {
-						if(EvaluateUtils.evaluate(scope, gtt)) {
+						if(EvaluateUtils.evaluate(scope, gtt, mapper)) {
 							value = 10;
 						} else {
 							value = -10;
 						}
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				return sortDirection * value;
@@ -184,65 +231,20 @@ public class newGroupBy implements DefaultIterator{
 		Collections.sort(maps, comp);
 		return maps;
 	}
-	
-//	private List<Set<Map<String, PrimitiveValue>>> getArrayList(ArrayList<Map<String, PrimitiveValue>> lstObj,
-//			List<OrderByElement> ordElem) {
-//		// TODO Auto-generated method stub
-//		Iterator< Map<String,PrimitiveValue> > itr = lstObj.iterator();
-//		Map<String,PrimitiveValue> pm = null;
-//
-//		
-//		while(itr.hasNext())
-//		{
-//			
-//			if(pm == null)
-//			{	pm=itr.next();
-//			}
-//			this.tempList = new HashSet<Map<String,PrimitiveValue>>();
-//
-//			tempList.add(pm);
-//			boolean flag = true;
-//			while(flag && itr.hasNext())
-//			{ 
-//
-//				Map<String,PrimitiveValue> pmNew = itr.next();			
-//				for(OrderByElement group : ordElem)
-//				{
-//						if(!pmNew.get(group.toString()).equals(pm.get(group.toString())) )
-//						{
-////							System.out.println( "  " + pm + " " + pmNew);
-//							pm = pmNew;
-//							arrayList.add(tempList);
-//							flag = false;
-//						}
-//						else
-//						{
-////							System.out.println(" " + pmNew + " "  + pm);
-//							tempList.add(pmNew);
-//						}
-//				}
-//			}
-//			tempList.clear();
-//		}
-//		arrayList.add(tempList);
-//		
-//		return arrayList;
-//	}
 
 	@Override
 	public boolean hasNext() {
-		// TODO Auto-generated method stub
 		return index < resultSet.size();
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		// TODO Auto-generated method stub
-		Map<String, PrimitiveValue> selectMap = new LinkedHashMap<>();
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> selectMap = new ArrayList<>();
+		
 		if(this.hasNext()) {
-			List<Map<String, PrimitiveValue>> group = this.resultSet.get(index++);
-			Iterator iter = group.iterator();
-			Map<String, PrimitiveValue> map = (Map<String, PrimitiveValue>) iter.next();
+			List<List<PrimitiveValue>> group = this.resultSet.get(index++);
+			Iterator<List<PrimitiveValue>> iter = group.iterator();
+			List<PrimitiveValue> map = (List<PrimitiveValue>) iter.next();
 			if(map!=null) {
 				for(int index = 0; index < this.selectItems.size();index++) {
 					SelectItem selectItem = this.selectItems.get(index);
@@ -259,13 +261,13 @@ public class newGroupBy implements DefaultIterator{
 						if(selectExpression.getExpression() instanceof Column) {
 							Column column = (Column) selectExpression.getExpression();
 							if(column.getTable().getName() != null && column.getColumnName() != null) {
-								selectMap.put(column.getTable().getName() + "." + column.getColumnName(), map.get(column.getTable().getName() + "." + column.getColumnName()));
+								selectMap.add(map.get(this.columnMapper.get(column.getTable().getName() + "." + column.getColumnName())));
 							} else if(column.getTable().getAlias() != null && column.getColumnName() != null) {
-								selectMap.put(column.getTable().getAlias() + "." + column.getColumnName(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
+								selectMap.add(map.get(this.columnMapper.get(column.getTable().getAlias() + "." + column.getColumnName())));		
 							} else if(column.getTable().getAlias() == null && column.getTable().getName() == null){
-								for(String key: map.keySet()) {
+								for(String key: this.columnMapper.keySet()) {
 									if(key.split("\\.")[1].equals(column.getColumnName())) {
-										selectMap.put(key, map.get(key));					
+										selectMap.add(map.get(this.columnMapper.get(key)));					
 										break;
 									}
 								}
@@ -276,18 +278,12 @@ public class newGroupBy implements DefaultIterator{
 								if(exp instanceof Function) {
 									Function func = (Function) exp;
 									iter = group.iterator();
-									DefaultIterator iter1 = new SimpleAggregateIterator(iter, func);
-									Map<String, PrimitiveValue> temp = iter1.next();
-									selectMap.putAll(temp);
-									if(selectExpression.getAlias()!=null) {
-										Set<String> keys  = temp.keySet();
-										for (String string : keys) {
-											selectMap.put(selectExpression.getAlias(), selectMap.get(string));
-										}
-									}
+									DefaultIterator iter1 = new SimpleAggregateIterator(iter, func, this.columnMapper);
+									List<PrimitiveValue> temp = iter1.next();
+									//selectMap.addAll(temp);
+									selectMap.addAll(temp);
 								}
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
@@ -303,20 +299,11 @@ public class newGroupBy implements DefaultIterator{
 
 	@Override
 	public void reset() {
-		// TODO Auto-generated method stub
-		
+		this.iterator.reset();
 	}
 
 	@Override
 	public List<String> getColumns() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.columns;
 	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

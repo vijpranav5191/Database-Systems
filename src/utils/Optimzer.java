@@ -40,14 +40,12 @@ public class Optimzer {
 				{
 					for(ColumnDefs cd : cdefs)	
 					{
-						if(  part.split("\\.")[1].equals(cd.cdef.getColumnName()) )
+						if(part.equals(table.getName() + "." + cd.cdef.getColumnName()))
 						{ 
 							lst.add(expression);
 						}
 					}
-				}
-				else
-				{ 
+				} else { 
 					for(ColumnDefs cd : cdefs){	
 						if(  part.equals(cd.cdef.getColumnName()) )
 						{

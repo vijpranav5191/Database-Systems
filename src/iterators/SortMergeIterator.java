@@ -71,8 +71,8 @@ public class SortMergeIterator implements DefaultIterator{
 		
 		List<OrderByElement> listLeft = new ArrayList<OrderByElement>();
 		listLeft.add(leftOrderByElement);	
-		this.leftIterator = new newExternal(leftIterator, listLeft, this.selectItem);
-		//this.leftIterator = new OrderByIterator(listLeft, leftIterator);
+		//this.leftIterator = new newExternal(leftIterator, listLeft, this.selectItem);
+		this.leftIterator = new OrderByIterator(listLeft, leftIterator);
 			
 		// Right Iteration after sorting
 		OrderByElement rightOrderByElement = new OrderByElement();
@@ -86,8 +86,8 @@ public class SortMergeIterator implements DefaultIterator{
 
 		List<OrderByElement> listRight = new ArrayList<OrderByElement>();
 		listRight.add(rightOrderByElement);
-		this.rightIterator = new newExternal(rightIterator, listRight, this.selectItem);
-		//this.rightIterator = new OrderByIterator(listRight, rightIterator);
+		//this.rightIterator = new newExternal(rightIterator, listRight, this.selectItem);
+		this.rightIterator = new OrderByIterator(listRight, rightIterator);
 		
 		this.equalTo.setLeftExpression(colLeft);
 		this.equalTo.setRightExpression(colRight);

@@ -49,7 +49,6 @@ public class BPlusTreeBuilder{
 		String startPoint = "";
 		int startOffset = 0;
 		int seekOffset = 0;
-		System.out.print(this.table.getName());
 		if(position >= 0) {
 			while(this.iterator.hasNext()) {
 				String next = this.iterator.next();

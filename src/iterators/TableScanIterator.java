@@ -165,7 +165,7 @@ public class TableScanIterator implements DefaultIterator {
 		Map<String, Integer> mapper = new HashMap<String, Integer>();
 		int index = 0;
 		for(ColumnDefs cdef: cdefs) {
-			this.columnMap.put(tableName + "." + cdef.cdef.getColumnName(), index);
+			mapper.put(tableName + "." + cdef.cdef.getColumnName(), index);
 			index+=1;
 		}
 		return mapper;

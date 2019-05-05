@@ -116,7 +116,7 @@ public class TableSeekIterator implements DefaultIterator {
 		Map<String, Integer> mapper = new HashMap<String, Integer>();
 		int index = 0;
 		for(ColumnDefs cdef: cdefs) {
-			this.columnMap.put(this.table.getName() + "." + cdef.cdef.getColumnName(), index);
+			mapper.put(this.table.getName() + "." + cdef.cdef.getColumnName(), index);
 			index+=1;
 		}
 		return mapper;

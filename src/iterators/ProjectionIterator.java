@@ -27,6 +27,7 @@ public class ProjectionIterator implements DefaultIterator{
 	Table primaryTable;
 	private boolean zeroAggflag;
 	private String catchfunc;
+	Map<String, Integer> columnMapper;
 
 	public ProjectionIterator(DefaultIterator iterator, List<SelectItem> selectItems, Table primaryTable, List<Column> groupBy) {
 		this.selectItems = selectItems;
@@ -54,7 +55,7 @@ public class ProjectionIterator implements DefaultIterator{
 						}
 					}
 				} else if((selectExpression.getExpression() instanceof Function)){
-					if(selectExpression.getAlias()==null){
+					if(selectExpression.getAlias() == null){
 						Function func = (Function) selectExpression.getExpression();
 						String name = func.getName();
 						if(func.getParameters()!=null) {
@@ -64,8 +65,7 @@ public class ProjectionIterator implements DefaultIterator{
 								sb.append(exp.toString());
 							}
 							this.columns.add(name+"("+sb.toString()+")");
-						}
-						else {
+						} else {
 							if(func.isAllColumns()) {
 								this.columns.add("COUNT(*)");
 								if(!this.iterator.hasNext()) {
@@ -74,16 +74,14 @@ public class ProjectionIterator implements DefaultIterator{
 								}
 							}
 						}
-					}
-					else {
-						if(selectExpression.getAlias()==null) {
+					} else {
+						if(selectExpression.getAlias() == null) {
 							this.columns.add(selectItem.toString());
-						}else {
+						} else {
 							this.columns.add(selectExpression.getAlias());
 						}
 					}
-				}
-				else {
+				} else {
 					if(selectExpression.getAlias()==null) {
 						this.columns.add(selectItem.toString());
 					}else {
@@ -102,21 +100,32 @@ public class ProjectionIterator implements DefaultIterator{
 				this.columns = this.iterator.getColumns();
 			}	
 		}
+		createMapperColumn();
 	}
 
+	private void createMapperColumn() {
+		this.columnMapper = new HashMap<String, Integer>();
+		int index = 0;
+		for(String col: this.iterator.getColumns()) {
+			this.columnMapper.put(col, index);
+			index += 1;
+		}
+	}
+	
 	@Override
 	public boolean hasNext() {
 		return this.iterator.hasNext();
 	}
 
 	@Override
-	public Map<String, PrimitiveValue> next() {
-		Map<String, PrimitiveValue> map = this.iterator.next();
-		Map<String, PrimitiveValue> selectMap = new HashMap<String, PrimitiveValue>(map);
+	public List<PrimitiveValue> next() {
+		List<PrimitiveValue> map = this.iterator.next();
+		List<PrimitiveValue> selectMap = new ArrayList<PrimitiveValue>();
+		
 		if(map == null && this.zeroAggflag) {
 			this.zeroAggflag = false;
-			map = new HashMap<>();	
-			map.put(this.catchfunc, new LongValue(0));
+			map = new ArrayList<>();	
+			map.add(new LongValue(0));
 		}
 
 		if(map != null) { // hasNext() not working
@@ -136,21 +145,21 @@ public class ProjectionIterator implements DefaultIterator{
 					if(selectExpression.getExpression() instanceof Column) {
 						Column column = (Column) selectExpression.getExpression();
 						if(column.getTable().getName() != null && column.getColumnName() != null) {
-							selectMap.put(column.getTable().getName() + "." + column.getColumnName(), map.get(column.getTable().getName() + "." + column.getColumnName()));
+							selectMap.add(map.get(this.columnMapper.get(column.getTable().getName() + "." + column.getColumnName())));
 							if(selectExpression.getAlias() != null) {
-								selectMap.put(selectExpression.getAlias(), map.get(column.getTable().getName() + "." + column.getColumnName()));	
+								selectMap.add(map.get(this.columnMapper.get(column.getTable().getName() + "." + column.getColumnName())));	
 							}
 						} else if(column.getTable().getAlias() != null && column.getColumnName() != null) {
-							selectMap.put(column.getTable().getAlias() + "." + column.getColumnName(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
+							selectMap.add(map.get(this.columnMapper.get(column.getTable().getAlias() + "." + column.getColumnName())));		
 							if(selectExpression.getAlias() != null) {
-								selectMap.put(selectExpression.getAlias(), map.get(column.getTable().getAlias() + "." + column.getColumnName()));		
+								selectMap.add(map.get(this.columnMapper.get(column.getTable().getAlias() + "." + column.getColumnName())));		
 							}
 						} else if(column.getTable().getAlias() == null && column.getTable().getName() == null){
-							for(String key: map.keySet()) {
+							for(String key: this.columnMapper.keySet()) {
 								if(key.split("\\.")[1].equals(column.getColumnName())) {
-									selectMap.put(key.split("\\.")[1], map.get(key));					
+									selectMap.add(map.get(this.columnMapper.get(key)));					
 									if(selectExpression.getAlias() != null) {
-										selectMap.put(selectExpression.getAlias(), map.get(key));					
+										selectMap.add(map.get(this.columnMapper.get(key)));					
 									}
 									break;
 								}
@@ -159,21 +168,15 @@ public class ProjectionIterator implements DefaultIterator{
 					} else if(selectExpression.getExpression() instanceof Function) {
 						Expression exp = selectExpression.getExpression();
 						Function func = (Function) exp;
-						if(this.groupBy==null) {
+						if(this.groupBy == null) {
 							try {
 								this.iterator.reset();
-								DefaultIterator iter = new SimpleAggregateIterator(this.iterator, func);
-								Map<String, PrimitiveValue> temp = iter.next();
-								selectMap.putAll(temp);
-								if(selectExpression.getAlias()!=null) {
-									Set<String> keys  = temp.keySet();
-									for (String string : keys) {
-										selectMap.put(selectExpression.getAlias(), selectMap.get(string));
-									}
-								}
+								DefaultIterator iter = new SimpleAggregateIterator(this.iterator, func, this.columnMapper);
+								List<PrimitiveValue> temp = iter.next();
+								selectMap.addAll(temp);
+								selectMap.addAll(temp);
 
 							} catch (Exception e) {
-								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						} else {
@@ -194,18 +197,19 @@ public class ProjectionIterator implements DefaultIterator{
 								}
 							}
 							if(selectExpression.getAlias() != null) {
-								selectMap.put(selectExpression.getAlias(), map.get(key));
+								selectMap.add(map.get(this.columnMapper.get(selectExpression.getAlias())));
+							} else {
+								selectMap.add(map.get(this.columnMapper.get(key)));
 							}
-							selectMap.put(key, map.get(key));
 						}
 					} else {
 						try {
 							Expression exp = selectExpression.getExpression();
 							if(selectExpression.getAlias() != null) {
-								selectMap.put(selectExpression.getAlias(), EvaluateUtils.evaluateExpression(map, exp));
-								selectMap.put(exp.toString(), EvaluateUtils.evaluateExpression(map, exp));	
+								selectMap.add(EvaluateUtils.evaluateExpression(map, exp, this.columnMapper));
+								selectMap.add(EvaluateUtils.evaluateExpression(map, exp, this.columnMapper));	
 							} else {
-								selectMap.put(exp.toString(), EvaluateUtils.evaluateExpression(map, exp));	
+								selectMap.add(EvaluateUtils.evaluateExpression(map, exp, this.columnMapper));	
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
@@ -226,11 +230,5 @@ public class ProjectionIterator implements DefaultIterator{
 	@Override
 	public List<String> getColumns() {
 		return this.columns;
-	}
-
-	@Override
-	public DefaultIterator getChildIter() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

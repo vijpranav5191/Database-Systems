@@ -28,6 +28,8 @@ public class HashJoinIterator implements DefaultIterator {
 	Join join;
 	List<String> columns;
 	Map<String, Integer> columnMapper;
+	Map<String, Integer> rightColumnMapper;
+	Map<String, Integer> leftColumnMapper;
 
 	
 	ArrayList<List<PrimitiveValue>> mapList;
@@ -45,7 +47,6 @@ public class HashJoinIterator implements DefaultIterator {
 		createMapperColumn();
 		this.passMap = new HashMap<String, ArrayList<List<PrimitiveValue>>>();
 		createOnePassHash();
-		
 		this.nextResult = getNextIter();
 	}
 
@@ -56,6 +57,18 @@ public class HashJoinIterator implements DefaultIterator {
 			this.columnMapper.put(col, index);
 			index+=1;
 		}
+		this.leftColumnMapper = new HashMap<String, Integer>();
+		index = 0;
+		for(String col: this.leftIterator.getColumns()) {
+			this.leftColumnMapper.put(col, index);
+			index+=1;
+		}
+		this.rightColumnMapper = new HashMap<String, Integer>();
+		index = 0;
+		for(String col: this.rightIterator.getColumns()) {
+			this.rightColumnMapper.put(col, index);
+			index+=1;
+		}	
 	}
 	
 	private void createOnePassHash() {
@@ -68,15 +81,15 @@ public class HashJoinIterator implements DefaultIterator {
 				List<PrimitiveValue> map = this.leftIterator.next();
 				
 				String key = null; 
-				if(this.columnMapper.containsKey(leftExpression)) {
+				if(this.leftColumnMapper.containsKey(leftExpression)) {
 					 key = leftExpression;
 					 this.rightExpression = rightExpression;
-				} else if(this.columnMapper.containsKey(rightExpression)) {
+				} else if(this.leftColumnMapper.containsKey(rightExpression)) {
 					 key = rightExpression;
 					 this.rightExpression = leftExpression;
 				}
 				try {
-					PrimitiveValue value = map.get(this.columnMapper.get(key));
+					PrimitiveValue value = map.get(this.leftColumnMapper.get(key));
 					String hashKey = Utils.hashString(value.toString());
 					ArrayList<List<PrimitiveValue>> list = this.passMap.getOrDefault(hashKey, new ArrayList<List<PrimitiveValue>>());
 					list.add(map);
@@ -132,7 +145,7 @@ public class HashJoinIterator implements DefaultIterator {
 				return null;
 			}
 			this.rightTuple = this.rightIterator.next();	
-			PrimitiveValue value = this.rightTuple.get(this.columnMapper.get(this.rightExpression));
+			PrimitiveValue value = this.rightTuple.get(this.rightColumnMapper.get(this.rightExpression));
 			String hashKey;
 			try {
 				hashKey = Utils.hashString(value.toString());

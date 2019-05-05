@@ -144,11 +144,11 @@ public class BPlusTree {
 		Node insertValue(PrimitiveValue key, int value) {
 			int loc = binarySearch(keys, key);
 			int valueIndex = loc >= 0 ? loc : -loc - 1;
-			try {
-				writeMapToFile(Config.bPlusTreeDir + indexStr, value);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+//			try {
+//				writeMapToFile(Config.bPlusTreeDir + indexStr, value);
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
 			keys.add(valueIndex, key);
 			values.add(valueIndex, value);
 			if(isOverflow()) {

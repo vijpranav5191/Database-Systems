@@ -2,15 +2,10 @@ package queryexec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import bPlusTree.BPlusTreeBuilder;
 import iterators.DefaultIterator;
-import iterators.HavingIterator;
 import iterators.IndexJoinIterator;
-import iterators.IndexScanIterator;
-import iterators.IndexSelectionIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.LimitIterator;
@@ -21,17 +16,10 @@ import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
 
-import iterators.groupByExternal;
-import iterators.newExternal;
 import iterators.newGroupBy;
-import iterators.newGroupByExternal;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
-import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
-import net.sf.jsqlparser.expression.operators.relational.MinorThan;
-import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
@@ -44,7 +32,6 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 import utils.Config;
-import utils.Constants;
 import utils.Optimzer;
 import utils.Utils;
 
@@ -74,19 +61,7 @@ public class SelectWrapper {
 		this.having = this.plainselect.getHaving();
 		SchemaStructure.whrexpressions = Utils.splitAndClauses(whereExp);
 		indexMap = SchemaStructure.indexMap;
-		
-		// Expression exp =
-		// Optimzer.getExpressionForJoinPredicate(SchemaStructure.tableMap.get(leftTable),
-		// SchemaStructure.schema.get(leftTable),
-		// SchemaStructure.tableMap.get(rightTable),
-		// SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
-		// System.out.print(exp);
-		//
-		// List<Expression> temp =
-		// Optimzer.getExpressionForSelectionPredicate(SchemaStructure.tableMap.get(rightTable),
-		// SchemaStructure.schema.get(rightTable), SchemaStructure.whrexpressions);
-		// System.out.print(temp);
-
+	
 		if (fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table);
@@ -131,13 +106,7 @@ public class SelectWrapper {
 				}
 				if (Config.isInMemory) {
 					result = new newGroupBy(result, this.groupBy, (Table) fromItem, this.selectItems);
-				} else {
-					result = new newGroupByExternal(result, this.groupBy, (Table) fromItem, this.selectItems);
-				}
-			}
-
-			if (this.having != null) {
-				result = new HavingIterator(result, this.having, this.selectItems);
+				} 
 			}
 
 			if (this.selectItems != null) {
@@ -163,9 +132,7 @@ public class SelectWrapper {
 				}
 				if (Config.isInMemory) {
 					result = new OrderByIterator(this.orderBy, result);
-				} else {
-					result = new newExternal(result, this.orderBy, this.selectItems);
-				}
+				} 
 			}
 
 			if (this.limit != null) {
@@ -216,7 +183,7 @@ public class SelectWrapper {
 //				exp = inQSecondaryIndex.get(0);
 			for( Expression exp : inQSecondaryIndex )
 			{
-				iter = new IndexScanIterator(iter, exp);
+				//iter = new IndexScanIterator(iter, exp);
 			}
 
 		}
@@ -294,10 +261,8 @@ public class SelectWrapper {
 			EqualsTo equalTo = (EqualsTo) exp;
 			
 			if (Config.isInMemory) {	
-				//Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
-				//Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
-				Column HoldingLeftColumn = null;
-				Column HoldingRightColumn = null;
+				Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
+				Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
 				
 				if(HoldingLeftColumn != null && HoldingRightColumn != null) {
 					if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {
@@ -324,6 +289,7 @@ public class SelectWrapper {
 								(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
 					}
 				} else {
+					//result = new JoinIterator(leftIterator, rightIterator, join);
 					result = new HashJoinIterator(leftIterator, rightIterator, join);
 				}
 			} else {
@@ -339,10 +305,8 @@ public class SelectWrapper {
 				Join join = joinDefault;
 				
 				if (Config.isInMemory) {	
-					//Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
-					//Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
-					Column HoldingLeftColumn = null;
-					Column HoldingRightColumn = null;
+					Column HoldingLeftColumn = isTableHoldingIndexedWhichIndex(leftIterator, equalTo);
+					Column HoldingRightColumn = isTableHoldingIndexedWhichIndex(rightIterator, equalTo);
 					
 					if(HoldingLeftColumn != null && HoldingRightColumn != null) {
 						if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {

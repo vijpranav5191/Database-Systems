@@ -22,11 +22,11 @@ public class EvaluateUtils{
 			        return scope.get(mapperColumn.get(name));
 			    } else {
 			    	for(String key: mapperColumn.keySet()) {
-			    		if(key.split("\\.")[1].equals(name)) {
-			    			return scope.get(mapperColumn.get(name));
-			    		}
-			    	}
-			    }
+				    	if(key.split("\\.")[1].equals(name)) {
+				    		return scope.get(mapperColumn.get(name));
+				    	}
+				    }
+				} 
 				return scope.get(mapperColumn.get(name));
 			}
 			
@@ -60,29 +60,25 @@ public class EvaluateUtils{
 		return eval.eval(where).toBool();
 	}
 	
-//	
-	public static PrimitiveValue evaluateExpression( Map<String, PrimitiveValue> scope, Expression where) throws Exception {
+	public static PrimitiveValue evaluateExpression(List<PrimitiveValue> scope, Expression where, Map<String, Integer> mapperColumn) throws Exception {
 		Eval eval = new Eval() {
 			
 			public PrimitiveValue eval(Column col){
 				String name = col.getColumnName();
 				if(col.getTable() != null && col.getTable().getName() != null){
 			        name = col.getTable().getName() + "." + col.getColumnName();
-			        return scope.get(name);
+			        return scope.get(mapperColumn.get(name));
 			    }
 				else {
-			    	for(String key: scope.keySet()) {
+			    	for(String key: mapperColumn.keySet()) {
 			    		if(key.split("\\.")[1].equals(name)) {
-			    			return scope.get(key);
+			    			return scope.get(mapperColumn.get(key));
 			    		}
 			    	}
 				}
-				return scope.get(name);
+				return scope.get(mapperColumn.get(name));
 			}
-			
 		};
 		return eval.eval(where);
 	}
-	
-	
 }
