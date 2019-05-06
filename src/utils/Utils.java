@@ -2,16 +2,12 @@ package utils;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.LineNumberReader;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -20,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
 import java.util.Set;
 
 import net.sf.jsqlparser.expression.BinaryExpression;
@@ -30,10 +27,10 @@ import net.sf.jsqlparser.expression.WhenClause;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
-import net.sf.jsqlparser.statement.select.Join;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
 
@@ -109,7 +106,23 @@ public class Utils {
 		}
 		return lstResult;
 	}
+	
+	public static List<Expression> splitOrClauses(Expression e) {
+		List<Expression> ret = new ArrayList<Expression>();
+		if (e != null) {
+			if (e instanceof OrExpression) {
+				OrExpression a = (OrExpression) e;
+				ret.addAll(splitOrClauses(a.getLeftExpression()));
+				ret.addAll(splitOrClauses(a.getRightExpression()));
+			} else {
+				ret.add(e);
+			}
+		}
+		return ret;
+	}
+	
 	public static List<Expression> result = new ArrayList<>();
+	
 	public static void splitOrClauses2(Expression e) {
 		
 		if( !(e instanceof OrExpression ) )
@@ -138,6 +151,7 @@ public class Utils {
 		}
 		return ret;
 	}
+	
 	public static String hashString(String message) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		MessageDigest digest = MessageDigest.getInstance("MD5");
 		byte[] hashedBytes = digest.digest(message.getBytes("UTF-8"));
@@ -261,7 +275,7 @@ public class Utils {
 		}
 		return false;
 	}
-	
+
 	private static RandomAccessFile raf_1 = null;
 	public static BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
 		try {
@@ -312,12 +326,8 @@ public class Utils {
 	public static HashSet<String> splitExpCols2(Expression exp) {
 		// TODO Auto-generated method stub
 		HashSet<String> result1 = new HashSet<>();
-		if(exp instanceof Column)
-		{
-			result1.add(((Column) exp).getWholeColumnName());
-		}
-		else if(exp instanceof BinaryExpression)
-		{
+		
+		if(exp instanceof BinaryExpression){
 			BinaryExpression binExp = (BinaryExpression) exp;
 			
 			Expression leftB =  binExp.getLeftExpression();
