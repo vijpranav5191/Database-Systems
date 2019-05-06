@@ -28,6 +28,9 @@ import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
@@ -81,7 +84,11 @@ public class Utils {
 	public static List<Expression> splitWhereClauses(Expression e) {
 		List<Expression> lstResult = new ArrayList<Expression>();
 		
-		
+		if(e instanceof EqualsTo || e instanceof GreaterThan || e instanceof GreaterThanEquals || e instanceof MinorThan || e instanceof MinorThanEquals )
+		{
+			lstResult.add(e);
+			return lstResult;
+		}
 		if( e instanceof AndExpression )
 		{
 			return splitAndClauses(e);

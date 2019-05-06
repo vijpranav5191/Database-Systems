@@ -29,6 +29,7 @@ import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
+import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.Limit;
@@ -150,7 +151,9 @@ public class SelectWrapper {
 			}
 
 			ResultIterator res = new ResultIterator(result);
-			while (res.hasNext()) {
+			
+			while (res.hasNext()) 
+			{
 				res.next();
 			}
 		}
@@ -238,6 +241,8 @@ public class SelectWrapper {
 
 		if(selectItems2!=null) {
 			for (SelectItem sel : selectItems2) {
+				
+				
 				SelectExpressionItem selex = (SelectExpressionItem) sel;
 				if(selex.getExpression() instanceof Column) {
 					collist.add(sel.toString());
@@ -267,6 +272,7 @@ public class SelectWrapper {
 						}
 					}
 				}
+				
 			}
 		}
 		if(whereExp2!=null) {

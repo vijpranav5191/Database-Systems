@@ -79,7 +79,7 @@ public class TableScanIterator implements DefaultIterator {
 		}
 	}
 	
-	public List<PrimitiveValue> nextOld()
+	public List<PrimitiveValue> next()
 	{
 		if(this.hasNext())
 		{
@@ -88,7 +88,6 @@ public class TableScanIterator implements DefaultIterator {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			
 			
 			String row[] = tuple.split("\\|");
 			mapList = new ArrayList<PrimitiveValue>();
@@ -125,63 +124,65 @@ public class TableScanIterator implements DefaultIterator {
 					default:
 						pm = new StringValue(value);
 						break;
+					}
+					mapList.add(pm);
+ 
 				}
-				mapList.add(pm);
-				}
-				
 			}
-			
 		}
-		
-		
+//		System.out.println(" here + maplist" + mapList);
 		return mapList;
 	}
 	
+//	@Override
+//	public List<PrimitiveValue> next() {
+//		if(this.hasNext()) {
+//			try {
+//				tuple = br.readLine();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			
+//			map = new ArrayList<PrimitiveValue>();
+//			
+//			String[] row = tuple.split("\\|");
+//			for(int j = 0;j < row.length; j++) {
+//				ColumnDefs cdef = this.cdefs.get(j);
+//				String value = row[j];
+//				PrimitiveValue pm;
+//				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
+//					case "int":
+//						pm = new LongValue(value);
+//						break;
+//					case "string":
+//						pm = new StringValue(value);
+//						break;
+//					case "varchar":
+//						pm = new StringValue(value);
+//						break;	
+//					case "char":
+//						pm = new StringValue(value);
+//						break;
+//					case "decimal":
+//						pm = new DoubleValue(value);
+//						break;
+//					case "date":
+//						pm = new DateValue(value);
+//						break;
+//					default:
+//						pm = new StringValue(value);
+//						break;
+//				}
+//				map.add(pm);
+//			}
+//			return map;
+//		}
+//		return null;
+//	}
+
 	
-	public List<PrimitiveValue> next() {
-		if(this.hasNext()) {
-			try {
-				tuple = br.readLine();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			map = new ArrayList<PrimitiveValue>();
-			
-			String[] row = tuple.split("\\|");
-			for(int j = 0;j < row.length; j++) {
-				ColumnDefs cdef = this.cdefs.get(j);
-				String value = row[j];
-				PrimitiveValue pm;
-				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
-					case "int":
-						pm = new LongValue(value);
-						break;
-					case "string":
-						pm = new StringValue(value);
-						break;
-					case "varchar":
-						pm = new StringValue(value);
-						break;	
-					case "char":
-						pm = new StringValue(value);
-						break;
-					case "decimal":
-						pm = new DoubleValue(value);
-						break;
-					case "date":
-						pm = new DateValue(value);
-						break;
-					default:
-						pm = new StringValue(value);
-						break;
-				}
-				map.add(pm);
-			}
-			return map;
-		}
-		return null;
-	}
+
+
 
 	@Override
 	public void reset() {
@@ -198,7 +199,7 @@ public class TableScanIterator implements DefaultIterator {
 
 	@Override
 	public List<String> getColumns() {
-		return this.columns;
+		return  this.queryColumns.get(this.tab.toString());
 	}
 	
 	public Map<String, Integer> createColumnMapper(List<ColumnDefs> cdefs) {

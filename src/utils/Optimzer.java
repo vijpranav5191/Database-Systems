@@ -31,48 +31,51 @@ public class Optimzer {
 	
 	
 	public static List<Expression> getExpressionForSelectionPredicate(Table table, List<ColumnDefs> cdefs, List<Expression> expressions){
-			List<Expression> lst = new ArrayList<Expression>();
+		List<Expression> lst = new ArrayList<Expression>();
 
-			for(Expression expression : expressions)
+		for(Expression expression : expressions)
+		{
+			if(expression instanceof EqualsTo && ((EqualsTo) expression).getRightExpression() instanceof Column)
+				continue;
+//			System.out.println(" expresson " + expression);
+			
+			BinaryExpression bExp = (BinaryExpression) expression;
+			
+			if(expression instanceof OrExpression )
 			{
-				if(expression instanceof EqualsTo && ((EqualsTo) expression).getRightExpression() instanceof Column)
-					continue;
-//				System.out.println(" expresson " + expression);
-				
-				BinaryExpression bExp = (BinaryExpression) expression;
-				
-				if(expression instanceof OrExpression )
+
+				OrExpression orExp = (OrExpression) expression;
+				BinaryExpression bExp1 = (BinaryExpression) orExp.getLeftExpression();
+				Column col1 = (Column) bExp1.getLeftExpression();
+				if(col1.getTable().toString().equals(table.toString()))
 				{
-					OrExpression orExp = (OrExpression) expression;
-					BinaryExpression bExp1 = (BinaryExpression) orExp.getLeftExpression();
-					Column col1 = (Column) bExp1.getLeftExpression();
-					if(col1.getTable().toString().equals(table.toString()))
-					{
-						lst.add(expression);
-					}
-				} else {
-					Column col = (Column) bExp.getLeftExpression();
-					if(col.getTable().toString().equals(table.toString()))
-					{
-						lst.add(expression);
-					}
+					lst.add(expression);
 				}
-					//				lst.add(expression);
-				
 
 			}
-			if(lst != null && lst.size() > 0) {
-				for(Expression exp : lst) {
-					SchemaStructure.whrexpressions.remove(exp);
+			else {
+				Column col = (Column) bExp.getLeftExpression();
+				if(col.getTable().toString().equals(table.toString()))
+				{
+					lst.add(expression);
 				}
 			}
-			return lst;
-	}
+				//				lst.add(expression);
+			
+
+		}
+		if(lst != null && lst.size() > 0) {
+			for(Expression exp : lst) {
+				SchemaStructure.whrexpressions.remove(exp);
+			}
+		}
+		return lst;
+}
 	
 	
 
 
-	public static Expression getExpressionForJoinPredicate(List<String> leftcdefs,List<String> rightcdefs, List<Expression> expressions){
+	public static Expression getExpressionForJoinPredicate(List<String> leftcdefs, List<String> rightcdefs, List<Expression> expressions){
 		Expression result = null; 
 		if(expressions != null) {
 			for(Expression exp: expressions) {
