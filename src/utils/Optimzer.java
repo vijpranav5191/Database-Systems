@@ -8,6 +8,8 @@ import iterators.DefaultIterator;
 import net.sf.jsqlparser.eval.Eval;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
+import net.sf.jsqlparser.expression.operators.conditional.OrExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -29,24 +31,16 @@ public class Optimzer {
 	
 	public static List<Expression> getExpressionForSelectionPredicate(Table table, List<ColumnDefs> cdefs, List<Expression> expressions){
 			List<Expression> lst = new ArrayList<Expression>();
-			for(Expression expression : expressions){
-				if(expression instanceof EqualsTo && expression.toString().split(" ")[2].split("\\.").length == 2)
+
+			for(Expression expression : expressions)
+			{
+				if(expression instanceof EqualsTo && ((EqualsTo) expression).getRightExpression() instanceof Column)
 					continue;
-				String part = expression.toString().split(" ")[0];
-				if(part.split("\\.").length == 2){
-					for(ColumnDefs cd : cdefs){
-						if(part.equals(table.getName() + "." + cd.cdef.getColumnName())){ 
-							lst.add(expression);
-						}
-					}
-				} else { 
-					for(ColumnDefs cd : cdefs){	
-						if(  part.equals(cd.cdef.getColumnName()) )
-						{
-							lst.add(expression);
-						}
-					}
-				}
+//				System.out.println(" expresson " + expression);
+
+				lst.add(expression);
+				
+
 			}
 			if(lst != null && lst.size() > 0) {
 				for(Expression exp : lst) {
@@ -56,6 +50,9 @@ public class Optimzer {
 			return lst;
 	}
 	
+	
+
+
 	public static Expression getExpressionForJoinPredicate(List<String> leftcdefs,List<String> rightcdefs, List<Expression> expressions){
 		Expression result = null; 
 		if(expressions != null) {

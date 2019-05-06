@@ -51,6 +51,7 @@ public class CreateWrapper {
 		String path = Config.createFileDir + tbal.getName();
 		List<Index> indexes = createtab.getIndexes();
 		List<ColumnDefinition> cdef = createtab.getColumnDefinitions();
+
 		if(!Utils.isFileExists(path)) {
 			try {
 				for(Index index: indexes) {
