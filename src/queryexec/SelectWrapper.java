@@ -360,26 +360,26 @@ public class SelectWrapper {
 				if(HoldingLeftColumn != null && HoldingRightColumn != null) {
 					if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {
 						result = new IndexJoinIterator(rightIterator, leftIterator, join, 
-								HoldingRightColumn, HoldingLeftColumn);
+								HoldingRightColumn, HoldingLeftColumn, this.queryColumns);
 					} else{
 						result = new IndexJoinIterator(leftIterator, rightIterator, join, 
-								HoldingLeftColumn, HoldingRightColumn);	
+								HoldingLeftColumn, HoldingRightColumn, this.queryColumns);	
 					}
 				} else if(HoldingLeftColumn != null) {
 					if(HoldingLeftColumn.toString().equals(equalTo.getLeftExpression().toString())) {
 						result = new IndexJoinIterator(rightIterator, leftIterator, join, 
-							(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+							(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression(), this.queryColumns);
 					} else {
 						result = new IndexJoinIterator(rightIterator, leftIterator, join, 
-								(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+								(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression(), this.queryColumns);
 					}
 				} else if(HoldingRightColumn != null) {
 					if(HoldingRightColumn.toString().equals(equalTo.getLeftExpression().toString())) {
 						result = new IndexJoinIterator(leftIterator, rightIterator, join, 
-							(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+							(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression(), this.queryColumns);
 					} else {
 						result = new IndexJoinIterator(leftIterator, rightIterator, join, 
-								(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+								(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression(), this.queryColumns);
 					}
 				} else {
 					//result = new JoinIterator(leftIterator, rightIterator, join);
@@ -404,26 +404,26 @@ public class SelectWrapper {
 					if(HoldingLeftColumn != null && HoldingRightColumn != null) {
 						if(Utils.isHoldingPrecedence(((TableScanIterator)leftIterator).tab, ((TableScanIterator)rightIterator).tab)) {
 							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
-									HoldingRightColumn, HoldingLeftColumn);
+									HoldingRightColumn, HoldingLeftColumn, this.queryColumns);
 						} else{
 							result = new IndexJoinIterator(leftIterator, rightIterator, join, 
-									HoldingLeftColumn, HoldingRightColumn);	
+									HoldingLeftColumn, HoldingRightColumn,this.queryColumns);	
 						}
 					} else if(HoldingLeftColumn != null) {
 						if(HoldingLeftColumn.toString().equals(equalTo.getLeftExpression().toString())) {
 							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
-								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression(),this.queryColumns);
 						} else {
 							result = new IndexJoinIterator(leftIterator, rightIterator, join, 
-									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression(),this.queryColumns);
 						}
 					} else if(HoldingRightColumn != null) {
 						if(HoldingRightColumn.toString().equals(equalTo.getLeftExpression().toString())) {
 							result = new IndexJoinIterator(rightIterator, leftIterator, join, 
-								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression());
+								(Column)equalTo.getRightExpression(), (Column)equalTo.getLeftExpression(),this.queryColumns);
 						} else {
 							result = new IndexJoinIterator(leftIterator, rightIterator, join, 
-									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression());
+									(Column)equalTo.getLeftExpression(), (Column)equalTo.getRightExpression(),this.queryColumns);
 						}
 					} else {
 						result = new HashJoinIterator(leftIterator, rightIterator, join);

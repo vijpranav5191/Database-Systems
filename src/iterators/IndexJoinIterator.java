@@ -24,16 +24,21 @@ public class IndexJoinIterator implements DefaultIterator {
 	private BPlusTreeBuilder btree;
 	private List<String> columns;
 	Map<String, Integer> columnMapper;
+	Map<String, Integer> indexedColumnMapper;
+	Map<String, Integer> nonIndexedColumnMapper;
 	
 	Column indexedColumn, nonIndexedColumn;
 	String indexedColumnStr, nonIndexedColumnStr;
 	private List<PrimitiveValue> nonIndexedTuple;
 	List<PrimitiveValue> nextResult;
-	
+	private Map<String, List<String>> queryColumnsMap;
+	List<String> queryColumns;
 	
 	public IndexJoinIterator(DefaultIterator nonIndexedIterator, DefaultIterator indexedIterator, 
-			Join join, Column nonIndexedColumn, Column indexedColumn) {
+			Join join, Column nonIndexedColumn, Column indexedColumn, Map<String, List<String>> queryColumnsMap) {
 		this.indexedIterator = indexedIterator;
+		this.queryColumnsMap = queryColumnsMap;
+		this.queryColumns = this.queryColumnsMap.get(indexedColumn.getTable().getName());
 		this.nonIndexedIterator = nonIndexedIterator;
 		this.columns = new ArrayList<String>();
 		this.join = join;
@@ -56,6 +61,19 @@ public class IndexJoinIterator implements DefaultIterator {
 			this.columnMapper.put(col, index);
 			index += 1;
 		}
+		this.indexedColumnMapper = new HashMap<String, Integer>();
+		index = 0;
+		for(String col: this.indexedIterator.getColumns()) {
+			this.indexedColumnMapper.put(col, index);
+			index+=1;
+		}
+		
+		this.nonIndexedColumnMapper = new HashMap<String, Integer>();
+		index = 0;
+		for(String col: this.nonIndexedIterator.getColumns()) {
+			this.nonIndexedColumnMapper.put(col, index);
+			index+=1;
+		}	
 	}
 	
 	@Override
@@ -81,7 +99,7 @@ public class IndexJoinIterator implements DefaultIterator {
 			if(this.nonIndexedTuple != null) {
 				try {
 					this.searchIndexIterator = this.btree.search(this.nonIndexedTuple
-									.get(this.columnMapper.get(this.nonIndexedColumnStr)), this.indexedColumnStr);
+									.get(this.columnMapper.get(this.nonIndexedColumnStr)), this.indexedColumnStr, this.queryColumns);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

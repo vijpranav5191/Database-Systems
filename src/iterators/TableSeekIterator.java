@@ -28,18 +28,11 @@ public class TableSeekIterator implements DefaultIterator {
 	List<ColumnDefs> cdefs;
 	Map<String, Integer> columnMap;
 	
-	public TableSeekIterator(BufferedReader br, Table table, PrimitiveValue searchValue, String indexColumn){
-		this.columns = new ArrayList<String>();
+	public TableSeekIterator(BufferedReader br, Table table, PrimitiveValue searchValue, String indexColumn, List<String> queryColumns){
+		this.columns = queryColumns;
 		this.br = br;
 		this.table = table;
 		this.cdefs = SchemaStructure.schema.get(table.getName());
-		for(int j = 0;j < this.cdefs.size(); j++) {
-			if(this.table.getAlias() != null){
-				this.columns.add(this.table.getAlias() + "." + cdefs.get(j).cdef.getColumnName());	
-			} else {
-				this.columns.add(table.getName() + "." + cdefs.get(j).cdef.getColumnName());
-			}
-		}
 		this.columnMap = createColumnMapper(this.cdefs);
 		this.searchValue = searchValue;
 		this.indexColumn = indexColumn;
@@ -75,38 +68,43 @@ public class TableSeekIterator implements DefaultIterator {
 		} else {
 			return null;
 		}
-		for(int j = 0;j < row.length; j++) {
-			ColumnDefs cdef = this.cdefs.get(j);
-			String value = row[j];
-			PrimitiveValue pm;
-			switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
-				case "int":
-					pm = new LongValue(value);
-					break;
-				case "string":
-					pm = new StringValue(value);
-					break;
-				case "varchar":
-					pm = new StringValue(value);
-					break;	
-				case "char":
-					pm = new StringValue(value);
-					break;
-				case "decimal":
-					pm = new DoubleValue(value);
-					break;
-				case "date":
-					pm = new DateValue(value);
-					break;
-				default:
-					pm = new StringValue(value);
-					break;
+		for(String elem : this.columns){
+			if( this.columnMap.containsKey(elem) ) {
+				PrimitiveValue pm;
+				int index = this.columnMap.get(elem);
+				ColumnDefs cdef = this.cdefs.get(index);
+				String value = row[index];
+				
+				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
+					case "int":
+						pm = new LongValue(value);
+						break;
+					case "string":
+						pm = new StringValue(value);
+						break;
+					case "varchar":
+						pm = new StringValue(value);
+						break;	
+					case "char":
+						pm = new StringValue(value);
+						break;
+					case "decimal":
+						pm = new DoubleValue(value);
+						break;
+					case "date":
+						pm = new DateValue(value);
+						break;
+					default:
+						pm = new StringValue(value);
+						break;
+				}
+				map.add(pm);
 			}
-			map.add(pm);
 		}
 		return map;
 	}
 	
+
 	@Override
 	public void reset() {
 		new Exception("Please dont Reset!!!!!");
