@@ -117,7 +117,7 @@ public class BPlusTreeBuilder{
 	public BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
 		try {
 			if(raf_1 == null) {
-				raf_1 = new RandomAccessFile(path, "rw");
+				raf_1 = new RandomAccessFile(path, "r");
 			}
 			raf_1.seek(seekPosition);
 		} catch (IOException e) {
@@ -145,16 +145,20 @@ public class BPlusTreeBuilder{
 	}
 	
 	public void readMapFromFile() {
-		File filename = new File(Config.bPlusTreeDir + this.table + "__" + this.indexStr);
+		List<Integer> values = new ArrayList<>();
+		List<PrimitiveValue> keys = new ArrayList<>();
 		String line;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(Config.bPlusTreeDir + this.table + "__" + this.indexStr));
 			while ((line = br.readLine()) != null) {
 				String[] l = line.split("\\,");
-			    System.out.println(l[0] + "   " + l[1]);
+				keys.add(new LongValue(l[0]));
+				values.add(Integer.parseInt(l[1]));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.bPlusTree = new BPlusTree(Config.BRANCHING_FACTOR, indexStr);
+		this.bPlusTree.createFromDisk(keys, values);
 	}
 }

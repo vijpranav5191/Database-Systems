@@ -43,6 +43,7 @@ public class Optimzer {
 			
 			if(expression instanceof OrExpression )
 			{
+
 				OrExpression orExp = (OrExpression) expression;
 				BinaryExpression bExp1 = (BinaryExpression) orExp.getLeftExpression();
 				Column col1 = (Column) bExp1.getLeftExpression();
@@ -50,6 +51,7 @@ public class Optimzer {
 				{
 					lst.add(expression);
 				}
+
 			}
 			else {
 				Column col = (Column) bExp.getLeftExpression();

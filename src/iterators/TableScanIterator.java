@@ -31,7 +31,6 @@ public class TableScanIterator implements DefaultIterator {
 	public Table tab;
 	private List<PrimitiveValue> map;
 	private List<String> columns;
-	private Boolean isOrderBy;
 	List<ColumnDefs> cdefs;
 	Map<String, Integer> columnMap;
 	Map< String, List<String> > queryColumns;
@@ -127,9 +126,11 @@ public class TableScanIterator implements DefaultIterator {
 						break;
 					}
 					mapList.add(pm);
+ 
 				}
 			}
 		}
+//		System.out.println(" here + maplist" + mapList);
 		return mapList;
 	}
 	
@@ -178,6 +179,10 @@ public class TableScanIterator implements DefaultIterator {
 //		}
 //		return null;
 //	}
+
+	
+
+
 
 	@Override
 	public void reset() {
