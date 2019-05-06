@@ -106,10 +106,6 @@ public class HashJoinIterator implements DefaultIterator {
 		if(this.nextResult != null) {
 			return true;
 		}
-		this.passMap = null;
-		if(mapList != null && mapList.size() > 0) {
-			this.mapList = null;
-		}
 		return false;
 	}
 
@@ -141,10 +137,10 @@ public class HashJoinIterator implements DefaultIterator {
 			temp.addAll(leftTuple);
 			temp.addAll(rightTuple);
 		} else {
-			if(!this.rightIterator.hasNext()) {
+			this.rightTuple = this.rightIterator.next();
+			if(this.rightTuple == null) {
 				return null;
 			}
-			this.rightTuple = this.rightIterator.next();	
 			PrimitiveValue value = this.rightTuple.get(this.rightColumnMapper.get(this.rightExpression));
 			String hashKey;
 			try {

@@ -75,7 +75,7 @@ public class SelectWrapper {
 		
 		if (fromItem instanceof Table) {
 			Table table = (Table) fromItem;
-			iter = new TableScanIterator(table , this.queryColumns);
+			iter = new TableScanIterator(table , this.queryColumns.get(table.getName()));
 			iter = pushDownSelectPredicate(table, iter);
 		}
 
@@ -89,7 +89,7 @@ public class SelectWrapper {
 					if (item instanceof Table) 
 					{
 						Table rightTb = (Table) item;
-						DefaultIterator iter2 = new TableScanIterator(rightTb , this.queryColumns);
+						DefaultIterator iter2 = new TableScanIterator(rightTb , this.queryColumns.get(rightTb.getName()));
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
 						result = pushDownJoinPredicate(result, iter2, join);
 					}

@@ -333,7 +333,11 @@ public class Utils {
 	public static HashSet<String> splitExpCols2(Expression exp) {
 		// TODO Auto-generated method stub
 		HashSet<String> result1 = new HashSet<>();
-		
+		if(exp instanceof Column)
+		{
+			result1.add(exp.toString());
+			return result1;
+		}
 		if(exp instanceof BinaryExpression){
 			BinaryExpression binExp = (BinaryExpression) exp;
 			
