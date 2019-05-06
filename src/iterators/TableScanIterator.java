@@ -90,7 +90,6 @@ public class TableScanIterator implements DefaultIterator {
 				e.printStackTrace();
 			}
 			
-			
 			String row[] = tuple.split("\\|");
 			mapList = new ArrayList<PrimitiveValue>();
 			List<String> arrList = this.queryColumns.get(this.tab.toString());
@@ -126,63 +125,59 @@ public class TableScanIterator implements DefaultIterator {
 					default:
 						pm = new StringValue(value);
 						break;
+					}
+					mapList.add(pm);
 				}
-				mapList.add(pm);
-				}
-				
 			}
-			
 		}
-		
-		
 		return mapList;
 	}
 	
-	
-	public List<PrimitiveValue> nextOld() {
-		if(this.hasNext()) {
-			try {
-				tuple = br.readLine();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			map = new ArrayList<PrimitiveValue>();
-			
-			String[] row = tuple.split("\\|");
-			for(int j = 0;j < row.length; j++) {
-				ColumnDefs cdef = this.cdefs.get(j);
-				String value = row[j];
-				PrimitiveValue pm;
-				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
-					case "int":
-						pm = new LongValue(value);
-						break;
-					case "string":
-						pm = new StringValue(value);
-						break;
-					case "varchar":
-						pm = new StringValue(value);
-						break;	
-					case "char":
-						pm = new StringValue(value);
-						break;
-					case "decimal":
-						pm = new DoubleValue(value);
-						break;
-					case "date":
-						pm = new DateValue(value);
-						break;
-					default:
-						pm = new StringValue(value);
-						break;
-				}
-				map.add(pm);
-			}
-			return map;
-		}
-		return null;
-	}
+//	@Override
+//	public List<PrimitiveValue> next() {
+//		if(this.hasNext()) {
+//			try {
+//				tuple = br.readLine();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//			
+//			map = new ArrayList<PrimitiveValue>();
+//			
+//			String[] row = tuple.split("\\|");
+//			for(int j = 0;j < row.length; j++) {
+//				ColumnDefs cdef = this.cdefs.get(j);
+//				String value = row[j];
+//				PrimitiveValue pm;
+//				switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
+//					case "int":
+//						pm = new LongValue(value);
+//						break;
+//					case "string":
+//						pm = new StringValue(value);
+//						break;
+//					case "varchar":
+//						pm = new StringValue(value);
+//						break;	
+//					case "char":
+//						pm = new StringValue(value);
+//						break;
+//					case "decimal":
+//						pm = new DoubleValue(value);
+//						break;
+//					case "date":
+//						pm = new DateValue(value);
+//						break;
+//					default:
+//						pm = new StringValue(value);
+//						break;
+//				}
+//				map.add(pm);
+//			}
+//			return map;
+//		}
+//		return null;
+//	}
 
 	@Override
 	public void reset() {
@@ -199,7 +194,7 @@ public class TableScanIterator implements DefaultIterator {
 
 	@Override
 	public List<String> getColumns() {
-		return this.columns;
+		return  this.queryColumns.get(this.tab.toString());
 	}
 	
 	public Map<String, Integer> createColumnMapper(List<ColumnDefs> cdefs) {
