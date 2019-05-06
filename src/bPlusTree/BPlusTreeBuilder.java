@@ -117,7 +117,7 @@ public class BPlusTreeBuilder{
 	public BufferedReader getInputStreamBySeek(String path, int seekPosition) throws IOException {
 		try {
 			if(raf_1 == null) {
-				raf_1 = new RandomAccessFile(path, "rw");
+				raf_1 = new RandomAccessFile(path, "r");
 			}
 			raf_1.seek(seekPosition);
 		} catch (IOException e) {

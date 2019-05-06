@@ -6,6 +6,7 @@ import java.util.Map;
 
 import iterators.DefaultIterator;
 import net.sf.jsqlparser.eval.Eval;
+import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -37,8 +38,26 @@ public class Optimzer {
 				if(expression instanceof EqualsTo && ((EqualsTo) expression).getRightExpression() instanceof Column)
 					continue;
 //				System.out.println(" expresson " + expression);
-
-				lst.add(expression);
+				
+				BinaryExpression bExp = (BinaryExpression) expression;
+				
+				if(expression instanceof OrExpression )
+				{
+					OrExpression orExp = (OrExpression) expression;
+					BinaryExpression bExp1 = (BinaryExpression) orExp.getLeftExpression();
+					Column col1 = (Column) bExp1.getLeftExpression();
+					if(col1.getTable().toString().equals(table.toString()))
+					{
+						lst.add(expression);
+					}
+				} else {
+					Column col = (Column) bExp.getLeftExpression();
+					if(col.getTable().toString().equals(table.toString()))
+					{
+						lst.add(expression);
+					}
+				}
+					//				lst.add(expression);
 				
 
 			}
