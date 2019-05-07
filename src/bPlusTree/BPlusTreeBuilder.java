@@ -99,9 +99,6 @@ public class BPlusTreeBuilder{
 
 
 	public DefaultIterator search(PrimitiveValue searchValue, String indexColumn, List<String> queryColumns) throws IOException {
-		if(searchValue == null) {
-			bPlusTree.search(searchValue);	
-		}
 		int position = bPlusTree.search(searchValue);
 		BufferedReader br = getInputStreamBySeek(Config.databasePath + table.getName() + ".csv", position);
 		TableSeekIterator tableSeekItr = new TableSeekIterator(br, this.table, searchValue, indexColumn, queryColumns);

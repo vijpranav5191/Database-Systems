@@ -43,7 +43,7 @@ public class IndexJoinIterator implements DefaultIterator {
 		this.columns = new ArrayList<String>();
 		this.join = join;
 		this.columns.addAll(nonIndexedIterator.getColumns());
-		this.columns.addAll(indexedIterator.getColumns());
+		this.columns.addAll(this.queryColumns);
 		createMapperColumn();
 		this.indexedColumn = indexedColumn;
 		this.nonIndexedColumn = nonIndexedColumn;
@@ -99,7 +99,8 @@ public class IndexJoinIterator implements DefaultIterator {
 			if(this.nonIndexedTuple != null) {
 				try {
 					this.searchIndexIterator = this.btree.search(this.nonIndexedTuple
-									.get(this.columnMapper.get(this.nonIndexedColumnStr)), this.indexedColumnStr, this.queryColumns);
+									.get(this.nonIndexedColumnMapper.get(this.nonIndexedColumnStr)),
+									this.indexedColumnStr, this.queryColumns);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
