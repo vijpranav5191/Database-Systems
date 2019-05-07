@@ -27,11 +27,16 @@ public class TableSeekIterator implements DefaultIterator {
 	PrimitiveValue searchValue;
 	List<ColumnDefs> cdefs;
 	Map<String, Integer> columnMap;
+	Map<String, Integer> queryMap;
 	
 	public TableSeekIterator(BufferedReader br, Table table, PrimitiveValue searchValue, String indexColumn, List<String> queryColumns){
 		this.columns = queryColumns;
 		this.br = br;
 		this.table = table;
+		this.queryMap = new HashMap<String, Integer>();
+		for(int i =0;i < this.columns.size();i++) {
+			this.queryMap.put(this.columns.get(i), i);
+		}
 		this.cdefs = SchemaStructure.schema.get(table.getName());
 		this.columnMap = createColumnMapper(this.cdefs);
 		this.searchValue = searchValue;
@@ -41,7 +46,9 @@ public class TableSeekIterator implements DefaultIterator {
 	
 	@Override
 	public boolean hasNext() {
-		if(this.nextResult != null && this.nextResult.get(this.columnMap.get(indexColumn)).equals(searchValue)) {
+		if(this.nextResult != null && this.nextResult
+				.get(this.queryMap.get(indexColumn))
+				.equals(searchValue)) {
 			return true;
 		}
 		return false;
