@@ -72,19 +72,19 @@ public class CreateWrapper {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} else {
-			for(Index index: indexes) {
-				if(index.getType().equals(Constants.PRIMARY_KEY)) {
-					for(String primaryKey: index.getColumnsNames()) {
-						BPlusTreeBuilder btree = new BPlusTreeBuilder(tbal, cdef, primaryKey);
-						btree.readMapFromFile();
-						SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-						break;
-					}
-				}
-			}
-			
-		}
+		} 
+//		else {
+//			for(Index index: indexes) {
+//				if(index.getType().equals(Constants.PRIMARY_KEY)) {
+//					for(String primaryKey: index.getColumnsNames()) {
+//						//BPlusTreeBuilder btree = new BPlusTreeBuilder(tbal, cdef, primaryKey);
+//						//btree.readMapFromFile();
+//						//SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+//						break;
+//					}
+//				}
+//			}			
+//		}
 		List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
 		for (ColumnDefinition cd : cdef) {
 			ColumnDefs c = new ColumnDefs();
