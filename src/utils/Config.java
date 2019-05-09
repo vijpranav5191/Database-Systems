@@ -1,4 +1,7 @@
 package utils;
+
+import net.sf.jsqlparser.schema.Table;
+
 public class Config {
 	public static Boolean isInMemory;	
 	public static int blockSize = 5000;
@@ -8,10 +11,15 @@ public class Config {
 	public static String folderName = "tempfolder/";
 	public static String createFileDir = "createDB/";
 	public static String bPlusTreeDir = "bPlusTreeDir/";
+	public static String secIndexdir = "secIndexDir/";
 //	public static String databasePath = "data/";	
 	
-	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
+//	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 	
+
+//	public static String databasePath = "data/";	
+	
+//	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 	
 //	public static String databasePath = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\Database\\";	
 //	this.csvFile = "C:\\Users\\ayush\\Documents\\Sanity_Check_Examples\\data\\" + tableName.toLowerCase() + ".csv";			
@@ -22,7 +30,7 @@ public class Config {
 	
 	
 //	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
-//	public static String databasePath = "C:\\\\Users\\\\Amit\\\\Desktop\\\\Sanity_Check_Examples\\\\data\\\\checkpoint3_big\\\\";
+	public static String databasePath = "C:\\\\Users\\\\Amit\\\\Desktop\\\\Sanity_Check_Examples\\\\data\\\\checkpoint3_big\\\\";
 
 //	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 //	public static String databasePath = "C:\\\\Users\\\\Amit\\\\Desktop\\\\Sanity_Check_Examples\\\\data\\\\database\\\\";

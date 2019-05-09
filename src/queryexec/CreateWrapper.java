@@ -1,5 +1,6 @@
 package queryexec;
 import java.io.IOException;
+import java.awt.SecondaryLoop;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,8 +13,7 @@ import java.util.List;
 import FileUtils.WriteOutputFile;
 import bPlusTree.BPlusTreeBuilder;
 import iterators.FileReaderIterator;
-import iterators.TableScanIterator;
-import net.sf.jsqlparser.expression.PrimitiveValue;
+
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Table;
@@ -24,6 +24,7 @@ import net.sf.jsqlparser.statement.create.table.Index;
 import objects.ColumnDefs;
 import objects.IndexDef;
 import objects.SchemaStructure;
+import secondaryIndex.SecondaryIndexBuilder;
 import utils.Config;
 import utils.Constants;
 import utils.Utils;
@@ -65,6 +66,18 @@ public class CreateWrapper {
 							break;
 						}
 					}
+					if(index.getType().equals(Constants.INDEX_KEY)){
+						if(tbal.getName().equals("LINEITEM"))
+							break;
+						for(String indexKey: index.getColumnsNames()) {
+							FileReaderIterator iter = new FileReaderIterator(tbal);
+							SecondaryIndexBuilder sec = new SecondaryIndexBuilder(iter, tbal, cdef, indexKey);
+							sec.build();
+							sec.writeMapToFile();
+							SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
+							break;
+						}
+					}
 				}
 				WriteOutputFile.writeObjectInFile(path, querystr);
 			} catch (FileNotFoundException e) {
@@ -72,19 +85,31 @@ public class CreateWrapper {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} 
-//		else {
-//			for(Index index: indexes) {
-//				if(index.getType().equals(Constants.PRIMARY_KEY)) {
-//					for(String primaryKey: index.getColumnsNames()) {
-//						//BPlusTreeBuilder btree = new BPlusTreeBuilder(tbal, cdef, primaryKey);
-//						//btree.readMapFromFile();
-//						//SchemaStructure.bTreeMap.put(tbal.getName(), btree);
-//						break;
-//					}
-//				}
-//			}			
-//		}
+		} else {
+			for(Index index: indexes) {
+				if(index.getType().equals(Constants.PRIMARY_KEY)) {
+					for(String primaryKey: index.getColumnsNames()) {
+						BPlusTreeBuilder btree = new BPlusTreeBuilder(tbal, cdef, primaryKey);
+						btree.readMapFromFile();
+						SchemaStructure.bTreeMap.put(tbal.getName(), btree);
+						break;
+					}
+				}
+				if(index.getType().equals(Constants.INDEX_KEY)){
+					if(tbal.getName().equals("LINEITEM"))
+						break;
+					for(String indexKey: index.getColumnsNames()) {
+						FileReaderIterator iter = new FileReaderIterator(tbal);
+						SecondaryIndexBuilder sec = new SecondaryIndexBuilder(iter, tbal, cdef, indexKey);
+						sec.build();
+						sec.readMapFromFile();
+						SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
+						break;
+					}
+				}
+			}
+			
+		}
 		List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
 		for (ColumnDefinition cd : cdef) {
 			ColumnDefs c = new ColumnDefs();
