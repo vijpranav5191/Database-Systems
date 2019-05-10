@@ -8,6 +8,7 @@ import bPlusTree.BPlusTreeBuilder;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
+import secondaryIndex.SecondaryIndexBuilder;
 
 public class SchemaStructure {
 	public static HashMap<String, List<ColumnDefs>> schema = new HashMap<>();
@@ -17,4 +18,5 @@ public class SchemaStructure {
 	public static HashMap<String, List<Index>> indexMap = new HashMap<>();
 	public static HashMap<String, BPlusTreeBuilder> bTreeMap = new HashMap<>();
 	public static HashMap<String, Integer> precedenceMap = new HashMap<>();
+	public static HashMap<String, SecondaryIndexBuilder> secIndexMap = new HashMap<>();
 }
