@@ -15,7 +15,6 @@ public class Config {
 	public static String columnSeparator = "columnSep/";
 	
 	public static String databasePath = "data/";	
-	
 //	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 	
 
