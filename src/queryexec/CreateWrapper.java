@@ -25,6 +25,7 @@ import objects.ColumnDefs;
 import objects.IndexDef;
 import objects.SchemaStructure;
 import secondaryIndex.SecondaryIndexBuilder;
+import utils.ColumnSeparator;
 import utils.Config;
 import utils.Constants;
 import utils.Utils;
@@ -74,7 +75,7 @@ public class CreateWrapper {
 							SecondaryIndexBuilder sec = new SecondaryIndexBuilder(iter, tbal, cdef, indexKey);
 							sec.build();
 							sec.writeMapToFile();
-							SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
+							//SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
 							break;
 						}
 					}
@@ -95,18 +96,18 @@ public class CreateWrapper {
 						break;
 					}
 				}
-				if(index.getType().equals(Constants.INDEX_KEY)){
-					if(tbal.getName().equals("LINEITEM"))
-						break;
-					for(String indexKey: index.getColumnsNames()) {
-						FileReaderIterator iter = new FileReaderIterator(tbal);
-						SecondaryIndexBuilder sec = new SecondaryIndexBuilder(iter, tbal, cdef, indexKey);
-						sec.build();
-						sec.readMapFromFile();
-						SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
-						break;
-					}
-				}
+//				if(index.getType().equals(Constants.INDEX_KEY)){
+//					if(tbal.getName().equals("LINEITEM"))
+//						break;
+//					for(String indexKey: index.getColumnsNames()) {
+//						FileReaderIterator iter = new FileReaderIterator(tbal);
+//						SecondaryIndexBuilder sec = new SecondaryIndexBuilder(iter, tbal, cdef, indexKey);
+//						sec.build();
+//						sec.readMapFromFile();
+//						SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
+//						break;
+//					}
+//				}
 			}
 			
 		}
@@ -117,6 +118,13 @@ public class CreateWrapper {
 			cdfList.add(c);
 			SchemaStructure.columnTableMap.put(cd.getColumnName(), tbal);		
 		}
+		ColumnSeparator colSep = new ColumnSeparator(tbal, cdef);
+		try {
+			colSep.execute();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		colSep.close();
 		SchemaStructure.schema.put(tbal.getName(), cdfList);
 		SchemaStructure.tableMap.put(tbal.getName(), tbal);
 		SchemaStructure.indexMap.put(tbal.getName(), indexes);

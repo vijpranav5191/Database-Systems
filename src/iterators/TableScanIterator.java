@@ -24,66 +24,46 @@ import utils.Utils;
 
 
 public class TableScanIterator implements DefaultIterator {
-	private String csvFile;
-	private String tableName;
-	private BufferedReader br;
-	private String tuple;
 	public Table tab;
-	private List<PrimitiveValue> map;
 	private List<String> columns;
 	List<ColumnDefs> cdefs;
 	Map<String, Integer> columnMap;
-	private List<PrimitiveValue> mapList;
-	
+	private List<ColumnIterator> columnIterator;
 	
 	public TableScanIterator( Table tab, List<String> queryColumns) {
 		this.columns = queryColumns;
-		this.tableName = tab.getName();
 		this.tab = tab;
-		this.cdefs = SchemaStructure.schema.get(tableName);
+		this.cdefs = SchemaStructure.schema.get(this.tab.getName());
 		this.columnMap = createColumnMapper(this.cdefs);
+		this.columnIterator = new ArrayList<>();
 		
-		this.csvFile = Config.databasePath + tableName + ".csv";;	
-		try {
-			br = new BufferedReader(new FileReader(csvFile));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.out.println("Error 1 " + tableName);
+		for(String col: this.columns) {
+			ColumnIterator colIter = new ColumnIterator(col);
+			columnIterator.add(colIter);
 		}
-		tuple = "";
 	}
 	
 	
 	@Override
 	public boolean hasNext() {
-		try {
-			if(br.ready()) {
-				return true;
-			}
-			else return false;
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Error 2 " + tableName);
+		if(this.columnIterator.isEmpty()) {
 			return false;
-			
 		}
+		return this.columnIterator.get(0).hasNext();
 	}
 	
 	public List<PrimitiveValue> next() {
 		if(this.hasNext()) {
-			mapList = new ArrayList<PrimitiveValue>();
-			try {
-				tuple = br.readLine();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			String row[] = tuple.split("\\|");
-			for(String elem : this.columns){
+			List<PrimitiveValue> mapList = new ArrayList<PrimitiveValue>();
+			for(int i = 0;i < this.columns.size();i++){
+				String elem = this.columns.get(i);
 				if( this.columnMap.containsKey(elem) ) {
 					PrimitiveValue pm;
 					int index = this.columnMap.get(elem);
+					ColumnIterator colIter = this.columnIterator.get(i);
+					
 					ColumnDefs cdef = this.cdefs.get(index);
-					String value = row[index];
+					String value = colIter.next();
 					
 					switch (cdef.cdef.getColDataType().getDataType().toLowerCase()) {
 						case "int":
@@ -118,14 +98,10 @@ public class TableScanIterator implements DefaultIterator {
 
 	@Override
 	public void reset() {
-		try {
-			br.close();
-			br = new BufferedReader(new FileReader(this.csvFile));
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			System.out.println("Error 1 " + tableName);
-		} catch (IOException e) {
-			e.printStackTrace();
+		if(this.columnIterator != null) {
+			for(ColumnIterator colIter: columnIterator) {
+				colIter.reset();
+			}
 		}
 	}
 
@@ -138,7 +114,7 @@ public class TableScanIterator implements DefaultIterator {
 		Map<String, Integer> mapper = new HashMap<String, Integer>();
 		int index = 0;
 		for(ColumnDefs cdef: cdefs) {
-			mapper.put(tableName + "." + cdef.cdef.getColumnName(), index);
+			mapper.put(this.tab.getName() + "." + cdef.cdef.getColumnName(), index);
 			index+=1;
 		}
 		return mapper;
