@@ -21,9 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.sun.javafx.fxml.expression.Expression;
-
-import bPlusTree.BPlusTree.LeafNode;
 import iterators.DefaultIterator;
 import iterators.FileReaderIterator;
 import iterators.RAIterator;
@@ -31,6 +28,7 @@ import iterators.TableSeekBySecIndexIterator;
 import iterators.TableSeekIterator;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
