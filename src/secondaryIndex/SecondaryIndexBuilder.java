@@ -55,8 +55,8 @@ public class SecondaryIndexBuilder {
 		this.indexColType = this.cdefs.get(position).getColDataType().getDataType();
 		this.index = new TreeMap<>(	new Comparator<PrimitiveValue>(){
 			@Override
-			public int compare(PrimitiveValue o1, PrimitiveValue o2) {
-				if(o1 instanceof DateValue){
+				public int compare(PrimitiveValue o1, PrimitiveValue o2) {
+					if(o1 instanceof DateValue){
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
 					Date dateFirst;
 					try {
