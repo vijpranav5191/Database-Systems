@@ -41,7 +41,7 @@ public class TableScanIterator implements DefaultIterator {
 	public TableScanIterator( Table tab, List<String> queryColumns) {
 		this.columns = queryColumns;
 		this.tab = tab;
-		this.path = Config.columnSeparator;
+		this.path = Config.columnSeparator + this.tab.getName() + "/";
 		this.cdefs = SchemaStructure.schema.get(this.tab.getName());
 		this.columnMap = createColumnMapper(this.cdefs);
 		this.columnIterator = new ArrayList<>();

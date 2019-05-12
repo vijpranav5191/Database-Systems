@@ -25,8 +25,7 @@ public class InsertWrapper {
 			columnStr.add(columns.get(i).getColumnName());
 		}
 		
-		ColumnSeparator colSep = new ColumnSeparator(this.insert.getTable(), columnStr, Config.insertTemp);
-	
+		ColumnSeparator colSep = new ColumnSeparator(this.insert.getTable(), columnStr, Config.insertTemp + this.insert.getTable().getName() + "/");
 		ExpressionList values = (ExpressionList) this.insert.getItemsList();
 		List<Expression> exps = values.getExpressions();
 		try {

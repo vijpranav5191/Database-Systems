@@ -49,7 +49,7 @@ public class ColumnIterator implements RAIterator {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return tuple;
+		return tuple.toString();
 	}
 
 	@Override

@@ -11,7 +11,6 @@ import java.util.Map;
 
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
-import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
@@ -20,21 +19,23 @@ import objects.ColumnDefs;
 import objects.SchemaStructure;
 import utils.Config;
 
-public class TableSeekBySecIndexIterator implements DefaultIterator {
-
+public class TableSeekSecIndexByRangeIterator implements DefaultIterator {
 	private List<String> columns;
 	Table table;
 	private String tuple;
-	private List<PrimitiveValue> nextResult;
 	BufferedReader br;
 	String indexColumn;
-	PrimitiveValue searchValue;
+	int searchValue,endvalue;
 	List<ColumnDefs> cdefs;
 	Map<String, Integer> columnMap;
 	List<Integer> seekList;
 	private RandomAccessFile raf_1 = null;
-	private Iterator<Integer> iter;
-	public TableSeekBySecIndexIterator(List<Integer> slist , Table table, PrimitiveValue key, String indexColumn){
+	private Map<PrimitiveValue, List<Integer>> index;
+	private ArrayList keylist;
+	private Iterator<Integer> iterator;
+	private int end;
+	public TableSeekSecIndexByRangeIterator(Table table, int i, int e, String indexColumn, Map<PrimitiveValue, List<Integer>> index) {
+		// TODO Auto-generated constructor stub
 		this.columns = new ArrayList<String>();
 		this.table = table;
 		this.cdefs = SchemaStructure.schema.get(table.getName());
@@ -45,41 +46,45 @@ public class TableSeekBySecIndexIterator implements DefaultIterator {
 				this.columns.add(table.getName() + "." + cdefs.get(j).cdef.getColumnName());
 			}
 		}
+		this.end = e;
+		this.searchValue = i;
 		this.columnMap = createColumnMapper(this.cdefs);
-		this.searchValue = key;
 		this.indexColumn = indexColumn;
-		this.nextResult = getNextIter();
+		this.index = index;
+		this.keylist = new ArrayList<>(this.index.keySet());
 		try {
-			if(raf_1 == null) {
-				raf_1 = new RandomAccessFile(Config.databasePath + this.table.getName() + ".csv", "r");
+			if(this.raf_1 == null) {
+				this.raf_1 = new RandomAccessFile(Config.databasePath + this.table.getName() + ".csv", "r");
 			}
-			raf_1.seek(slist.get(0));
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException ex) {
+			ex.printStackTrace();
 		}
-		this.seekList = slist;
-		this.iter = this.seekList.iterator();
-
+		this.iterator = this.index.get(this.keylist.get(this.searchValue)).iterator();
 	}
-	
 
 	@Override
-	public boolean hasNext() {	
-		return this.iter.hasNext();
+	public boolean hasNext() {
+		// TODO Auto-generated method stub
+		if(this.searchValue<=this.end) {
+			return true;
+		}
+		else 
+			return false;
 	}
 
 	@Override
 	public List<PrimitiveValue> next() {
-		List<PrimitiveValue> temp = this.nextResult;
-		this.nextResult = getNextIter();
-		return temp;
-	}
+		// TODO Auto-generated method stub
+		if(!this.iterator.hasNext())
+		{
+			this.searchValue++;
+			this.iterator = this.index.get(this.keylist.get(this.searchValue)).iterator();
+		}
 
-
-	public List<PrimitiveValue> getNextIter(){
+		
 		try {
 			tuple = raf_1.readLine();
-			raf_1.seek(this.iter.next());
+			raf_1.seek(this.iterator.next());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -121,12 +126,19 @@ public class TableSeekBySecIndexIterator implements DefaultIterator {
 		}
 		return map;
 	}
-	
+
 	@Override
 	public void reset() {
-		new Exception("Please dont Reset!!!!!");
+		// TODO Auto-generated method stub
+
 	}
 
+	@Override
+	public List<String> getColumns() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	public Map<String, Integer> createColumnMapper(List<ColumnDefs> cdefs) {
 		Map<String, Integer> mapper = new HashMap<String, Integer>();
 		int index = 0;
@@ -136,9 +148,5 @@ public class TableSeekBySecIndexIterator implements DefaultIterator {
 		}
 		return mapper;
 	}
-	
-	@Override
-	public List<String> getColumns() {
-		return this.columns;
-	}
+
 }

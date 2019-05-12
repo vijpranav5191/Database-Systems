@@ -120,7 +120,7 @@ public class CreateWrapper {
 			columns.add(cd.getColumnName());
 			SchemaStructure.columnTableMap.put(cd.getColumnName(), tbal);		
 		}
-		ColumnSeparator colSep = new ColumnSeparator(tbal, columns, Config.columnSeparator);
+		ColumnSeparator colSep = new ColumnSeparator(tbal, columns, Config.columnSeparator + tbal.getName() + "/");
 		try {
 			colSep.execute();
 		} catch (IOException e) {

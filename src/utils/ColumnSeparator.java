@@ -12,6 +12,8 @@ import java.util.List;
 
 import iterators.FileReaderIterator;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
@@ -27,6 +29,9 @@ public class ColumnSeparator {
 		this.columns = columns;
 		this.writers = new ArrayList<>();
 		iter = new FileReaderIterator(this.table);
+		if(!Utils.isFileExists(pathToDir)) {
+			Utils.createDirectory(pathToDir);
+		}
 		for(int i = 0; i < this.columns.size(); i++) {
 			String cols = columns.get(i);
 			File filename = new File(pathToDir + this.table.getName() + "." + cols);
@@ -55,7 +60,13 @@ public class ColumnSeparator {
 	public void executeSingle(List<Expression> exps) throws IOException {
 		for(int i = 0; i < columns.size();i++) {
 			BufferedWriter writer = this.writers.get(i);
-			writer.write(exps.get(i).toString());
+			PrimitiveValue pm = (PrimitiveValue) exps.get(i);
+			if(pm instanceof StringValue) {
+				String value = exps.get(i).toString();
+				writer.write(value.substring(1, value.length() - 1));
+			} else {
+				writer.write(exps.get(i).toString());
+			}
 			writer.newLine();
 		}
 	}
