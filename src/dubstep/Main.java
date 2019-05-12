@@ -25,6 +25,8 @@ class Main {
 		Utils.createDirectory(Config.createFileDir);		
 		Utils.createDirectory(Config.bPlusTreeDir);
 		Utils.createDirectory(Config.secIndexdir);
+		Utils.createDirectory(Config.columnSeparator);
+		
 		File createDir = new File(Config.createFileDir);
 		CreateWrapper createWrapper = new CreateWrapper();
 		for(File file: createDir.listFiles()) {
