@@ -32,22 +32,22 @@ import utils.Utils;
 
 public class CreateWrapper {
 
-	public void createHandler(String tableName) {
-		String path = Config.createFileDir + tableName;
-		try {
-			String queryStr = (String) WriteOutputFile.readObjectInFile(path);
-			InputStream inputStream = new ByteArrayInputStream(queryStr.getBytes(Charset.forName("UTF-8")));
-			CCJSqlParser parser = new CCJSqlParser(inputStream);
-			if(queryStr != null) {
-				Statement query = parser.Statement();
-				this.createHandler(query, queryStr);
-			}
-		} catch (ClassNotFoundException | IOException | ParseException e) {
-			e.printStackTrace();
-		}
-	}
+//	public void createHandler(String tableName) {
+//		String path = Config.createFileDir + tableName;
+//		try {
+//			String queryStr = (String) WriteOutputFile.readObjectInFile(path);
+//			InputStream inputStream = new ByteArrayInputStream(queryStr.getBytes(Charset.forName("UTF-8")));
+//			CCJSqlParser parser = new CCJSqlParser(inputStream);
+//			if(queryStr != null) {
+//				Statement query = parser.Statement();
+//				this.createHandler(query, queryStr);
+//			}
+//		} catch (ClassNotFoundException | IOException | ParseException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
-	public void createHandler(Statement query, String querystr) {
+	public void createHandler(Statement query) {
 		CreateTable createtab = (CreateTable) query;
 		Table tbal = createtab.getTable();
 		String path = Config.createFileDir + tbal.getName();
@@ -80,7 +80,7 @@ public class CreateWrapper {
 						}
 					}
 				}
-				WriteOutputFile.writeObjectInFile(path, querystr);
+				//WriteOutputFile.writeObjectInFile(path, querystr);
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
