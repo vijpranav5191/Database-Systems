@@ -1,13 +1,8 @@
 package iterators;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-//import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.sf.jsqlparser.expression.DateValue;
@@ -18,9 +13,7 @@ import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.schema.Table;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
-import queryexec.CreateWrapper;
 import utils.Config;
-import utils.Utils;
 
 
 public class TableScanIterator implements DefaultIterator {
@@ -29,20 +22,35 @@ public class TableScanIterator implements DefaultIterator {
 	List<ColumnDefs> cdefs;
 	Map<String, Integer> columnMap;
 	private List<ColumnIterator> columnIterator;
+	String path;
 	
-	public TableScanIterator( Table tab, List<String> queryColumns) {
+	public TableScanIterator( Table tab, List<String> queryColumns, String path) {
 		this.columns = queryColumns;
 		this.tab = tab;
+		this.path = path;
 		this.cdefs = SchemaStructure.schema.get(this.tab.getName());
 		this.columnMap = createColumnMapper(this.cdefs);
 		this.columnIterator = new ArrayList<>();
 		
 		for(String col: this.columns) {
-			ColumnIterator colIter = new ColumnIterator(col);
+			ColumnIterator colIter = new ColumnIterator(col, this.path);
 			columnIterator.add(colIter);
 		}
 	}
 	
+	public TableScanIterator( Table tab, List<String> queryColumns) {
+		this.columns = queryColumns;
+		this.tab = tab;
+		this.path = Config.columnSeparator;
+		this.cdefs = SchemaStructure.schema.get(this.tab.getName());
+		this.columnMap = createColumnMapper(this.cdefs);
+		this.columnIterator = new ArrayList<>();
+		
+		for(String col: this.columns) {
+			ColumnIterator colIter = new ColumnIterator(col, this.path);
+			columnIterator.add(colIter);
+		}
+	}
 	
 	@Override
 	public boolean hasNext() {

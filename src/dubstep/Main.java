@@ -12,10 +12,12 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
+import queryexec.InsertWrapper;
 import queryexec.SelectWrapper;
 import utils.Config;
 import utils.Utils;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.insert.Insert;
 
 class Main {
 
@@ -26,6 +28,7 @@ class Main {
 		Utils.createDirectory(Config.bPlusTreeDir);
 		Utils.createDirectory(Config.secIndexdir);
 		Utils.createDirectory(Config.columnSeparator);
+		Utils.createDirectory(Config.insertTemp);
 		
 		File createDir = new File(Config.createFileDir);
 		CreateWrapper createWrapper = new CreateWrapper();
@@ -68,6 +71,10 @@ class Main {
 				}
 			} else if (query instanceof CreateTable) {
 				cw.createHandler(query, querystr);
+			} else if(query  instanceof Insert) {
+				Insert insert = (Insert) query;
+				InsertWrapper insertWrapper = new InsertWrapper(insert);
+				insertWrapper.insertValues();
 			}
 			System.out.println("$>"); // print a prompt after executing each command
 		}

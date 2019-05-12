@@ -16,9 +16,9 @@ public class ColumnIterator implements RAIterator {
 	private String tuple;
 	String column;
 	
-	ColumnIterator(String column){
+	ColumnIterator(String column, String path){
 		this.column = column;
-		this.csvFile = Config.columnSeparator + column;
+		this.csvFile = path + column;
 		this.columns = new ArrayList<>();
 		this.columns.add(column);
 		

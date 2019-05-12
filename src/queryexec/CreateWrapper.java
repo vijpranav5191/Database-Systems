@@ -112,13 +112,15 @@ public class CreateWrapper {
 			
 		}
 		List<ColumnDefs> cdfList = new ArrayList<ColumnDefs>();
+		List<String> columns = new ArrayList<String>();
 		for (ColumnDefinition cd : cdef) {
 			ColumnDefs c = new ColumnDefs();
 			c.cdef = cd;
 			cdfList.add(c);
+			columns.add(cd.getColumnName());
 			SchemaStructure.columnTableMap.put(cd.getColumnName(), tbal);		
 		}
-		ColumnSeparator colSep = new ColumnSeparator(tbal, cdef);
+		ColumnSeparator colSep = new ColumnSeparator(tbal, columns, Config.columnSeparator);
 		try {
 			colSep.execute();
 		} catch (IOException e) {
