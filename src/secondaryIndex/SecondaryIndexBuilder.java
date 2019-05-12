@@ -14,14 +14,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
-import com.sun.javafx.fxml.expression.Expression;
+
 
 import bPlusTree.BPlusTree.LeafNode;
 import iterators.DefaultIterator;
@@ -29,8 +31,10 @@ import iterators.FileReaderIterator;
 import iterators.RAIterator;
 import iterators.TableSeekBySecIndexIterator;
 import iterators.TableSeekIterator;
+import iterators.TableSeekSecIndexByRangeIterator;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.LongValue;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.StringValue;
@@ -198,25 +202,34 @@ public class SecondaryIndexBuilder {
 			e.printStackTrace();
 		}
 	}
-	public DefaultIterator search(String key) throws IOException {
+	public DefaultIterator search(PrimitiveValue key , Expression exp) throws IOException {
 		List<Integer> slist = this.index.get(key);
 //		BufferedReader br = getInputStreamBySeek(Config.databasePath + this.table.getName() + ".csv", startOffset, endOffset);
 		TableSeekBySecIndexIterator tableSeekItr = new TableSeekBySecIndexIterator(slist,this.table, key, this.table.getName()+this.indexStr);
 		return tableSeekItr;
 	}
-	public DefaultIterator search(String start, String end, Expression exp){
-		List<PrimitiveValue> keyset = new ArrayList<>();
-		keyset.addAll(this.index.keySet());
-		int i = keyset.indexOf(start);
-		int e = keyset.indexOf(end);
-		List<Integer> slist = new ArrayList<>();
-		for (int j=i; j<=e; j++) {
-			PrimitiveValue key = keyset.get(j);
-			slist.addAll(this.index.get(key));
+	public DefaultIterator search(PrimitiveValue start, PrimitiveValue end, Expression exp){
+		Iterator<PrimitiveValue> iterator;
+		int loc = binarySearch(this.index.keySet(), start);
+		int i = loc >= 0 ? loc : -loc - 1;
+
+		int e = 0;
+		if(end!=null) {
+			loc = binarySearch(this.index.keySet(), end);
+			e = loc >= 0 ? loc : -loc - 1;
+//			e = keyset.indexOf(end);
 		}
-		TableSeekBySecIndexIterator tableSeekItr = new TableSeekBySecIndexIterator(slist,this.table, start, this.table.getName()+this.indexStr);
-		keyset = null;
-		return tableSeekItr;
+		else {
+			iterator = this.index.keySet().iterator();
+			while(iterator.hasNext())
+				end = iterator.next();
+			loc = binarySearch(this.index.keySet(), end);
+			e = loc >= 0 ? loc : -loc - 1;
+		}
+		TableSeekSecIndexByRangeIterator tableseekIter = new TableSeekSecIndexByRangeIterator(this.table, i, e, this.table.getName()+this.indexStr, this.index);
+//		TableSeekBySecIndexIteraator tableSeekItr = new TableSeekBySecIndexIterator(slist,this.table, start, this.table.getName()+this.indexStr);
+//		keyset = null;
+		return tableseekIter;
 	}
 	public BufferedReader getInputStreamBySeek(String path, int seekPosition, Integer endOffset) throws IOException {
 		try {
@@ -230,5 +243,31 @@ public class SecondaryIndexBuilder {
 		InputStream is = Channels.newInputStream(raf_1.getChannel());
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		return br;
+	}
+	private int binarySearch(Set<PrimitiveValue> kList, PrimitiveValue key) {
+		Comparator<PrimitiveValue> comp = new Comparator<PrimitiveValue>(){
+			@Override
+			public int compare(PrimitiveValue o1, PrimitiveValue o2) {
+			    if(o1 instanceof LongValue){
+			    	return (int) (((LongValue)o1).toLong() - ((LongValue)o2).toLong());	
+				} else if(o1 instanceof DoubleValue){
+					return (int) (((DoubleValue)o1).toDouble() - ((DoubleValue)o2).toDouble());
+				} else if(o1 instanceof DateValue){
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+					Date dateFirst;
+					try {
+						dateFirst = sdf.parse(String.valueOf(o1));
+						Date dateSecond = sdf.parse(String.valueOf(o2));
+						return  ((dateFirst.compareTo(dateSecond)));
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}	
+				}
+				return o1.toString().compareTo(o2.toString());
+			}
+			
+		};
+//		int loc = Collections.binarySearch(kList, key, comp);
+		return 0;
 	}
 }

@@ -1,5 +1,6 @@
 package queryexec;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,11 +22,16 @@ import iterators.ResultIterator;
 import iterators.SelectionIterator;
 import iterators.SortMergeIterator;
 import iterators.TableScanIterator;
-
+import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThan;
+import net.sf.jsqlparser.expression.operators.relational.GreaterThanEquals;
+import net.sf.jsqlparser.expression.operators.relational.MinorThan;
+import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.Index;
@@ -39,6 +45,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import objects.ColumnDefs;
 import objects.SchemaStructure;
+import secondaryIndex.SecondaryIndexBuilder;
 import utils.Config;
 import utils.Optimzer;
 import utils.Utils;
@@ -189,14 +196,38 @@ public class SelectWrapper {
 		
 		if (inQSecondaryIndex != null && inQSecondaryIndex.size() > 0) 
 		{	
-//			Expression exp  = null;
-//			if(inQnonSecondaryIndex.size() > 1)
-//				exp = Utils.conquerExpression(inQSecondaryIndex); // what if only one?
-//			else
-//				exp = inQSecondaryIndex.get(0);
+
 			for( Expression exp : inQSecondaryIndex )
 			{
-				//iter = new IndexScanIterator(iter, exp);
+				if(exp instanceof BinaryExpression) {
+					BinaryExpression exp2 = ((BinaryExpression) exp);
+					Expression rightEx = exp2.getRightExpression();
+					if(rightEx instanceof PrimitiveValue) {
+						PrimitiveValue rightVal = (PrimitiveValue) rightEx;
+						Expression leftEx = exp2.getLeftExpression();
+						Column leftEx1 = (Column) leftEx; 
+						SecondaryIndexBuilder sec = SchemaStructure.secIndexMap.get(leftEx1.getWholeColumnName());	
+						if(exp2 instanceof EqualsTo) {
+							try {
+								iter = sec.search(rightVal, exp);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						else  if (exp2 instanceof GreaterThan){
+							
+							iter = sec.search(rightVal, null, exp);
+						}else  if (exp2 instanceof GreaterThanEquals){
+							iter = sec.search(rightVal, null, exp);
+						}else if (exp2 instanceof MinorThan) {
+							
+						}else if (exp2 instanceof MinorThanEquals) {
+							
+						}
+						
+					}
+				}
 			}
 
 		}
@@ -332,6 +363,11 @@ public class SelectWrapper {
 		List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table,
 				SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
 		
+		
+		String path = Config.insertDir + table.getName();
+		if(!Utils.isFileExists(path)) {
+			
+		}
 		
 		if (tempExp != null && tempExp.size() > 0) {
 			Expression exp = Utils.conquerExpression(tempExp);
