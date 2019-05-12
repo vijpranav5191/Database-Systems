@@ -11,26 +11,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 import iterators.FileReaderIterator;
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.PrimitiveValue;
+import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 
 public class ColumnSeparator {
 	Table table;
 	FileReaderIterator iter;
-	List<ColumnDefinition> columns;
+	List<String> columns;
 	List<BufferedWriter> writers;
 	
-	public ColumnSeparator(Table table, List<ColumnDefinition> columns){
+	public ColumnSeparator(Table table, List<String> columns, String pathToDir){
 		this.table = table;
 		this.columns = columns;
 		this.writers = new ArrayList<>();
 		iter = new FileReaderIterator(this.table);
+		if(!Utils.isFileExists(pathToDir)) {
+			Utils.createDirectory(pathToDir);
+		}
 		for(int i = 0; i < this.columns.size(); i++) {
-			ColumnDefinition cols = columns.get(i);
-			File filename = new File(Config.columnSeparator + this.table + "." + cols.getColumnName());
+			String cols = columns.get(i);
+			File filename = new File(pathToDir + this.table.getName() + "." + cols);
 			BufferedWriter writer;
 			try {
-				writer = new BufferedWriter(new FileWriter(filename));
+				writer = new BufferedWriter(new FileWriter(filename, true));
 				writers.add(writer);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -43,11 +50,24 @@ public class ColumnSeparator {
 			String next = this.iter.next();
 			String[] arr = next.split("\\|");
 			for(int i = 0; i < columns.size();i++) {
-				ColumnDefinition cols = columns.get(i);
 				BufferedWriter writer = this.writers.get(i);
 				writer.write(arr[i]);
 				writer.newLine();
 			}
+		}
+	}
+	
+	public void executeSingle(List<Expression> exps) throws IOException {
+		for(int i = 0; i < columns.size();i++) {
+			BufferedWriter writer = this.writers.get(i);
+			PrimitiveValue pm = (PrimitiveValue) exps.get(i);
+			if(pm instanceof StringValue) {
+				String value = exps.get(i).toString();
+				writer.write(value.substring(1, value.length() - 1));
+			} else {
+				writer.write(exps.get(i).toString());
+			}
+			writer.newLine();
 		}
 	}
 	

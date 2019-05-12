@@ -12,10 +12,12 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
+import queryexec.InsertWrapper;
 import queryexec.SelectWrapper;
 import utils.Config;
 import utils.Utils;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.insert.Insert;
 
 class Main {
 
@@ -26,12 +28,13 @@ class Main {
 		Utils.createDirectory(Config.bPlusTreeDir);
 		Utils.createDirectory(Config.secIndexdir);
 		Utils.createDirectory(Config.columnSeparator);
+		Utils.createDirectory(Config.insertTemp);
 		
-		File createDir = new File(Config.createFileDir);
-		CreateWrapper createWrapper = new CreateWrapper();
-		for(File file: createDir.listFiles()) {
-			createWrapper.createHandler(file.getName());
-		}
+////		File createDir = new File(Config.createFileDir);
+////		CreateWrapper createWrapper = new CreateWrapper();
+////		for(File file: createDir.listFiles()) {
+////			createWrapper.createHandler(file.getName());
+////		}
 		
 		for (String arg : args) {
 			if (arg.equals("--in-mem")) {
@@ -41,20 +44,19 @@ class Main {
 		System.out.println("$> "); // print a prompt
 		while (true) {
 			
-			/* code to parse stdin as a string and then feed to JSQL parser */
-			BufferedInputStream buf = new BufferedInputStream(System.in);	
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			int result = buf.read();
-			while(result != 59) {
-				baos.write((byte) result);
-				result = buf.read();
-			}
-			if(baos.size()<=1) {
-				break;
-			}
-			String querystr = baos.toString();
-			CreateWrapper cw = new CreateWrapper();
-			CCJSqlParser parser = new CCJSqlParser(new StringReader(querystr));
+//			/* code to parse stdin as a string and then feed to JSQL parser */
+//			BufferedInputStream buf = new BufferedInputStream();	
+//			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//			int result = buf.read();
+//			while(result != 59) {
+//				baos.write((byte) result);
+//				result = buf.read();
+//			}
+//			if(baos.size()<=1) {
+//				break;
+//			}
+		//	String querystr = baos.toString();
+			CCJSqlParser parser = new CCJSqlParser(System.in);
 			Statement query = parser.Statement();
 			if (query instanceof Select) {
 				Select select = (Select) query;
@@ -67,7 +69,12 @@ class Main {
 					new UnionWrapper(union).parse();
 				}
 			} else if (query instanceof CreateTable) {
-				cw.createHandler(query, querystr);
+				CreateWrapper cw = new CreateWrapper();
+				cw.createHandler(query);
+			} else if(query  instanceof Insert) {
+				Insert insert = (Insert) query;
+				InsertWrapper insertWrapper = new InsertWrapper(insert);
+				insertWrapper.insertValues();
 			}
 			System.out.println("$>"); // print a prompt after executing each command
 		}

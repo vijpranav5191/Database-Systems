@@ -13,6 +13,7 @@ import java.util.Set;
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
 import iterators.IndexJoinIterator;
+import iterators.InsertIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.LimitIterator;
@@ -83,6 +84,7 @@ public class SelectWrapper {
 		if (fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table , this.queryColumns.get(table.getName()));
+			iter = getInsertUnion(table, iter);
 			iter = pushDownSelectPredicate(table, iter);
 		}
 
@@ -97,6 +99,7 @@ public class SelectWrapper {
 					{
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb , this.queryColumns.get(rightTb.getName()));
+						iter = getInsertUnion(rightTb, iter2);
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
 						result = pushDownJoinPredicate(result, iter2, join);
 					}
@@ -166,103 +169,20 @@ public class SelectWrapper {
 		}
 	}
 
-	private DefaultIterator pushDownSelectPredicate2(Table table, DefaultIterator iter) {
-		// TODO Auto-generated method stub
-		List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table,SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
-		
-		List<Index> lst = SchemaStructure.indexMap.get(table.toString());
-		List<Index> secondaryIndex = new ArrayList<Index>();
-		List<Index> nonSecondaryIndex = new ArrayList<Index>();
-		for(Index l : lst )
-		{
-			if(l.getType().equals("INDEX"))
-				secondaryIndex.add(l);
-			else
-				nonSecondaryIndex.add(l);
+	private DefaultIterator getInsertUnion(Table table, DefaultIterator iter) {
+		String path = Config.insertTemp + table.getName() + "/";
+		DefaultIterator result = iter;
+		if(Utils.isFileExists(path)) {
+			TableScanIterator iterTemp = new TableScanIterator(table , this.queryColumns.get(table.getName()), path);
+			result = new InsertIterator(result, iterTemp);
 		}
-		List<Expression> inQSecondaryIndex = new ArrayList<Expression>();
-		List<Expression> inQnonSecondaryIndex = new ArrayList<Expression>();
-		for(Expression exp : tempExp)
-		{
-			if(secondaryIndex.contains(exp.toString().split("\\.")[1]))
-			{
-				inQSecondaryIndex.add(exp);
-			}
-			else
-			{
-				inQnonSecondaryIndex.add(exp);
-			}
-		}
-		
-		if (inQSecondaryIndex != null && inQSecondaryIndex.size() > 0) 
-		{	
-
-			for( Expression exp : inQSecondaryIndex )
-			{
-				if(exp instanceof BinaryExpression) {
-					BinaryExpression exp2 = ((BinaryExpression) exp);
-					Expression rightEx = exp2.getRightExpression();
-					if(rightEx instanceof PrimitiveValue) {
-						PrimitiveValue rightVal = (PrimitiveValue) rightEx;
-						Expression leftEx = exp2.getLeftExpression();
-						Column leftEx1 = (Column) leftEx; 
-						SecondaryIndexBuilder sec = SchemaStructure.secIndexMap.get(leftEx1.getWholeColumnName());	
-						if(exp2 instanceof EqualsTo) {
-							try {
-								iter = sec.search(rightVal, exp);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						else  if (exp2 instanceof GreaterThan){
-							
-							iter = sec.search(rightVal, null, exp);
-						}else  if (exp2 instanceof GreaterThanEquals){
-							iter = sec.search(rightVal, null, exp);
-						}else if (exp2 instanceof MinorThan) {
-							
-						}else if (exp2 instanceof MinorThanEquals) {
-							
-						}
-						
-					}
-				}
-			}
-
-		}
-		if (inQnonSecondaryIndex != null && inQnonSecondaryIndex.size() > 0) 
-		{
-			Expression exp = Utils.conquerExpression(inQnonSecondaryIndex);
-			iter = new SelectionIterator(iter, exp);
-		}
-		
-//		if (tempExp != null && tempExp.size() > 0) {
-//			Expression exp = Utils.conquerExpression(tempExp);
-//			iter = new SelectionIterator(iter, exp);
-//		}
-		return iter;
+		return result;
 	}
 
-//	private void function(DefaultIterator iterator , HashMap<String, List<Index>> indexMap, String columnName, Table tableName) {
-//		// TODO Auto-generated method stub
-//		List<Index> indexes =  indexMap.get( tableName.toString());
-//		
-//		if( indexes.contains(columnName))
-//		{
-//			iterator = new IndexSelectionIterator(iterator , tableName , columnName);
-//		}
-//		else
-//		{
-//			iterator = new IndexSelectionIterator(iterator , tableName , columnName);
-//		}
-//	}
-	
 	private Map<String, List<String>> extractQueryCols(List<SelectItem> selectItems2, Expression whereExp2, List<Join> joins2,
 			List<Column> groupBy2, List<OrderByElement> orderBy2) {
 		Map<String, List<String>> queryColumns = new HashMap<>();
 		Set<String> collist = new HashSet();
-		// TODO Auto-generated method stub
 		if(joins2!=null) {
 			for(Join j : joins2) {
 				Expression e = j.getOnExpression();
@@ -362,12 +282,6 @@ public class SelectWrapper {
 	public DefaultIterator pushDownSelectPredicate(Table table, DefaultIterator iter) {
 		List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table,
 				SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
-		
-		
-		String path = Config.insertDir + table.getName();
-		if(!Utils.isFileExists(path)) {
-			
-		}
 		
 		if (tempExp != null && tempExp.size() > 0) {
 			Expression exp = Utils.conquerExpression(tempExp);
