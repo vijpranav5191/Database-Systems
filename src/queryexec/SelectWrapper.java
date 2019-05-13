@@ -192,8 +192,19 @@ public class SelectWrapper {
 
 	private Map<String, List<String>> extractQueryCols(List<SelectItem> selectItems2, Expression whereExp2, List<Join> joins2,
 			List<Column> groupBy2, List<OrderByElement> orderBy2) {
-		Map<String, List<String>> queryColumns = new HashMap<>();
 		Set<String> collist = new HashSet();
+		
+		Map<String, List<String>> queryColumns = new HashMap<>();
+		for(String tableName: SchemaStructure.deleteMap.keySet()) {
+			List<Expression> exps = SchemaStructure.deleteMap.get(tableName);
+			if(exps != null) {
+				for(Expression exp: exps) {
+					collist.addAll(Utils.splitExpCols(exp));
+				}
+			}
+		}
+		
+		
 		if(joins2!=null) {
 			for(Join j : joins2) {
 				Expression e = j.getOnExpression();

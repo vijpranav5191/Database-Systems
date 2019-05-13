@@ -18,7 +18,6 @@ public class DeleteWrapper {
 	}
 
 	public void parse() {
-		// TODO Auto-generated method stub
 		Table  table = this.delete.getTable();
 		Expression exp = this.delete.getWhere();
 		List<Expression> deleteExpList = SchemaStructure.deleteMap.get(table.getName());

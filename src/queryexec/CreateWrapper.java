@@ -67,18 +67,18 @@ public class CreateWrapper {
 							break;
 						}
 					}
-					if(index.getType().equals(Constants.INDEX_KEY)){
-						if(tbal.getName().equals("LINEITEM"))
-							break;
-						for(String indexKey: index.getColumnsNames()) {
-							FileReaderIterator iter = new FileReaderIterator(tbal);
-							SecondaryIndexBuilder sec = new SecondaryIndexBuilder(iter, tbal, cdef, indexKey);
-							sec.build();
-							sec.writeMapToFile();
-							//SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
-							break;
-						}
-					}
+//					if(index.getType().equals(Constants.INDEX_KEY)){
+//						if(tbal.getName().equals("LINEITEM"))
+//							break;
+//						for(String indexKey: index.getColumnsNames()) {
+//							FileReaderIterator iter = new FileReaderIterator(tbal);
+//							SecondaryIndexBuilder sec = new SecondaryIndexBuilder(iter, tbal, cdef, indexKey);
+//							sec.build();
+//							sec.writeMapToFile();
+//							//SchemaStructure.secIndexMap.put(tbal.getName()+indexKey, sec);
+//							break;
+//						}
+//					}
 				}
 				//WriteOutputFile.writeObjectInFile(path, querystr);
 			} catch (FileNotFoundException e) {
