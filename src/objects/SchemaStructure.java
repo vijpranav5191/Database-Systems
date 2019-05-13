@@ -19,4 +19,5 @@ public class SchemaStructure {
 	public static HashMap<String, BPlusTreeBuilder> bTreeMap = new HashMap<>();
 	public static HashMap<String, Integer> precedenceMap = new HashMap<>();
 	public static HashMap<String, SecondaryIndexBuilder> secIndexMap = new HashMap<>();
+	public static HashMap <String, List<Expression>>deleteMap;
 }

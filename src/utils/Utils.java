@@ -197,6 +197,26 @@ public class Utils {
 
 		return result;
 	}
+	public static Expression conquerExpressionOR(List<Expression> elist) {
+		if (elist.size() == 2) 
+		{
+			OrExpression or = new OrExpression();
+			or.setLeftExpression(elist.get(0));
+			or.setRightExpression(elist.get(1));
+			return or;
+		}
+		Expression result = elist.get(0);
+
+		for (int i = 1; i < elist.size(); i++) 
+		{
+			OrExpression or = new OrExpression();
+			or.setLeftExpression(result);
+			or.setRightExpression(elist.get(i));
+			result = or;
+		}
+
+		return result;
+	}
 
 	private static Expression recursion(List<Expression> elist, int index, Expression result) {
 		if (index == elist.size() + 2) {

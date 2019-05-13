@@ -26,6 +26,7 @@ import iterators.TableScanIterator;
 import net.sf.jsqlparser.expression.BinaryExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
+import net.sf.jsqlparser.expression.InverseExpression;
 import net.sf.jsqlparser.expression.PrimitiveValue;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
@@ -85,6 +86,13 @@ public class SelectWrapper {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table , this.queryColumns.get(table.getName()));
 			iter = getInsertUnion(table, iter);
+			if(SchemaStructure.deleteMap!=null) {
+				List<Expression> deleteExpList = SchemaStructure.deleteMap.get(table.getName());
+				if(deleteExpList!=null) {
+					Expression deleteExp = Utils.conquerExpressionOR(deleteExpList);
+					iter = new SelectionIterator(iter, new InverseExpression(deleteExp));		
+				}
+			}
 			iter = pushDownSelectPredicate(table, iter);
 		}
 
@@ -100,6 +108,13 @@ public class SelectWrapper {
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb , this.queryColumns.get(rightTb.getName()));
 						iter = getInsertUnion(rightTb, iter2);
+						if(SchemaStructure.deleteMap!=null) {
+							List<Expression> deleteExpList = SchemaStructure.deleteMap.get(rightTb.getName());
+							if(deleteExpList!=null) {
+								Expression deleteExp = Utils.conquerExpressionOR(deleteExpList);
+								iter = new SelectionIterator(iter, new InverseExpression(deleteExp));		
+							}
+						}
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
 						result = pushDownJoinPredicate(result, iter2, join);
 					}
