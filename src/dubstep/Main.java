@@ -12,11 +12,13 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.Union;
 import queryexec.CreateWrapper;
+import queryexec.DeleteWrapper;
 import queryexec.InsertWrapper;
 import queryexec.SelectWrapper;
 import utils.Config;
 import utils.Utils;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 
 class Main {
@@ -29,12 +31,6 @@ class Main {
 		Utils.createDirectory(Config.secIndexdir);
 		Utils.createDirectory(Config.columnSeparator);
 		Utils.createDirectory(Config.insertTemp);
-		
-////		File createDir = new File(Config.createFileDir);
-////		CreateWrapper createWrapper = new CreateWrapper();
-////		for(File file: createDir.listFiles()) {
-////			createWrapper.createHandler(file.getName());
-////		}
 		
 		for (String arg : args) {
 			if (arg.equals("--in-mem")) {
@@ -75,6 +71,10 @@ class Main {
 				Insert insert = (Insert) query;
 				InsertWrapper insertWrapper = new InsertWrapper(insert);
 				insertWrapper.insertValues();
+			}else if(query instanceof Delete) {
+				Delete delete = (Delete) query;
+				DeleteWrapper deleteWrapper = new DeleteWrapper(delete);
+				deleteWrapper.parse();
 			}
 			System.out.println("$>"); // print a prompt after executing each command
 		}
