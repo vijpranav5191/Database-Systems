@@ -15,8 +15,8 @@ public class Config {
 	public static String insertTemp = "insertTemp/";
 	
 	
-	public static String databasePath = "data/";	
-//	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
+//	public static String databasePath = "data/";	
+	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 
 
 //	public static String databasePath = "data/";	
