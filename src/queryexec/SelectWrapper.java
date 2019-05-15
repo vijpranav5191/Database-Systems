@@ -87,8 +87,8 @@ public class SelectWrapper {
 			iter = new TableScanIterator(table , this.queryColumns.get(table.getName()));
 			iter = getInsertUnion(table, iter);
 			List<Expression> deleteExpList = SchemaStructure.deleteMap.get(table.getName());
-			if(deleteExpList != null) {
-				Expression deleteExp = Utils.conquerExpressionOR(deleteExpList);
+			if(deleteExpList.size() > 0) {
+				Expression deleteExp = Utils.conquerExpression(deleteExpList);
 				iter = new SelectionIterator(iter, new InverseExpression(deleteExp));		
 			}
 			iter = pushDownSelectPredicate(table, iter);
