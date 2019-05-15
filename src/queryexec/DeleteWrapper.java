@@ -21,14 +21,18 @@ import utils.Utils;
 public class DeleteWrapper {
 
 	Delete delete;
+	Table table;
+	Expression exp;
 	public DeleteWrapper(Delete delete) {
 		// TODO Auto-generated constructor stub
 		this.delete = delete;
+		this.table = this.delete.getTable();
 	}
 
 	public void parse() {
-		Table  table = this.delete.getTable();
-		Expression exp = this.delete.getWhere();
+
+		this.exp = this.delete.getWhere();
+		setTableinExp(this.exp);
 //		Collection<Expression> expList = Utils.splitAllClauses(exp);
 //		for(Expression e: expList) {
 //			if(e instanceof EqualsTo) {
@@ -87,11 +91,71 @@ public class DeleteWrapper {
 		if(deleteExpList == null) {
 			SchemaStructure.deleteMap = new HashMap<>();
 			List<Expression> temp =  new ArrayList<Expression>();
-			temp.add(exp);
+			temp.add(this.exp);
 			SchemaStructure.deleteMap.put(table.getName(), temp);		
 		} else {
-			SchemaStructure.deleteMap.get(table.getName()).add(exp);
+			SchemaStructure.deleteMap.get(table.getName()).add(this.exp);
 		}
+	}
+
+	private void setTableinExp(Expression exp) {
+		// TODO Auto-generated method stub
+		if(exp instanceof EqualsTo) {
+			EqualsTo eq = (EqualsTo) exp;
+			Expression col = ((EqualsTo) exp).getLeftExpression();
+			if(col instanceof Column) {
+				Column col2 = (Column) col;
+				Table tab = col2.getTable();
+				if(col2.getTable().getName()==null) {
+					col2.setTable(this.table);
+				}
+			}
+		}
+		else if(exp instanceof GreaterThan) {
+		GreaterThan eq = (GreaterThan) exp;
+		Expression col = ((GreaterThan) exp).getLeftExpression();
+		if(col instanceof Column) {
+			Column col2 = (Column) col;
+			if(col2.getTable().getName()==null) {
+				col2.setTable(this.table);
+			}
+		}
+	}
+	else if(exp instanceof GreaterThanEquals) {
+		GreaterThanEquals eq = (GreaterThanEquals) exp;
+		Expression col = ((GreaterThanEquals) exp).getLeftExpression();
+		if(col instanceof Column) {
+			Column col2 = (Column) col;
+			if(col2.getTable().getName()==null) {
+				col2.setTable(this.table);
+			}
+		}
+	}
+	else if(exp instanceof MinorThan) {
+		MinorThan eq = (MinorThan) exp;
+		Expression col = ((MinorThan) exp).getLeftExpression();
+		if(col instanceof Column) {
+			Column col2 = (Column) col;
+			if(col2.getTable().getName()==null) {
+				col2.setTable(this.table);
+			}
+		}
+	}
+	else if (exp instanceof MinorThanEquals) {
+		MinorThanEquals eq = (MinorThanEquals) exp;
+		Expression col = ((MinorThanEquals) exp).getLeftExpression();
+		if(col instanceof Column) {
+			Column col2 = (Column) col;
+			if(col2.getTable().getName()==null) {
+				col2.setTable(this.table);
+			}
+		}
+	}
+	else if(exp instanceof BinaryExpression) {
+		setTableinExp(((BinaryExpression) exp).getLeftExpression());
+		setTableinExp(((BinaryExpression) exp).getRightExpression());
+	}
+		
 	}
 
 }
