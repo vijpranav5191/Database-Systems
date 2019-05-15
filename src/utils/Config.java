@@ -19,7 +19,7 @@ public class Config {
 //	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 
 
-//	public static String databasePath = "data/";	
+	public static String databasePath = "data/";	
 	
 //	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 	
@@ -33,7 +33,7 @@ public class Config {
 	
 //	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 
-	public static String databasePath = "C:\\\\Users\\\\Amit\\\\Desktop\\\\Sanity_Check_Examples\\\\data\\\\checkpoint3_big\\\\";
+//	public static String databasePath = "C:\\\\Users\\\\Amit\\\\Desktop\\\\Sanity_Check_Examples\\\\data\\\\checkpoint3_big\\\\";
 
 //	public static String databasePath = "/Users/pranavvij/Desktop/Database Systems/data/checkpoint3_big/";
 //	public static String databasePath = "C:\\\\Users\\\\Amit\\\\Desktop\\\\Sanity_Check_Examples\\\\data\\\\database\\\\";
