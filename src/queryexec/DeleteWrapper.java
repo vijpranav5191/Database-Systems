@@ -27,6 +27,7 @@ public class DeleteWrapper {
 	}
 
 	public void parse() {
+		System.out.println(this.delete.toString());
 		Table  table = this.delete.getTable();
 		Expression exp = this.delete.getWhere();
 		Collection<Expression> expList = Utils.splitAllClauses(exp);
