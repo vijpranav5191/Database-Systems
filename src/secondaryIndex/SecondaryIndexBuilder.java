@@ -135,7 +135,8 @@ public class SecondaryIndexBuilder {
 		return -1;
 	}
 	public void writeMapToFile() throws IOException {
-		File filename = new File(Config.secIndexdir + this.table + "__" + this.indexStr);
+		File filename = null;
+		//= new File(Config.secIndexdir + this.table + "__" + this.indexStr);
 		BufferedWriter writer = new BufferedWriter(new FileWriter(filename)); 
 		writer.write(this.indexColType+"\n");
 		for(PrimitiveValue key : this.index.keySet()) {
@@ -147,7 +148,8 @@ public class SecondaryIndexBuilder {
 		writer.close();
 	}
 	public void readMapFromFile() {
-		File filename = new File(Config.secIndexdir + this.table + "__" + this.indexStr);
+		File filename = null;
+		//= new File(Config. + this.table + "__" + this.indexStr);
 		String line;
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(filename));

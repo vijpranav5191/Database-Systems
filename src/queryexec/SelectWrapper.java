@@ -13,6 +13,7 @@ import java.util.Set;
 import iterators.DefaultIterator;
 import iterators.GroupByIterator;
 import iterators.IndexJoinIterator;
+import iterators.InsertIterator;
 import iterators.HashJoinIterator;
 import iterators.JoinIterator;
 import iterators.LimitIterator;
@@ -83,6 +84,7 @@ public class SelectWrapper {
 		if (fromItem instanceof Table) {
 			Table table = (Table) fromItem;
 			iter = new TableScanIterator(table , this.queryColumns.get(table.getName()));
+			iter = getInsertUnion(table, iter);
 			iter = pushDownSelectPredicate(table, iter);
 		}
 
@@ -97,6 +99,7 @@ public class SelectWrapper {
 					{
 						Table rightTb = (Table) item;
 						DefaultIterator iter2 = new TableScanIterator(rightTb , this.queryColumns.get(rightTb.getName()));
+						iter = getInsertUnion(rightTb, iter);
 						iter2 = pushDownSelectPredicate(rightTb, iter2);
 						result = pushDownJoinPredicate(result, iter2, join);
 					}
@@ -363,12 +366,6 @@ public class SelectWrapper {
 		List<Expression> tempExp = Optimzer.getExpressionForSelectionPredicate(table,
 				SchemaStructure.schema.get(table.getName()), SchemaStructure.whrexpressions);
 		
-		
-		String path = Config.insertDir + table.getName();
-		if(!Utils.isFileExists(path)) {
-			
-		}
-		
 		if (tempExp != null && tempExp.size() > 0) {
 			Expression exp = Utils.conquerExpression(tempExp);
 			iter = new SelectionIterator(iter, exp);
@@ -505,6 +502,17 @@ public class SelectWrapper {
 		}
 		return null;
 	}
+	
+	private DefaultIterator getInsertUnion(Table table, DefaultIterator iter) {
+		DefaultIterator result = iter;
+		if(SchemaStructure.insertTuples.containsKey(table.getName())) {
+			result = new InsertIterator(result, 
+					SchemaStructure.insertTuples.get(table.getName()),
+					this.queryColumns.get(table.getName()), table);
+		}
+		return result;
+	}
+
 }
 
 
